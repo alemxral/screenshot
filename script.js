@@ -55,7 +55,7 @@ function loadGallery() {
   }
   
 
-// Close the modal when clicking anywhere on it.
+// Close the modal when clicking anywhere on it. adapt
 modal.addEventListener("click", () => {
   modal.style.display = "none";
 });
