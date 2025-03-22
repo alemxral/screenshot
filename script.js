@@ -1,3 +1,12 @@
+// gallery.js
+
+// Get references to the DOM elements for the gallery and modal.
+const gallery = document.getElementById("gallery");
+const modal = document.getElementById("modal");
+const modalImage = document.getElementById("modal-image");
+const basePath = "screenshots/";
+
+// Load the registry.json file and populate the gallery.
 function loadGallery() {
     fetch('registry.json')
       .then(response => {
@@ -45,3 +54,11 @@ function loadGallery() {
       .catch(error => console.error("Error loading registry:", error));
   }
   
+
+// Close the modal when clicking anywhere on it.
+modal.addEventListener("click", () => {
+  modal.style.display = "none";
+});
+
+// Start loading the gallery.
+loadGallery();
