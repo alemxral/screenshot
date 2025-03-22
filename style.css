@@ -61,6 +61,19 @@ body {
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
   }
+
+
+/* Caption below each image */
+.caption {
+    margin-top: 8px;
+    font-size: 0.9em;
+    color: #555;
+    background: #fafafa;
+    padding: 5px 8px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  
   
   /* Fade In Animation for Modal */
   @keyframes fadeIn {
