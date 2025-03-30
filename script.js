@@ -4,6 +4,12 @@ const modal = document.getElementById("modal");
 const modalImage = document.getElementById("modal-image");
 const basePath = "screenshots/";
 
+// Helper function to convert the upload_time string to a Date.
+// This expects the format "YYYY-MM-DD HH:MM:SS" and converts it to "YYYY-MM-DDTHH:MM:SS".
+function parseUploadTime(upload_time) {
+  return new Date(upload_time.replace(" ", "T"));
+}
+
 // Load the registry.json file and populate the gallery.
 function loadGallery() {
   fetch('registry.json')
@@ -14,8 +20,8 @@ function loadGallery() {
       return response.json();
     })
     .then(data => {
-      // ✅ Sort by upload_time (ascending). For descending order, reverse the subtraction.
-      data.sort((a, b) => new Date(a.upload_time) - new Date(b.upload_time));
+      // Sort the data by upload_time (newest first)
+      data.sort((a, b) => parseUploadTime(b.upload_time) - parseUploadTime(a.upload_time));
       
       data.forEach(entry => {
         const { filename, upload_time } = entry;
