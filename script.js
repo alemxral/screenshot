@@ -4,12 +4,6 @@ const modal = document.getElementById("modal");
 const modalImage = document.getElementById("modal-image");
 const basePath = "screenshots/";
 
-// Helper function to convert the upload_time string to a Date.
-// This expects the format "YYYY-MM-DD HH:MM:SS" and converts it to "YYYY-MM-DDTHH:MM:SS".
-function parseUploadTime(upload_time) {
-  return new Date(upload_time.replace(" ", "T"));
-}
-
 // Load the registry.json file and populate the gallery.
 function loadGallery() {
   fetch('registry.json')
@@ -20,8 +14,11 @@ function loadGallery() {
       return response.json();
     })
     .then(data => {
-      // Sort the data by upload_time (newest first)
-      data.sort((a, b) => parseUploadTime(b.upload_time) - parseUploadTime(a.upload_time));
+      // Sort by upload_time (newest first) using Date.parse.
+      data.sort((a, b) =>
+        Date.parse(b.upload_time.replace(" ", "T")) -
+        Date.parse(a.upload_time.replace(" ", "T"))
+      );
       
       data.forEach(entry => {
         const { filename, upload_time } = entry;
@@ -39,7 +36,6 @@ function loadGallery() {
           const caption = document.createElement("div");
           caption.classList.add("caption");
           caption.textContent = `${filename} - Uploaded: ${upload_time}`;
-
           imgContainer.appendChild(img);
           imgContainer.appendChild(caption);
           gallery.appendChild(imgContainer);
