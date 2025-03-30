@@ -1,43 +1,44 @@
-import asyncio
-import pyautogui
-import keyboard
-import time
 import os
-import glob
-import subprocess
+import time
 import json
+import glob
+import asyncio
+import subprocess
+import threading
+from ctypes import POINTER, cast
 
-# Get the root path of the project (directory where the script is located)
+import comtypes
+from comtypes import CLSCTX_ALL
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+import keyboard
+import pyautogui
+
+# --------------------- Screenshot & Git Functionality ---------------------
+
+# Define project directories and load (or initialize) the registry.
 project_root = os.path.dirname(os.path.abspath(__file__))
-save_dir = os.path.join(project_root, "screenshots")
-os.makedirs(save_dir, exist_ok=True)
-
-# Path to the JSON registry file
+screenshots_dir = os.path.join(project_root, "screenshots")
+os.makedirs(screenshots_dir, exist_ok=True)
 registry_path = os.path.join(project_root, "registry.json")
 
-# Load existing registry or initialize an empty list
 if os.path.exists(registry_path):
     with open(registry_path, "r") as f:
         registry = json.load(f)
 else:
     registry = []
 
-# Determine the starting counter based on existing files
-existing_files = glob.glob(os.path.join(save_dir, "img*.png"))
+# Determine starting counter based on existing screenshot files.
+existing_files = glob.glob(os.path.join(screenshots_dir, "img*.png"))
 counter = len(existing_files) + 1
 
-print("Press Down Arrow or '<' to take a screenshot. Press Esc to exit.")
-
 def update_registry(filename, timestamp):
-    # Append the new entry to the registry list
-    registry.append({"filename": filename, "upload_time": timestamp})
-    # Write back the updated registry to the JSON file
+    registry.append({"filename": filename, "timestamp": timestamp})
     with open(registry_path, "w") as f:
         json.dump(registry, f, indent=4)
 
-async def git_upload_async(filepath, filename):
+async def git_push(filepath, filename):
     try:
-        # Run git add for both the screenshot and the registry file
+        # Add the screenshot file and the registry file.
         proc = await asyncio.create_subprocess_exec(
             "git", "add", filepath, registry_path,
             stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
@@ -57,36 +58,67 @@ async def git_upload_async(filepath, filename):
         )
         await proc.communicate()
 
-        print(f"✅ Git: {commit_message} and pushed.")
+        print(f"Screenshot {filename} pushed to git.")
     except Exception as e:
-        print("Git error:", e)
+        print("Git push error:", e)
 
-async def process_screenshot(current_counter):
-    filename = f"img{current_counter}.png"
-    filepath = os.path.join(save_dir, filename)
-    # Offload the screenshot capture to a thread (since it's blocking)
-    await asyncio.to_thread(pyautogui.screenshot, filepath)
-    print(f"✅ Screenshot saved to {filepath}")
+def async_git_push(filepath, filename):
+    # Launch a daemon thread that runs an asyncio event loop to push to git.
+    threading.Thread(target=lambda: asyncio.run(git_push(filepath, filename)), daemon=True).start()
 
-    current_time = time.strftime("%Y-%m-%d %H:%M:%S")
-    update_registry(filename, current_time)
-    print(f"✅ Registry updated with {filename} at {current_time}")
+def save_screenshot():
+    global counter, registry
+    filename = f"img{counter}.png"
+    filepath = os.path.join(screenshots_dir, filename)
+    # Capture and save screenshot.
+    screenshot = pyautogui.screenshot()
+    screenshot.save(filepath)
+    print(f"Screenshot saved to {filepath}")
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    update_registry(filename, timestamp)
+    # Push changes asynchronously to git.
+    async_git_push(filepath, filename)
+    counter += 1
 
-    await git_upload_async(filepath, filename)
+# --------------------- Microphone Mute/Unmute Functionality ---------------------
 
-async def main_loop():
-    global counter
-    while True:
-        if keyboard.is_pressed("down") or keyboard.is_pressed("<"):
-            # Schedule the screenshot processing asynchronously
-            asyncio.create_task(process_screenshot(counter))
-            counter += 1
-            await asyncio.sleep(1)  # Prevent multiple triggers
-        elif keyboard.is_pressed("esc"):
-            print("👋 Exiting...")
-            break
-        # Small sleep to yield control and check keys frequently
-        await asyncio.sleep(0.1)
+def set_microphone_mute(mute=True):
+    # Initialize COM for the current thread.
+    comtypes.CoInitialize()
+    try:
+        # Retrieve the default microphone (capture device).
+        mic = AudioUtilities.GetMicrophone()  # Requires a version of pycaw with this helper.
+        if mic is None:
+            print("No microphone found!")
+            return
+        # Activate the IAudioEndpointVolume interface.
+        interface = mic.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+        volume = cast(interface, POINTER(IAudioEndpointVolume))
+        volume.SetMute(int(mute), None)
+        print("Microphone muted." if mute else "Microphone unmuted.")
+    except Exception as e:
+        print("Error setting microphone mute state:", e)
+    finally:
+        comtypes.CoUninitialize()
+
+# --------------------- Key Event Handlers ---------------------
+
+def on_right_arrow(event):
+    set_microphone_mute(True)
+
+def on_left_arrow(event):
+    set_microphone_mute(False)
+
+def on_tab(event):
+    save_screenshot()
+
+# --------------------- Main Loop ---------------------
 
 if __name__ == "__main__":
-    asyncio.run(main_loop())
+    print("Press Right Arrow to mute microphone, Left Arrow to unmute, Tab to take a screenshot, Esc to exit.")
+    # Bind key events using the keyboard module.
+    keyboard.on_press_key("right", on_right_arrow)
+    keyboard.on_press_key("left", on_left_arrow)
+    keyboard.on_press_key("tab", on_tab)
+    # Wait until Esc is pressed.
+    keyboard.wait("esc")
