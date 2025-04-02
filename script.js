@@ -1,10 +1,10 @@
-// Get references to DOM elements.
+// Get references to the DOM elements.
 const gallery = document.getElementById("gallery");
 const modal = document.getElementById("modal");
 const modalImage = document.getElementById("modal-image");
 const basePath = "screenshots/";
 
-// Load registry.json, show each unique image with its upload time.
+// Load registry.json and display each unique image with its filename and upload time.
 function loadGallery() {
   fetch("registry.json")
     .then(response => {
@@ -12,11 +12,11 @@ function loadGallery() {
       return response.json();
     })
     .then(data => {
-      const seen = new Set(); // To avoid duplicates.
+      const seen = new Set(); // To avoid duplicate filenames.
       data.forEach(({ filename, upload_time }) => {
         if (seen.has(filename)) return;
         seen.add(filename);
-        
+
         const imgPath = `${basePath}${filename}`;
         const imgContainer = document.createElement("div");
         imgContainer.classList.add("img-container");
@@ -26,10 +26,10 @@ function loadGallery() {
         img.alt = filename;
 
         img.onload = () => {
-          // Create caption with the upload time.
+          // Create a caption that shows both the filename and upload time.
           const caption = document.createElement("div");
           caption.classList.add("caption");
-          caption.textContent = `Uploaded: ${upload_time}`;
+          caption.textContent = `${filename} - Uploaded: ${upload_time}`;
           imgContainer.appendChild(img);
           imgContainer.appendChild(caption);
           gallery.appendChild(imgContainer);
@@ -46,10 +46,10 @@ function loadGallery() {
     .catch(error => console.error("Error loading registry:", error));
 }
 
-// Close modal when clicked.
+// Close the modal when clicking anywhere on it.
 modal.addEventListener("click", () => {
   modal.style.display = "none";
 });
 
-// Start the gallery.
+// Start loading the gallery.
 loadGallery();
