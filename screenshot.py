@@ -95,7 +95,7 @@ async def main_loop():
     print("Press Right Arrow to mute microphone, Left Arrow to unmute, Shift+Alt to take a screenshot, Esc to exit.")
     while True:
         # Screenshot trigger: Shift + Alt
-        if keyboard.is_pressed("shift") or keyboard.is_pressed("alt"):
+        if keyboard.is_pressed("tab"):
             asyncio.create_task(save_screenshot_async())
             await asyncio.sleep(1)  # Prevent multiple triggers
         # Mute trigger: Right Arrow pressed.
