@@ -156,12 +156,9 @@ async def main_loop():
             start_iriun_webcam()
             await asyncio.sleep(0.5)
         # Exit trigger: Esc
-        elif keyboard.is_pressed("esc"):
-            print("Exiting...")
-            unmute_microphone()  # Optional: ensure microphone is unmuted before exit.
-            break
 
         await asyncio.sleep(0.1)
 
 if __name__ == "__main__":
     asyncio.run(main_loop())
+    
