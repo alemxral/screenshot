@@ -209,7 +209,6 @@ function setupQuizEventListeners() {
   const deleteBtn = document.getElementById("delete-answer");
   const refreshBtn = document.getElementById("refresh-answers");
   const clearAllBtn = document.getElementById("clear-all-answers");
-  const exportBtn = document.getElementById("export-answers");
   const errorDiv = document.getElementById("question-error");
   
   // Question dropdown change
@@ -252,9 +251,6 @@ function setupQuizEventListeners() {
   
   // Clear all answers
   clearAllBtn.addEventListener("click", clearAllAnswers);
-  
-  // Export answers
-  exportBtn.addEventListener("click", exportAnswers);
 }
 
 // Validate question number input
