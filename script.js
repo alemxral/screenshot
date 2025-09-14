@@ -628,9 +628,10 @@ async function loadQuizAnswers() {
         const content = atob(fileData.content);
         const githubData = JSON.parse(content);
         
-        // Convert GitHub format back to local format
+        // Load the complete quiz data from GitHub
         quizAnswers = {};
         if (githubData.answers) {
+          // GitHub stores full answer objects, localStorage stores just the answer value
           Object.keys(githubData.answers).forEach(questionNum => {
             quizAnswers[questionNum] = githubData.answers[questionNum].answer;
           });
