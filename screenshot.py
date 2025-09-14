@@ -19,9 +19,7 @@ def install_required_packages():
     if not os.path.exists(requirements_file):
         print("requirements.txt file not found. Creating it...")
         with open(requirements_file, 'w') as f:
-            f.write("pyautogui==0.9.54\nkeyboard==0.13.5\n")
-    
-    # Check if packages are installed by trying to import them
+            f.write("pyautogui==0.9.54\nkeyboard==0.13.5\npycaw==20230407\ncomtypes==1.2.0\n")    # Check if packages are installed by trying to import them
     missing_packages = []
     try:
         import pyautogui
@@ -34,6 +32,14 @@ def install_required_packages():
         print("Package 'keyboard' is already installed.")
     except ImportError:
         missing_packages.append('keyboard')
+    
+    try:
+        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+        from comtypes import CLSCTX_ALL
+        print("Package 'pycaw' and 'comtypes' are already installed.")
+    except ImportError:
+        missing_packages.append('pycaw')
+        missing_packages.append('comtypes')
     
     # Install missing packages using requirements.txt
     if missing_packages:
@@ -112,18 +118,106 @@ async def save_screenshot_async():
 
 # --------------------- Microphone Mute/Unmute Functionality ---------------------
 def mute_microphone():
+    """
+    Mutes the default microphone using multiple methods for better compatibility.
+    """
+    success = False
+    
+    # Method 1: Try using pycaw (most reliable for Windows)
     try:
-        subprocess.run(["nircmd.exe", "mutesysvolume", "1", "microphone"], check=True)
-        print("Microphone muted.")
-    except subprocess.CalledProcessError as e:
-        print("Error muting microphone:", e)
+        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+        from ctypes import cast, POINTER
+        from comtypes import CLSCTX_ALL
+        
+        # Get default microphone
+        devices = AudioUtilities.GetMicrophone()
+        if devices:
+            interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+            volume = cast(interface, POINTER(IAudioEndpointVolume))
+            volume.SetMute(1, None)
+            print("🔇 Microphone muted using pycaw.")
+            success = True
+    except Exception as e:
+        print(f"pycaw method failed: {e}")
+    
+    # Method 2: PowerShell command (fallback)
+    if not success:
+        try:
+            ps_command = '''
+            Add-Type -AssemblyName System.Windows.Forms
+            $devices = Get-WmiObject -Class Win32_SoundDevice | Where-Object {$_.Name -like "*microphone*" -or $_.Name -like "*mic*"}
+            foreach($device in $devices) {
+                $device.Disable()
+            }
+            '''
+            subprocess.run(["powershell", "-Command", ps_command], check=True, capture_output=True)
+            print("🔇 Microphone muted using PowerShell.")
+            success = True
+        except Exception as e:
+            print(f"PowerShell method failed: {e}")
+    
+    # Method 3: nircmd (final fallback)
+    if not success:
+        try:
+            subprocess.run(["nircmd.exe", "mutesysvolume", "1", "microphone"], check=True)
+            print("🔇 Microphone muted using nircmd.")
+            success = True
+        except Exception as e:
+            print(f"nircmd method failed: {e}")
+    
+    if not success:
+        print("❌ Failed to mute microphone with all methods.")
 
 def unmute_microphone():
+    """
+    Unmutes the default microphone using multiple methods for better compatibility.
+    """
+    success = False
+    
+    # Method 1: Try using pycaw (most reliable for Windows)
     try:
-        subprocess.run(["nircmd.exe", "mutesysvolume", "0", "microphone"], check=True)
-        print("Microphone unmuted.")
-    except subprocess.CalledProcessError as e:
-        print("Error unmuting microphone:", e)
+        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+        from ctypes import cast, POINTER
+        from comtypes import CLSCTX_ALL
+        
+        # Get default microphone
+        devices = AudioUtilities.GetMicrophone()
+        if devices:
+            interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+            volume = cast(interface, POINTER(IAudioEndpointVolume))
+            volume.SetMute(0, None)
+            print("🔊 Microphone unmuted using pycaw.")
+            success = True
+    except Exception as e:
+        print(f"pycaw method failed: {e}")
+    
+    # Method 2: PowerShell command (fallback)
+    if not success:
+        try:
+            ps_command = '''
+            Add-Type -AssemblyName System.Windows.Forms
+            $devices = Get-WmiObject -Class Win32_SoundDevice | Where-Object {$_.Name -like "*microphone*" -or $_.Name -like "*mic*"}
+            foreach($device in $devices) {
+                $device.Enable()
+            }
+            '''
+            subprocess.run(["powershell", "-Command", ps_command], check=True, capture_output=True)
+            print("🔊 Microphone unmuted using PowerShell.")
+            success = True
+        except Exception as e:
+            print(f"PowerShell method failed: {e}")
+    
+    # Method 3: nircmd (final fallback)
+    if not success:
+        try:
+            subprocess.run(["nircmd.exe", "mutesysvolume", "0", "microphone"], check=True)
+            print("🔊 Microphone unmuted using nircmd.")
+            success = True
+        except Exception as e:
+            print(f"nircmd method failed: {e}")
+    
+    if not success:
+        print("❌ Failed to unmute microphone with all methods.")
 
 # --------------------- Iriun Webcam Process Management ---------------------
 def kill_iriun_webcam():
