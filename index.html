@@ -29,9 +29,14 @@
       <div class="question-input-section">
         <div class="input-group">
           <label for="question-number">Question Number (1-20):</label>
-          <select id="question-number" class="form-control">
-            <!-- Options will be populated by JavaScript -->
-          </select>
+          <div class="question-number-controls">
+            <select id="question-number" class="form-control">
+              <!-- Options will be populated by JavaScript -->
+            </select>
+            <span class="input-separator">OR</span>
+            <input type="number" id="question-input" class="form-control" min="1" max="20" placeholder="Type number...">
+          </div>
+          <div id="question-error" class="error-message" style="display: none;"></div>
         </div>
         
         <div class="input-group">
