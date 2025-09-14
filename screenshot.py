@@ -7,6 +7,45 @@ import glob
 import subprocess
 import json
 import threading
+import sys
+
+def install_required_packages():
+    """
+    Auto-installs required packages from requirements.txt if not available.
+    """
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    requirements_file = os.path.join(script_dir, "requirements.txt")
+    
+    if not os.path.exists(requirements_file):
+        print("requirements.txt file not found. Creating it...")
+        with open(requirements_file, 'w') as f:
+            f.write("pyautogui==0.9.54\nkeyboard==0.13.5\n")
+    
+    # Check if packages are installed by trying to import them
+    missing_packages = []
+    try:
+        import pyautogui
+        print("Package 'pyautogui' is already installed.")
+    except ImportError:
+        missing_packages.append('pyautogui')
+    
+    try:
+        import keyboard
+        print("Package 'keyboard' is already installed.")
+    except ImportError:
+        missing_packages.append('keyboard')
+    
+    # Install missing packages using requirements.txt
+    if missing_packages:
+        print(f"Installing missing packages: {', '.join(missing_packages)}")
+        try:
+            subprocess.run([sys.executable, '-m', 'pip', 'install', '-r', requirements_file], check=True)
+            print("All required packages installed successfully from requirements.txt.")
+        except subprocess.CalledProcessError as e:
+            print(f"Failed to install packages from requirements.txt: {e}")
+            sys.exit(1)
+    else:
+        print("All required packages are already installed.")
 
 # --------------------- Screenshot & Git Functionality ---------------------
 project_root = os.path.dirname(os.path.abspath(__file__))
@@ -122,19 +161,105 @@ def start_iriun_webcam():
     except Exception as e:
         print("Error starting Iriun Webcam:", e)
 
+# --------------------- Reset Functionality ---------------------
+async def reset_screenshots():
+    """
+    Resets the screenshot folder and registry.json, then commits and pushes changes to git.
+    """
+    try:
+        global counter, registry
+        
+        print("Starting reset process...")
+        
+        # Delete all JPG files in the screenshots folder
+        if os.path.exists(screenshots_dir):
+            jpg_files = glob.glob(os.path.join(screenshots_dir, "*.jpg"))
+            for jpg_file in jpg_files:
+                os.remove(jpg_file)
+                print(f"Deleted: {os.path.basename(jpg_file)}")
+            
+            if jpg_files:
+                print(f"Deleted {len(jpg_files)} JPG files from screenshots folder.")
+            else:
+                print("No JPG files found in screenshots folder.")
+        else:
+            print("Screenshots folder does not exist.")
+        
+        # Empty the registry.json file
+        registry = []
+        with open(registry_path, 'w') as f:
+            json.dump([], f, indent=4)
+        print("Registry.json has been emptied.")
+        
+        # Reset counter
+        counter = 1
+        
+        # Git operations using async
+        try:
+            # Add all changes
+            proc = await asyncio.create_subprocess_exec(
+                "git", "add", ".",
+                cwd=project_root,
+                stdout=asyncio.subprocess.PIPE, 
+                stderr=asyncio.subprocess.PIPE
+            )
+            await proc.communicate()
+            print("Added changes to git staging area.")
+            
+            # Commit changes
+            commit_message = "Reset screenshots and registry"
+            proc = await asyncio.create_subprocess_exec(
+                "git", "commit", "-m", commit_message,
+                cwd=project_root,
+                stdout=asyncio.subprocess.PIPE, 
+                stderr=asyncio.subprocess.PIPE
+            )
+            await proc.communicate()
+            print("Changes committed to git.")
+            
+            # Push changes
+            proc = await asyncio.create_subprocess_exec(
+                "git", "push",
+                cwd=project_root,
+                stdout=asyncio.subprocess.PIPE, 
+                stderr=asyncio.subprocess.PIPE
+            )
+            await proc.communicate()
+            print("Changes pushed to remote repository.")
+            
+        except Exception as git_error:
+            print(f"Git operation failed: {git_error}")
+            print("Reset completed but git operations failed.")
+        
+        print("Reset process completed successfully!")
+        
+    except Exception as e:
+        print(f"Error during reset process: {e}")
+
 # --------------------- Main Loop Integration ---------------------
 async def main_loop():
+    # Install required packages before running the main program
+    install_required_packages()
+    
     print("Hotkeys:")
-    print("  Shift+Alt: Take a screenshot and push to git")
+    print("  Tab: Take a screenshot and push to git")
+    print("  ²: Take a screenshot and push to git")
     print("  Right Arrow: Mute microphone")
     print("  Left Arrow: Unmute microphone")
     print("  F2: Kill (close) Iriun Webcam process")
     print("  F3: Restart Iriun Webcam")
+    print("  F12: Reset screenshots and registry (deletes JPG files and empties registry.json)")
     print("  Esc: Exit the program")
     
     while True:
-        # Screenshot trigger: Shift + Alt (both pressed simultaneously)
+        # Screenshot trigger: Tab key
         if keyboard.is_pressed("tab"):
+            # Create an asynchronous screenshot task.
+            asyncio.create_task(save_screenshot_async())
+            await asyncio.sleep(1)  # Delay to avoid multiple triggers
+        
+        # Screenshot trigger: ² key (alternative)
+        elif keyboard.is_pressed("²"):
             # Create an asynchronous screenshot task.
             asyncio.create_task(save_screenshot_async())
             await asyncio.sleep(1)  # Delay to avoid multiple triggers
@@ -155,7 +280,14 @@ async def main_loop():
         elif keyboard.is_pressed("F3"):
             start_iriun_webcam()
             await asyncio.sleep(0.5)
+        # Reset trigger: F12
+        elif keyboard.is_pressed("F12"):
+            asyncio.create_task(reset_screenshots())
+            await asyncio.sleep(1)
         # Exit trigger: Esc
+        elif keyboard.is_pressed("esc"):
+            print("Exiting the program...")
+            break
 
         await asyncio.sleep(0.1)
 
