@@ -167,10 +167,16 @@ let quizAnswers = {}; // Store all quiz answers
 let selectedAnswer = null;
 
 // Initialize quiz section
-function initializeQuiz() {
+async function initializeQuiz() {
+  // Show loading indicator
+  const answersGrid = document.getElementById("answers-grid");
+  if (answersGrid) {
+    answersGrid.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">🔄 Loading quiz data from GitHub...</div>';
+  }
+  
   populateQuestionDropdown();
   setupQuizEventListeners();
-  loadQuizAnswers();
+  await loadQuizAnswers();
   renderAnswersGrid();
   updateAnswersSummary();
 }
@@ -201,6 +207,7 @@ function setupQuizEventListeners() {
   const answerButtons = document.querySelectorAll(".answer-btn");
   const submitBtn = document.getElementById("submit-answer");
   const deleteBtn = document.getElementById("delete-answer");
+  const refreshBtn = document.getElementById("refresh-answers");
   const clearAllBtn = document.getElementById("clear-all-answers");
   const exportBtn = document.getElementById("export-answers");
   const errorDiv = document.getElementById("question-error");
@@ -239,6 +246,9 @@ function setupQuizEventListeners() {
   
   // Delete answer
   deleteBtn.addEventListener("click", deleteAnswer);
+  
+  // Refresh answers from GitHub
+  refreshBtn.addEventListener("click", refreshAnswersFromGitHub);
   
   // Clear all answers
   clearAllBtn.addEventListener("click", clearAllAnswers);
@@ -599,12 +609,53 @@ function updateAnswersSummary() {
   document.getElementById("remaining-count").textContent = remainingCount;
 }
 
-// Load quiz answers from localStorage
-function loadQuizAnswers() {
+// Load quiz answers from GitHub first, then fallback to localStorage
+async function loadQuizAnswers() {
+  // First try to load from GitHub if token is available
+  if (GITHUB_CONFIG.token) {
+    try {
+      const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/quiz_answers.json`;
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `token ${GITHUB_CONFIG.token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+      
+      if (response.ok) {
+        const fileData = await response.json();
+        // Decode the base64 content
+        const content = atob(fileData.content);
+        const githubData = JSON.parse(content);
+        
+        // Convert GitHub format back to local format
+        quizAnswers = {};
+        if (githubData.answers) {
+          Object.keys(githubData.answers).forEach(questionNum => {
+            quizAnswers[questionNum] = githubData.answers[questionNum].answer;
+          });
+        }
+        
+        console.log('📡 Quiz answers loaded from GitHub:', Object.keys(quizAnswers).length, 'answers found');
+        
+        // Also save to localStorage as backup
+        saveQuizAnswers();
+        return;
+      }
+    } catch (error) {
+      console.log('⚠️ Could not load from GitHub:', error.message);
+    }
+  }
+  
+  // Fallback to localStorage if GitHub fails or no token
   try {
     const saved = localStorage.getItem("quiz-answers");
     if (saved) {
       quizAnswers = JSON.parse(saved);
+      console.log('💾 Quiz answers loaded from localStorage:', Object.keys(quizAnswers).length, 'answers found');
+    } else {
+      quizAnswers = {};
+      console.log('📝 Starting with empty quiz answers');
     }
   } catch (error) {
     console.error("Error loading quiz answers:", error);
@@ -618,6 +669,43 @@ function saveQuizAnswers() {
     localStorage.setItem("quiz-answers", JSON.stringify(quizAnswers));
   } catch (error) {
     console.error("Error saving quiz answers:", error);
+  }
+}
+
+// Refresh answers from GitHub
+async function refreshAnswersFromGitHub() {
+  if (!GITHUB_CONFIG.token) {
+    alert('❌ No GitHub token configured. Please set up your token first.');
+    return;
+  }
+  
+  const refreshBtn = document.getElementById("refresh-answers");
+  const originalText = refreshBtn.innerHTML;
+  refreshBtn.innerHTML = "🔄 Loading from GitHub...";
+  refreshBtn.disabled = true;
+  
+  try {
+    // Show loading in the grid
+    const answersGrid = document.getElementById("answers-grid");
+    answersGrid.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">🔄 Refreshing from GitHub...</div>';
+    
+    await loadQuizAnswers();
+    renderAnswersGrid();
+    updateAnswersSummary();
+    
+    const count = Object.keys(quizAnswers).length;
+    showSuccessMessage(`✅ Refreshed from GitHub: ${count} answers loaded`);
+    
+  } catch (error) {
+    console.error('Error refreshing from GitHub:', error);
+    showSuccessMessage(`❌ Failed to refresh from GitHub: ${error.message}`);
+    
+    // Restore from localStorage as fallback
+    renderAnswersGrid();
+    updateAnswersSummary();
+  } finally {
+    refreshBtn.innerHTML = originalText;
+    refreshBtn.disabled = false;
   }
 }
 
@@ -859,7 +947,7 @@ async function clearAllQuizAnswersFromGitHub() {
 }
 
 // Initialize application
-function initializeApp() {
+async function initializeApp() {
   // Load gallery first
   loadGallery();
   
@@ -869,7 +957,7 @@ function initializeApp() {
   // Check if GitHub token exists
   if (loadGitHubToken()) {
     showQuizSection();
-    initializeQuiz();
+    await initializeQuiz();
   } else {
     showGitHubSetup();
   }
