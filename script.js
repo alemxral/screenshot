@@ -329,7 +329,7 @@ function clearAnswerSelection() {
 }
 
 // Submit answer
-function submitAnswer() {
+async function submitAnswer() {
   const questionNum = getSelectedQuestionNumber();
   
   if (!questionNum) {
@@ -342,26 +342,56 @@ function submitAnswer() {
     return;
   }
   
-  // Save answer
-  quizAnswers[questionNum] = selectedAnswer;
-  saveQuizAnswers();
+  // Show loading state
+  const submitBtn = document.getElementById("submit-answer");
+  const originalText = submitBtn.innerHTML;
+  submitBtn.innerHTML = "🔄 Saving to GitHub...";
+  submitBtn.disabled = true;
   
-  // Update UI
-  renderAnswersGrid();
-  updateAnswersSummary();
-  
-  // Clear form for next entry
-  document.getElementById("question-number").value = "";
-  document.getElementById("question-input").value = "";
-  clearAnswerSelection();
-  hideError();
-  
-  // Success message
-  showSuccessMessage(`✅ Answer saved: Question ${questionNum} = ${selectedAnswer}`);
+  try {
+    // Save directly to GitHub
+    const success = await saveQuizAnswerToGitHub(questionNum, selectedAnswer);
+    
+    if (success) {
+      // Update UI
+      renderAnswersGrid();
+      updateAnswersSummary();
+      
+      // Clear form for next entry
+      document.getElementById("question-number").value = "";
+      document.getElementById("question-input").value = "";
+      clearAnswerSelection();
+      hideError();
+      
+      // Success message
+      showSuccessMessage(`✅ Answer saved to GitHub: Q${questionNum} = ${selectedAnswer}`);
+    } else {
+      throw new Error('Failed to save to GitHub');
+    }
+  } catch (error) {
+    console.error('Error saving answer:', error);
+    
+    // Fallback to localStorage
+    quizAnswers[questionNum] = selectedAnswer;
+    saveQuizAnswers();
+    renderAnswersGrid();
+    updateAnswersSummary();
+    
+    document.getElementById("question-number").value = "";
+    document.getElementById("question-input").value = "";
+    clearAnswerSelection();
+    hideError();
+    
+    showSuccessMessage(`⚠️ Answer saved locally (GitHub unavailable): Q${questionNum} = ${selectedAnswer}`);
+  } finally {
+    // Restore button state
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
+  }
 }
 
 // Delete answer
-function deleteAnswer() {
+async function deleteAnswer() {
   const questionNum = getSelectedQuestionNumber();
   
   if (!questionNum) {
@@ -374,34 +404,88 @@ function deleteAnswer() {
     return;
   }
   
-  if (confirm(`🗑️ Delete answer for Question ${questionNum}?`)) {
-    delete quizAnswers[questionNum];
-    saveQuizAnswers();
-    renderAnswersGrid();
-    updateAnswersSummary();
-    clearAnswerSelection();
-    hideError();
-    showSuccessMessage(`✅ Answer deleted for Question ${questionNum}`);
+  if (confirm(`🗑️ Delete answer for Question ${questionNum} from GitHub?`)) {
+    const deleteBtn = document.getElementById("delete-answer");
+    const originalText = deleteBtn.innerHTML;
+    deleteBtn.innerHTML = "🔄 Deleting from GitHub...";
+    deleteBtn.disabled = true;
+    
+    try {
+      const success = await deleteQuizAnswerFromGitHub(questionNum);
+      
+      if (success) {
+        renderAnswersGrid();
+        updateAnswersSummary();
+        clearAnswerSelection();
+        hideError();
+        showSuccessMessage(`✅ Answer deleted from GitHub: Q${questionNum}`);
+      } else {
+        throw new Error('Failed to delete from GitHub');
+      }
+    } catch (error) {
+      console.error('Error deleting answer:', error);
+      
+      // Fallback to localStorage
+      delete quizAnswers[questionNum];
+      saveQuizAnswers();
+      renderAnswersGrid();
+      updateAnswersSummary();
+      clearAnswerSelection();
+      hideError();
+      
+      showSuccessMessage(`⚠️ Answer deleted locally (GitHub unavailable): Q${questionNum}`);
+    } finally {
+      deleteBtn.innerHTML = originalText;
+      deleteBtn.disabled = false;
+    }
   }
 }
 
 // Clear all answers
-function clearAllAnswers() {
+async function clearAllAnswers() {
   if (Object.keys(quizAnswers).length === 0) {
     alert("❌ No answers to clear");
     return;
   }
   
-  if (confirm("🗑️ Delete ALL quiz answers? This cannot be undone!")) {
-    quizAnswers = {};
-    saveQuizAnswers();
-    renderAnswersGrid();
-    updateAnswersSummary();
-    clearAnswerSelection();
-    document.getElementById("question-number").value = "";
-    document.getElementById("question-input").value = "";
-    hideError();
-    showSuccessMessage("✅ All answers cleared");
+  if (confirm("🗑️ Delete ALL quiz answers from GitHub? This cannot be undone!")) {
+    const clearBtn = document.getElementById("clear-all-answers");
+    const originalText = clearBtn.innerHTML;
+    clearBtn.innerHTML = "🔄 Clearing from GitHub...";
+    clearBtn.disabled = true;
+    
+    try {
+      const success = await clearAllQuizAnswersFromGitHub();
+      
+      if (success) {
+        renderAnswersGrid();
+        updateAnswersSummary();
+        clearAnswerSelection();
+        document.getElementById("question-number").value = "";
+        document.getElementById("question-input").value = "";
+        hideError();
+        showSuccessMessage("✅ All answers cleared from GitHub");
+      } else {
+        throw new Error('Failed to clear from GitHub');
+      }
+    } catch (error) {
+      console.error('Error clearing answers:', error);
+      
+      // Fallback to localStorage
+      quizAnswers = {};
+      saveQuizAnswers();
+      renderAnswersGrid();
+      updateAnswersSummary();
+      clearAnswerSelection();
+      document.getElementById("question-number").value = "";
+      document.getElementById("question-input").value = "";
+      hideError();
+      
+      showSuccessMessage("⚠️ Answers cleared locally (GitHub unavailable)");
+    } finally {
+      clearBtn.innerHTML = originalText;
+      clearBtn.disabled = false;
+    }
   }
 }
 
@@ -537,6 +621,259 @@ function saveQuizAnswers() {
   }
 }
 
-// Start loading the gallery and initialize quiz.
-loadGallery();
-initializeQuiz();
+// GitHub Configuration
+const GITHUB_CONFIG = {
+  owner: 'alemxral',  // Your GitHub username
+  repo: 'screenshot', // Your repository name
+  token: null, // Will be loaded from localStorage
+  branch: 'main'
+};
+
+// GitHub Token Management
+function loadGitHubToken() {
+  const savedToken = localStorage.getItem('github-token');
+  if (savedToken) {
+    GITHUB_CONFIG.token = savedToken;
+    return true;
+  }
+  return false;
+}
+
+function saveGitHubToken(token) {
+  localStorage.setItem('github-token', token);
+  GITHUB_CONFIG.token = token;
+}
+
+function showGitHubSetup() {
+  document.getElementById('github-setup').style.display = 'block';
+  document.querySelector('.quiz-section').style.display = 'none';
+}
+
+function showQuizSection() {
+  document.getElementById('github-setup').style.display = 'none';
+  document.querySelector('.quiz-section').style.display = 'block';
+}
+
+// Setup GitHub token input handlers
+function setupGitHubHandlers() {
+  const tokenInput = document.getElementById('github-token-input');
+  const saveTokenBtn = document.getElementById('save-token-btn');
+  const changeTokenBtn = document.getElementById('change-token-btn');
+  
+  saveTokenBtn.addEventListener('click', async () => {
+    const token = tokenInput.value.trim();
+    
+    if (!token) {
+      alert('❌ Please enter a valid GitHub token');
+      return;
+    }
+    
+    // Test the token by making a simple API call
+    saveTokenBtn.innerHTML = '🔄 Validating token...';
+    saveTokenBtn.disabled = true;
+    
+    try {
+      const testResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`, {
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+      
+      if (testResponse.ok) {
+        saveGitHubToken(token);
+        showQuizSection();
+        await initializeQuiz();
+        alert('✅ GitHub token validated and saved successfully!');
+      } else {
+        throw new Error(`Invalid token or repository access denied (${testResponse.status})`);
+      }
+    } catch (error) {
+      alert(`❌ Token validation failed: ${error.message}`);
+    } finally {
+      saveTokenBtn.innerHTML = '💾 Save Token';
+      saveTokenBtn.disabled = false;
+    }
+  });
+  
+  if (changeTokenBtn) {
+    changeTokenBtn.addEventListener('click', () => {
+      if (confirm('🔄 Change GitHub token? You will need to re-enter your token.')) {
+        localStorage.removeItem('github-token');
+        GITHUB_CONFIG.token = null;
+        showGitHubSetup();
+      }
+    });
+  }
+}
+
+// GitHub API Functions
+async function pushToGitHub(filename, content, commitMessage) {
+  try {
+    const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filename}`;
+    
+    // First, try to get the current file to get its SHA (required for updates)
+    let sha = null;
+    try {
+      const getResponse = await fetch(url, {
+        headers: {
+          'Authorization': `token ${GITHUB_CONFIG.token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+      
+      if (getResponse.ok) {
+        const fileData = await getResponse.json();
+        sha = fileData.sha;
+      }
+    } catch (error) {
+      // File doesn't exist yet, which is fine
+    }
+    
+    // Prepare the request body
+    const requestBody = {
+      message: commitMessage,
+      content: btoa(unescape(encodeURIComponent(content))), // Base64 encode the content
+      branch: GITHUB_CONFIG.branch
+    };
+    
+    // Include SHA if we're updating an existing file
+    if (sha) {
+      requestBody.sha = sha;
+    }
+    
+    // Push to GitHub
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_CONFIG.token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    });
+    
+    if (response.ok) {
+      const result = await response.json();
+      console.log('✅ Successfully pushed to GitHub:', result.commit.html_url);
+      return true;
+    } else {
+      const error = await response.json();
+      console.error('❌ GitHub API Error:', error);
+      return false;
+    }
+    
+  } catch (error) {
+    console.error('❌ Error pushing to GitHub:', error);
+    return false;
+  }
+}
+
+// Save quiz answer and push to GitHub
+async function saveQuizAnswerToGitHub(questionNumber, answer) {
+  // Update local quiz data
+  quizAnswers[questionNumber] = answer;
+  
+  // Prepare quiz data for GitHub
+  const timestamp = new Date().toISOString();
+  const quizData = {
+    quiz_session: {
+      created_at: timestamp,
+      last_updated: timestamp,
+      total_questions: 20,
+      answered_questions: Object.keys(quizAnswers).length
+    },
+    answers: {}
+  };
+  
+  // Convert answers to GitHub format
+  Object.keys(quizAnswers).forEach(qNum => {
+    quizData.answers[qNum] = {
+      answer: quizAnswers[qNum],
+      answered_at: timestamp,
+      date: new Date().toISOString().split('T')[0],
+      time: new Date().toTimeString().split(' ')[0]
+    };
+  });
+  
+  const jsonContent = JSON.stringify(quizData, null, 2);
+  const commitMessage = `Update quiz: Q${questionNumber} = ${answer}`;
+  
+  return await pushToGitHub('quiz_answers.json', jsonContent, commitMessage);
+}
+
+// Delete quiz answer and push to GitHub
+async function deleteQuizAnswerFromGitHub(questionNumber) {
+  // Update local quiz data
+  delete quizAnswers[questionNumber];
+  
+  // Prepare quiz data for GitHub
+  const timestamp = new Date().toISOString();
+  const quizData = {
+    quiz_session: {
+      created_at: timestamp,
+      last_updated: timestamp,
+      total_questions: 20,
+      answered_questions: Object.keys(quizAnswers).length
+    },
+    answers: {}
+  };
+  
+  // Convert answers to GitHub format
+  Object.keys(quizAnswers).forEach(qNum => {
+    quizData.answers[qNum] = {
+      answer: quizAnswers[qNum],
+      answered_at: timestamp,
+      date: new Date().toISOString().split('T')[0],
+      time: new Date().toTimeString().split(' ')[0]
+    };
+  });
+  
+  const jsonContent = JSON.stringify(quizData, null, 2);
+  const commitMessage = `Delete quiz answer: Q${questionNumber}`;
+  
+  return await pushToGitHub('quiz_answers.json', jsonContent, commitMessage);
+}
+
+// Clear all quiz answers and push to GitHub
+async function clearAllQuizAnswersFromGitHub() {
+  // Clear local quiz data
+  quizAnswers = {};
+  
+  // Prepare empty quiz data for GitHub
+  const timestamp = new Date().toISOString();
+  const quizData = {
+    quiz_session: {
+      created_at: timestamp,
+      last_updated: timestamp,
+      total_questions: 20,
+      answered_questions: 0
+    },
+    answers: {}
+  };
+  
+  const jsonContent = JSON.stringify(quizData, null, 2);
+  const commitMessage = 'Clear all quiz answers';
+  
+  return await pushToGitHub('quiz_answers.json', jsonContent, commitMessage);
+}
+
+// Initialize application
+function initializeApp() {
+  // Load gallery first
+  loadGallery();
+  
+  // Setup GitHub token handlers
+  setupGitHubHandlers();
+  
+  // Check if GitHub token exists
+  if (loadGitHubToken()) {
+    showQuizSection();
+    initializeQuiz();
+  } else {
+    showGitHubSetup();
+  }
+}
+
+// Start loading the application
+initializeApp();

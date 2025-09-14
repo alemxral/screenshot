@@ -14,10 +14,47 @@
   
   <div id="gallery"></div>
 
+  <!-- GitHub Setup Section -->
+  <div id="github-setup" class="github-setup-section">
+    <div class="setup-header">
+      <h2>⚙️ GitHub Setup Required</h2>
+      <p>To save quiz answers directly to your GitHub repository, you need to configure your Personal Access Token.</p>
+    </div>
+    
+    <div class="setup-steps">
+      <ol>
+        <li><strong>Create a Personal Access Token:</strong>
+          <ul>
+            <li>Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings → Personal Access Tokens</a></li>
+            <li>Click "Generate new token" → "Tokens (classic)"</li>
+            <li>Select <code>repo</code> scope (full repository access)</li>
+            <li>Copy the generated token</li>
+          </ul>
+        </li>
+        <li><strong>Enter your token below:</strong></li>
+      </ol>
+      
+      <div class="token-input-section">
+        <input type="password" id="github-token-input" placeholder="Paste your GitHub token here..." class="token-input">
+        <button id="save-token-btn" class="btn btn-primary">💾 Save Token</button>
+      </div>
+      
+      <div class="setup-info">
+        <p><strong>Repository:</strong> alemxral/screenshot</p>
+        <p><strong>File:</strong> quiz_answers.json</p>
+        <p><em>Your token is stored locally in your browser and used to push answers directly to GitHub.</em></p>
+      </div>
+    </div>
+  </div>
+
   <!-- Quiz Section -->
-  <div class="quiz-section">
+  <div class="quiz-section" style="display: none;">
     <div class="section-header">
       <h2>📝 Quiz & Exam Answers</h2>
+      <div class="github-status">
+        <span id="github-connection-status" class="status-connected">✅ Connected to GitHub</span>
+        <button id="change-token-btn" class="btn btn-secondary">⚙️ Change Token</button>
+      </div>
       <div class="quiz-controls">
         <button id="clear-all-answers" class="btn btn-danger">🗑️ Clear All Answers</button>
         <button id="export-answers" class="btn btn-success">📊 Export Results</button>
