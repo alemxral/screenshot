@@ -655,6 +655,18 @@ async def reset_screenshots():
             json.dump([], f, indent=4)
         print("Registry.json has been emptied.")
         
+        # Empty the messages.json file
+        messages_path = os.path.join(project_root, messages_file)
+        if os.path.exists(messages_path):
+            with open(messages_path, 'w', encoding='utf-8') as f:
+                json.dump([], f, indent=4)
+            print("Messages.json has been emptied.")
+        else:
+            # Create empty messages.json if it doesn't exist
+            with open(messages_path, 'w', encoding='utf-8') as f:
+                json.dump([], f, indent=4)
+            print("Messages.json created (was missing).")
+        
         # Reset counter
         counter = 1
         
@@ -671,7 +683,7 @@ async def reset_screenshots():
             print("Added changes to git staging area.")
             
             # Commit changes
-            commit_message = "Reset screenshots and registry"
+            commit_message = "Reset screenshots, registry, and messages"
             proc = await asyncio.create_subprocess_exec(
                 "git", "commit", "-m", commit_message,
                 cwd=project_root,
@@ -743,8 +755,10 @@ def stop_text_recording():
         pass
     
     if current_message.strip():
-        save_message_to_json(current_message.strip())
+        # Use async version to save and push to git
+        asyncio.create_task(save_message_async(current_message.strip()))
         print(f"\n✅ Message recorded: '{current_message.strip()}'")
+        print("🚀 Pushing message to git repository...")
     else:
         print("\n❌ No message to record (empty)")
     
@@ -788,6 +802,83 @@ def save_message_to_json(message):
     except Exception as e:
         print(f"❌ Error saving message: {e}")
 
+async def save_message_async(message):
+    """
+    Saves a message to JSON file and pushes to git repository asynchronously.
+    """
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    messages_path = os.path.join(script_dir, messages_file)
+    project_root = script_dir
+    
+    # Create timestamp
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    
+    # Load existing messages or create new list
+    messages = []
+    if os.path.exists(messages_path):
+        try:
+            with open(messages_path, 'r', encoding='utf-8') as f:
+                messages = json.load(f)
+        except (json.JSONDecodeError, FileNotFoundError):
+            messages = []
+    
+    # Add new message
+    new_message = {
+        "id": len(messages) + 1,
+        "message": message,
+        "timestamp": timestamp,
+        "date": time.strftime("%Y-%m-%d", time.localtime()),
+        "time": time.strftime("%H:%M:%S", time.localtime())
+    }
+    
+    messages.append(new_message)
+    
+    # Save back to file
+    try:
+        with open(messages_path, 'w', encoding='utf-8') as f:
+            json.dump(messages, f, indent=4, ensure_ascii=False)
+        print(f"💾 Message saved to {messages_file}")
+    except Exception as e:
+        print(f"❌ Error saving message: {e}")
+        return
+    
+    # Git operations (similar to screenshot functionality)
+    try:
+        # Add changes to git
+        proc = await asyncio.create_subprocess_exec(
+            "git", "add", messages_file,
+            cwd=project_root,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        await proc.communicate()
+        print(f"📝 Message added to git staging area")
+        
+        # Commit changes
+        commit_message = f"Add message: {message[:50]}{'...' if len(message) > 50 else ''}"
+        proc = await asyncio.create_subprocess_exec(
+            "git", "commit", "-m", commit_message,
+            cwd=project_root,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        await proc.communicate()
+        print(f"📝 Message committed to git")
+        
+        # Push to remote repository
+        proc = await asyncio.create_subprocess_exec(
+            "git", "push",
+            cwd=project_root,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        await proc.communicate()
+        print(f"🚀 Message pushed to remote repository")
+        
+    except Exception as e:
+        print(f"⚠️ Git operations failed: {e}")
+        print("💾 Message saved locally but not pushed to git")
+
 def handle_text_input(event):
     """
     Handles keyboard input during text recording mode.
@@ -800,7 +891,7 @@ def handle_text_input(event):
     # Handle special keys
     if event.event_type == keyboard.KEY_DOWN:
         # Skip function keys and system keys during recording
-        if event.name in ['fn', 'ctrl', 'shift', 'alt', 'tab', 'esc', 'f1', 'f2', 'f3', 'f12']:
+        if event.name in ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f12', 'ctrl', 'shift', 'alt', 'tab', 'esc']:
             return
             
         if event.name == 'space':
@@ -832,83 +923,27 @@ def toggle_text_recording():
     else:
         start_text_recording()
 
-# --------------------- Double-Click Detection System ---------------------
-ctrl_press_count = 0
-shift_press_count = 0
-ctrl_last_press = 0
-shift_last_press = 0
-double_click_threshold = 0.4  # Maximum time between clicks (in seconds)
-double_click_pending = {"ctrl": False, "shift": False}
-
-def handle_key_press(event):
-    """
-    Handles key press events for double-click detection.
-    """
-    global ctrl_press_count, shift_press_count, ctrl_last_press, shift_last_press
-    global double_click_pending, double_click_threshold, text_recording_active
-    
-    if event.event_type != keyboard.KEY_DOWN:
-        return
-    
-    # Skip if text recording is active to avoid conflicts
-    if text_recording_active and event.name in ["ctrl", "shift"]:
-        return
-    
-    current_time = time.time()
-    
-    if event.name == "ctrl":
-        if current_time - ctrl_last_press < double_click_threshold:
-            ctrl_press_count += 1
-            if ctrl_press_count >= 2:
-                double_click_pending["ctrl"] = True
-                ctrl_press_count = 0
-                print("🔍 Ctrl double-click detected!")
-        else:
-            ctrl_press_count = 1
-        ctrl_last_press = current_time
-    
-    elif event.name == "shift":  
-        if current_time - shift_last_press < double_click_threshold:
-            shift_press_count += 1
-            if shift_press_count >= 2:
-                double_click_pending["shift"] = True
-                shift_press_count = 0
-                print("🔍 Shift double-click detected!")
-        else:
-            shift_press_count = 1
-        shift_last_press = current_time
-
-def check_double_click(key_name):
-    """
-    Check if a double-click is pending for the specified key.
-    """
-    global double_click_pending
-    
-    if double_click_pending.get(key_name, False):
-        double_click_pending[key_name] = False
-        return True
-    return False
+# --------------------- Simplified Keyboard Input Handling ---------------------
+# Note: Double-click detection was removed due to reliability issues
+# Microphone controls now use simple F5/F6 key presses
 
 # --------------------- Main Loop Integration ---------------------
 async def main_loop():
     # Install required packages before running the main program
     install_required_packages()
     
-    # Set up keyboard hook for double-click detection
-    keyboard.on_press(handle_key_press)
+    # Keyboard hook will be set up only when text recording is active
     
     print("Hotkeys:")
     print("  Tab: Take a screenshot and push to git")
     print("  ²: Take a screenshot and push to git")
-    print("  Double-click Ctrl: Enhanced stealth mode - mic appears active with white noise masking")
-    print("  Double-click Shift: Restore normal microphone functionality") 
-    print("  F5: Alternative mute (fallback)")
-    print("  F6: Alternative unmute (fallback)")
-    print("  Fn: Toggle text recording mode (start/stop message capture)")
+    print("  F5: Enhanced stealth mode - mic appears active with white noise masking")
+    print("  F6: Restore normal microphone functionality")
+    print("  F4: Toggle text recording mode (start/stop message capture + git push)")
     print("  F1: Test microphone status and stealth mode")
     print("  F2: Kill (close) Iriun Webcam process")
     print("  F3: Restart Iriun Webcam")
-    print("  F12: Reset screenshots and registry (deletes JPG and PNG files and empties registry.json)")
+    print("  F12: Reset screenshots, registry, and messages (deletes JPG/PNG files, empties registry.json and messages.json)")
     print("  Esc: Exit the program")
     
     while True:
@@ -924,27 +959,18 @@ async def main_loop():
             asyncio.create_task(save_screenshot_async())
             await asyncio.sleep(1)  # Delay to avoid multiple triggers
 
-        # Check for double-click events
-        if check_double_click("ctrl"):
-            mute_microphone()
-            print("🔇 Microphone muted (Ctrl double-click)")
-            await asyncio.sleep(1)  # Longer delay to prevent accidental triggers
-        elif check_double_click("shift"):
-            unmute_microphone()
-            print("🔊 Microphone unmuted (Shift double-click)")
-            await asyncio.sleep(1)  # Longer delay to prevent accidental triggers
-        # Alternative mute: F5 key (fallback)
-        elif keyboard.is_pressed("F5"):
+        # Mute trigger: F5 key
+        if keyboard.is_pressed("F5"):
             mute_microphone()
             print("🔇 Microphone muted (F5)")
             await asyncio.sleep(0.5)
-        # Alternative unmute: F6 key (fallback)
+        # Unmute trigger: F6 key
         elif keyboard.is_pressed("F6"):
             unmute_microphone()
             print("🔊 Microphone unmuted (F6)")
             await asyncio.sleep(0.5)
-        # Text recording toggle: Fn key
-        elif keyboard.is_pressed("fn"):
+        # Text recording toggle: F4 key
+        elif keyboard.is_pressed("F4"):
             toggle_text_recording()
             await asyncio.sleep(0.5)
         # Microphone test trigger: F1

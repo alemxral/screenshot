@@ -14,6 +14,57 @@
   
   <div id="gallery"></div>
 
+  <!-- Quiz Section -->
+  <div class="quiz-section">
+    <div class="section-header">
+      <h2>📝 Quiz & Exam Answers</h2>
+      <div class="quiz-controls">
+        <button id="clear-all-answers" class="btn btn-danger">🗑️ Clear All Answers</button>
+        <button id="export-answers" class="btn btn-success">📊 Export Results</button>
+      </div>
+    </div>
+    
+    <div class="quiz-container">
+      <!-- Question Input Form -->
+      <div class="question-input-section">
+        <div class="input-group">
+          <label for="question-number">Question Number (1-20):</label>
+          <select id="question-number" class="form-control">
+            <!-- Options will be populated by JavaScript -->
+          </select>
+        </div>
+        
+        <div class="input-group">
+          <label for="answer-choice">Answer Choice:</label>
+          <div class="answer-buttons">
+            <button type="button" class="answer-btn" data-answer="A">A</button>
+            <button type="button" class="answer-btn" data-answer="B">B</button>
+            <button type="button" class="answer-btn" data-answer="C">C</button>
+            <button type="button" class="answer-btn" data-answer="D">D</button>
+            <button type="button" class="answer-btn" data-answer="E">E</button>
+          </div>
+        </div>
+        
+        <div class="input-actions">
+          <button id="submit-answer" class="btn btn-primary">✅ Submit Answer</button>
+          <button id="delete-answer" class="btn btn-warning">❌ Delete Answer</button>
+        </div>
+      </div>
+      
+      <!-- Answers Display -->
+      <div class="answers-display">
+        <h3>📋 Current Answers</h3>
+        <div id="answers-grid" class="answers-grid">
+          <!-- Answers will be populated by JavaScript -->
+        </div>
+        <div id="answers-summary" class="answers-summary">
+          <p>Answered: <span id="answered-count">0</span> / 20</p>
+          <p>Remaining: <span id="remaining-count">20</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal for expanded image -->
   <div id="modal">
     <img id="modal-image" src="" alt="Expanded view">
