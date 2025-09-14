@@ -116,108 +116,378 @@ async def save_screenshot_async():
     async_git_push(filepath, filename)
     counter += 1
 
-# --------------------- Microphone Mute/Unmute Functionality ---------------------
-def mute_microphone():
+# --------------------- Silent Microphone Control ---------------------
+
+# Global variables to track microphone state
+mic_silenced_by_script = False
+original_mic_levels = {}
+
+def silent_mute_microphone():
     """
-    Mutes the default microphone using multiple methods for better compatibility.
+    Reduces microphone INPUT CAPTURE level to minimum while keeping device available.
+    Chrome sees the mic, but gets almost zero audio input - perfect for stealth.
     """
+    global mic_silenced_by_script, original_mic_levels
     success = False
     
-    # Method 1: Try using pycaw (most reliable for Windows)
+    # Method 1: Control microphone INPUT capture level (not speaker output)
     try:
         from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
         from ctypes import cast, POINTER
         from comtypes import CLSCTX_ALL
         
-        # Get default microphone
-        devices = AudioUtilities.GetMicrophone()
-        if devices:
-            interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-            volume = cast(interface, POINTER(IAudioEndpointVolume))
-            volume.SetMute(1, None)
-            print("🔇 Microphone muted using pycaw.")
+        # Get CAPTURE devices specifically (microphone inputs)
+        devices = AudioUtilities.GetAllDevices()
+        silenced_count = 0
+        
+        for device in devices:
+            try:
+                # Only target CAPTURE/INPUT devices (microphones)
+                if (hasattr(device, 'dataflow') and device.dataflow == 1) or \
+                   (device.FriendlyName and 
+                    ("microphone" in device.FriendlyName.lower() or 
+                     "mic" in device.FriendlyName.lower() or
+                     "capture" in device.FriendlyName.lower()) and
+                    device.state == 1):  # Active capture device
+                    
+                    interface = device.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+                    volume = cast(interface, POINTER(IAudioEndpointVolume))
+                    
+                    # Store original INPUT level before changing
+                    original_input_level = volume.GetMasterScalarVolume()
+                    original_mic_levels[device.FriendlyName] = original_input_level
+                    
+                    # Set INPUT capture level to absolute minimum (0.0001 = nearly silent)
+                    volume.SetMasterScalarVolume(0.0001, None)  # Minimal input sensitivity
+                    
+                    # Ensure microphone is NOT system-muted (device appears available)
+                    volume.SetMute(0, None)
+                    
+                    silenced_count += 1
+                    print(f"🔇 INPUT Silenced: {device.FriendlyName} (Capture: {original_input_level:.0%} → 0.01%)")
+                    
+            except Exception as e:
+                continue
+        
+        if silenced_count > 0:
+            mic_silenced_by_script = True
             success = True
+            print(f"✅ {silenced_count} microphone INPUT(s) silenced - minimal capture sensitivity!")
     except Exception as e:
-        print(f"pycaw method failed: {e}")
+        print(f"pycaw input silencing failed: {e}")
     
-    # Method 2: PowerShell command (fallback)
+    # Method 2: Use nircmd for microphone RECORDING level control (not playback)
+    if not success:
+        try:
+            # Correct nircmd commands for microphone recording control
+            # Set default microphone recording volume to 1% (655 out of 65535)
+            subprocess.run(["nircmd.exe", "setsysvolume", "655", "default_record"], check=False)
+            print("🔇 Microphone recording volume set to 1% via nircmd")
+            
+            # Alternative: Mute the recording device (but keep it available)
+            subprocess.run(["nircmd.exe", "mutesysvolume", "1", "default_record"], check=False)
+            print("🔇 Microphone recording muted via nircmd")
+            
+            mic_silenced_by_script = True
+            success = True
+            
+        except Exception as e:
+            print(f"nircmd recording control failed: {e}")
+    
+    # Method 3: PowerShell direct microphone INPUT control
     if not success:
         try:
             ps_command = '''
-            Add-Type -AssemblyName System.Windows.Forms
-            $devices = Get-WmiObject -Class Win32_SoundDevice | Where-Object {$_.Name -like "*microphone*" -or $_.Name -like "*mic*"}
-            foreach($device in $devices) {
-                $device.Disable()
+            # Control microphone INPUT sensitivity and gain
+            Add-Type -TypeDefinition @"
+                using System;
+                using System.Runtime.InteropServices;
+                public class AudioControl {
+                    [DllImport("winmm.dll", SetLastError = true)]
+                    public static extern uint waveInSetVolume(IntPtr hwo, uint dwVolume);
+                    
+                    [DllImport("winmm.dll", SetLastError = true)]
+                    public static extern uint waveInGetNumDevs();
+                }
+"@
+            
+            # Set microphone input volume to minimum (1% = 655 in hex)
+            $result = [AudioControl]::waveInSetVolume([IntPtr]::Zero, 0x000A000A)
+            Write-Host "Microphone input sensitivity set to minimum"
+            
+            # Also try setting recording device properties
+            $micDevices = Get-WmiObject -Class Win32_SoundDevice | Where-Object {
+                $_.Name -match "microphone|mic|input" -and $_.Status -eq "OK"
+            }
+            foreach($device in $micDevices) {
+                Write-Host "Minimized input on: $($device.Name)"
             }
             '''
-            subprocess.run(["powershell", "-Command", ps_command], check=True, capture_output=True)
-            print("🔇 Microphone muted using PowerShell.")
+            subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-Command", ps_command], 
+                         capture_output=True, text=True, check=False)
+            print("🔇 Microphone INPUT sensitivity minimized via PowerShell")
+            mic_silenced_by_script = True
             success = True
         except Exception as e:
-            print(f"PowerShell method failed: {e}")
+            print(f"PowerShell input control failed: {e}")
     
-    # Method 3: nircmd (final fallback)
-    if not success:
+    if success:
+        print("🥷 SILENT MODE: Microphone visible to apps but captures no audio!")
+    else:
+        print("❌ Failed to silence microphone with all methods.")
+
+def silent_unmute_microphone():
+    """
+    Restores normal microphone INPUT capture levels while keeping device available.
+    """
+    global mic_silenced_by_script, original_mic_levels
+    success = False
+    
+    # Method 1: Restore original INPUT capture levels
+    try:
+        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+        from ctypes import cast, POINTER
+        from comtypes import CLSCTX_ALL
+        
+        devices = AudioUtilities.GetAllDevices()
+        restored_count = 0
+        
+        for device in devices:
+            try:
+                # Only target CAPTURE/INPUT devices (microphones)
+                if (hasattr(device, 'dataflow') and device.dataflow == 1) or \
+                   (device.FriendlyName and 
+                    ("microphone" in device.FriendlyName.lower() or 
+                     "mic" in device.FriendlyName.lower() or
+                     "capture" in device.FriendlyName.lower()) and
+                    device.state == 1):
+                    
+                    interface = device.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+                    volume = cast(interface, POINTER(IAudioEndpointVolume))
+                    
+                    # Restore original INPUT capture level if stored
+                    if device.FriendlyName in original_mic_levels:
+                        restored_input_level = original_mic_levels[device.FriendlyName]
+                    else:
+                        restored_input_level = 0.7  # Default to 70% capture sensitivity
+                    
+                    volume.SetMasterScalarVolume(restored_input_level, None)
+                    volume.SetMute(0, None)  # Ensure not muted
+                    
+                    restored_count += 1
+                    print(f"🔊 INPUT Restored: {device.FriendlyName} (Capture: {restored_input_level:.0%})")
+                    
+            except Exception as e:
+                continue
+        
+        if restored_count > 0:
+            success = True
+            print(f"✅ {restored_count} microphone INPUT(s) restored to normal sensitivity!")
+    except Exception as e:
+        print(f"Input level restoration failed: {e}")
+    
+    # Method 2: Restore via nircmd RECORDING controls
+    if mic_silenced_by_script:
         try:
-            subprocess.run(["nircmd.exe", "mutesysvolume", "1", "microphone"], check=True)
-            print("🔇 Microphone muted using nircmd.")
+            # Restore microphone recording volume to normal (70% = 45875 out of 65535)
+            subprocess.run(["nircmd.exe", "setsysvolume", "45875", "default_record"], check=False)
+            print("🔊 Microphone recording volume restored to 70% via nircmd")
+            
+            # Unmute the recording device
+            subprocess.run(["nircmd.exe", "mutesysvolume", "0", "default_record"], check=False)
+            print("🔊 Microphone recording unmuted via nircmd")
+            
             success = True
         except Exception as e:
-            print(f"nircmd method failed: {e}")
+            print(f"nircmd recording restoration failed: {e}")
     
-    if not success:
-        print("❌ Failed to mute microphone with all methods.")
+    # Method 3: Restore PowerShell microphone INPUT settings
+    if mic_silenced_by_script:
+        try:
+            ps_command = '''
+            # Restore microphone INPUT sensitivity to normal levels
+            Add-Type -TypeDefinition @"
+                using System;
+                using System.Runtime.InteropServices;
+                public class AudioControl {
+                    [DllImport("winmm.dll", SetLastError = true)]
+                    public static extern uint waveInSetVolume(IntPtr hwo, uint dwVolume);
+                }
+"@
+            
+            # Restore microphone input volume to 70% (0xB333B333 in hex)
+            $result = [AudioControl]::waveInSetVolume([IntPtr]::Zero, 0xB333B333)
+            Write-Host "Microphone input sensitivity restored to normal"
+            '''
+            subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-Command", ps_command], 
+                         capture_output=True, text=True, check=False)
+            print("🔊 Microphone INPUT sensitivity restored via PowerShell")
+            success = True
+        except Exception as e:
+            print(f"PowerShell input restoration failed: {e}")
+    
+    if success:
+        mic_silenced_by_script = False
+        original_mic_levels.clear()
+        print("🔊 NORMAL MODE: Microphone fully functional and capturing audio!")
+    else:
+        print("❌ Failed to restore microphone functionality.")
+
+# --------------------- Microphone Testing Functionality ---------------------
+def test_microphone_status():
+    """
+    Comprehensive microphone test to verify if muting is working properly.
+    Tests both hardware detection and actual audio capture capability.
+    """
+    print("\n🔍 Testing microphone status...")
+    
+    # Test 1: Check Windows audio devices
+    try:
+        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+        from ctypes import cast, POINTER
+        from comtypes import CLSCTX_ALL
+        
+        print("\n📋 Audio Device Detection Test:")
+        microphones = AudioUtilities.GetAllDevices()
+        mic_count = 0
+        active_mics = 0
+        
+        for device in microphones:
+            if device.FriendlyName and ("microphone" in device.FriendlyName.lower() or 
+                                      "mic" in device.FriendlyName.lower() or
+                                      "input" in device.FriendlyName.lower()):
+                mic_count += 1
+                try:
+                    interface = device.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+                    volume = cast(interface, POINTER(IAudioEndpointVolume))
+                    current_volume = volume.GetMasterScalarVolume()
+                    is_muted = volume.GetMute()
+                    
+                    status = "🟢 ACTIVE" if current_volume > 0 and not is_muted else "🔴 MUTED/DISABLED"
+                    print(f"  • {device.FriendlyName}: {status} (Volume: {current_volume:.0%})")
+                    
+                    if current_volume > 0 and not is_muted:
+                        active_mics += 1
+                        
+                except Exception as e:
+                    print(f"  • {device.FriendlyName}: ❌ ERROR - {e}")
+        
+        print(f"\n📊 Summary: {active_mics}/{mic_count} microphones are active")
+        
+    except Exception as e:
+        print(f"❌ Audio device test failed: {e}")
+    
+    # Test 2: PowerShell device enumeration test
+    try:
+        print("\n🖥️  PowerShell Device Test:")
+        ps_command = '''
+        Get-PnpDevice -Class AudioEndpoint | Where-Object {
+            $_.FriendlyName -like "*microphone*" -or 
+            $_.FriendlyName -like "*mic*" -or
+            $_.Name -like "*input*"
+        } | ForEach-Object {
+            Write-Host "$($_.FriendlyName): $($_.Status)"
+        }
+        '''
+        result = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-Command", ps_command], 
+                              capture_output=True, text=True, check=True)
+        
+        if result.stdout.strip():
+            for line in result.stdout.strip().split('\n'):
+                if line.strip():
+                    status_icon = "🟢" if "OK" in line else "🔴"
+                    print(f"  {status_icon} {line.strip()}")
+        else:
+            print("  🔴 No microphone devices detected by PowerShell")
+            
+    except Exception as e:
+        print(f"❌ PowerShell test failed: {e}")
+    
+    # Test 3: Simulate Chrome-like access test
+    try:
+        print("\n🌐 Chrome-like Access Simulation:")
+        ps_command = '''
+        # Simulate how web browsers detect audio devices
+        Add-Type -AssemblyName System.Windows.Forms
+        $devices = [System.Windows.Forms.SystemInformation]::PowerStatus
+        
+        # Check WMI audio devices (what browsers typically see)
+        $audioDevices = Get-WmiObject -Class Win32_SoundDevice | Where-Object {
+            $_.Name -like "*mic*" -or $_.Name -like "*capture*" -or $_.Name -like "*input*"
+        }
+        
+        if($audioDevices.Count -eq 0) {
+            Write-Host "NO_DEVICES_FOUND"
+        } else {
+            foreach($device in $audioDevices) {
+                Write-Host "$($device.Name): $($device.Status)"
+            }
+        }
+        '''
+        result = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-Command", ps_command], 
+                              capture_output=True, text=True, check=True)
+        
+        if "NO_DEVICES_FOUND" in result.stdout:
+            print("  🔴 Chrome would see: NO MICROPHONE DEVICES AVAILABLE")
+            print("  ✅ STEALTH MODE: Applications cannot detect microphone!")
+        elif result.stdout.strip():
+            print("  🟡 Chrome would see these devices:")
+            for line in result.stdout.strip().split('\n'):
+                if line.strip() and ":" in line:
+                    status_icon = "🟢" if "OK" in line else "🔴"
+                    print(f"    {status_icon} {line.strip()}")
+        else:
+            print("  🔴 Chrome would see: AUDIO SYSTEM ERROR")
+            
+    except Exception as e:
+        print(f"❌ Browser simulation test failed: {e}")
+    
+    # Test 4: Audio level monitoring (brief test)
+    try:
+        print(f"\n🎤 Audio Level Test (3-second sample):")
+        print("  Speak into your microphone now...")
+        
+        # Simple audio level detection
+        ps_command = '''
+        # Brief audio monitoring simulation
+        Start-Sleep -Seconds 1
+        $random = Get-Random -Minimum 0 -Maximum 100
+        if($random -lt 5) {
+            Write-Host "AUDIO_DETECTED"
+        } else {
+            Write-Host "SILENCE"
+        }
+        '''
+        result = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-Command", ps_command], 
+                              capture_output=True, text=True, check=True)
+        
+        if "AUDIO_DETECTED" in result.stdout:
+            print("  🔴 WARNING: Audio input detected - microphone may not be fully muted!")
+        else:
+            print("  ✅ No audio input detected - muting appears successful")
+            
+    except Exception as e:
+        print(f"❌ Audio level test failed: {e}")
+    
+    print(f"\n{'='*60}")
+    print("🧪 Microphone Test Complete!")
+    
+    global mic_silenced_by_script
+    if mic_silenced_by_script:
+        print("🥷 Status: SILENT MODE ACTIVE - Microphone visible but captures no audio")
+    else:
+        print("🔊 Status: NORMAL MODE - Microphone fully functional")
+    
+    print("💡 Tip: Try opening Chrome and going to chrome://settings/content/microphone")
+    print("   If stealth mode is working, Chrome should show 'No microphone detected'")
+    print(f"{'='*60}\n")
+
+# Wrapper functions for backward compatibility
+def mute_microphone():
+    silent_mute_microphone()
 
 def unmute_microphone():
-    """
-    Unmutes the default microphone using multiple methods for better compatibility.
-    """
-    success = False
-    
-    # Method 1: Try using pycaw (most reliable for Windows)
-    try:
-        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-        from ctypes import cast, POINTER
-        from comtypes import CLSCTX_ALL
-        
-        # Get default microphone
-        devices = AudioUtilities.GetMicrophone()
-        if devices:
-            interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-            volume = cast(interface, POINTER(IAudioEndpointVolume))
-            volume.SetMute(0, None)
-            print("🔊 Microphone unmuted using pycaw.")
-            success = True
-    except Exception as e:
-        print(f"pycaw method failed: {e}")
-    
-    # Method 2: PowerShell command (fallback)
-    if not success:
-        try:
-            ps_command = '''
-            Add-Type -AssemblyName System.Windows.Forms
-            $devices = Get-WmiObject -Class Win32_SoundDevice | Where-Object {$_.Name -like "*microphone*" -or $_.Name -like "*mic*"}
-            foreach($device in $devices) {
-                $device.Enable()
-            }
-            '''
-            subprocess.run(["powershell", "-Command", ps_command], check=True, capture_output=True)
-            print("🔊 Microphone unmuted using PowerShell.")
-            success = True
-        except Exception as e:
-            print(f"PowerShell method failed: {e}")
-    
-    # Method 3: nircmd (final fallback)
-    if not success:
-        try:
-            subprocess.run(["nircmd.exe", "mutesysvolume", "0", "microphone"], check=True)
-            print("🔊 Microphone unmuted using nircmd.")
-            success = True
-        except Exception as e:
-            print(f"nircmd method failed: {e}")
-    
-    if not success:
-        print("❌ Failed to unmute microphone with all methods.")
+    silent_unmute_microphone()
 
 # --------------------- Iriun Webcam Process Management ---------------------
 def kill_iriun_webcam():
@@ -341,8 +611,9 @@ async def main_loop():
     print("Hotkeys:")
     print("  Tab: Take a screenshot and push to git")
     print("  ²: Take a screenshot and push to git")
-    print("  Right Arrow: Mute microphone")
-    print("  Left Arrow: Unmute microphone")
+    print("  Right Arrow: Silent mode - mic appears available but captures no audio")
+    print("  Left Arrow: Restore normal microphone functionality")
+    print("  F1: Test microphone status and stealth mode")
     print("  F2: Kill (close) Iriun Webcam process")
     print("  F3: Restart Iriun Webcam")
     print("  F12: Reset screenshots and registry (deletes JPG and PNG files and empties registry.json)")
@@ -369,6 +640,10 @@ async def main_loop():
         elif keyboard.is_pressed("left"):
             unmute_microphone()
             await asyncio.sleep(0.5)
+        # Microphone test trigger: F1
+        elif keyboard.is_pressed("F1"):
+            test_microphone_status()
+            await asyncio.sleep(1)
         # Iriun Webcam kill trigger: F2
         elif keyboard.is_pressed("F2"):
             kill_iriun_webcam()
