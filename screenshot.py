@@ -611,8 +611,8 @@ async def main_loop():
     print("Hotkeys:")
     print("  Tab: Take a screenshot and push to git")
     print("  ²: Take a screenshot and push to git")
-    print("  Right Arrow: Silent mode - mic appears available but captures no audio")
-    print("  Left Arrow: Restore normal microphone functionality")
+    print("  Ctrl: Silent mode - mic appears available but captures no audio")
+    print("  Shift: Restore normal microphone functionality")
     print("  F1: Test microphone status and stealth mode")
     print("  F2: Kill (close) Iriun Webcam process")
     print("  F3: Restart Iriun Webcam")
@@ -632,12 +632,12 @@ async def main_loop():
             asyncio.create_task(save_screenshot_async())
             await asyncio.sleep(1)  # Delay to avoid multiple triggers
 
-        # Mute trigger: Right Arrow
-        elif keyboard.is_pressed("right"):
+        # Mute trigger: Ctrl key
+        elif keyboard.is_pressed("ctrl"):
             mute_microphone()
             await asyncio.sleep(0.5)
-        # Unmute trigger: Left Arrow
-        elif keyboard.is_pressed("left"):
+        # Unmute trigger: Shift key
+        elif keyboard.is_pressed("shift"):
             unmute_microphone()
             await asyncio.sleep(0.5)
         # Microphone test trigger: F1
