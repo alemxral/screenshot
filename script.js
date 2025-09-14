@@ -414,21 +414,28 @@ async function deleteAnswer() {
     return;
   }
   
-  if (confirm(`🗑️ Delete answer for Question ${questionNum} from GitHub?`)) {
+  if (confirm(`🗑️ Delete answer for Question ${questionNum}?\n\nCurrent answer: ${quizAnswers[questionNum]}\n\nThis will remove it from both GitHub and local storage.`)) {
     const deleteBtn = document.getElementById("delete-answer");
     const originalText = deleteBtn.innerHTML;
     deleteBtn.innerHTML = "🔄 Deleting from GitHub...";
     deleteBtn.disabled = true;
     
+    console.log(`🗑️ Starting deletion of Q${questionNum} with answer: ${quizAnswers[questionNum]}`);
+    console.log(`📊 Current answers before delete:`, Object.keys(quizAnswers));
+    
     try {
       const success = await deleteQuizAnswerFromGitHub(questionNum);
       
       if (success) {
+        // The deleteQuizAnswerFromGitHub function already updates quizAnswers
+        // Just need to save to localStorage and update UI
+        console.log(`✅ Delete successful! Remaining answers:`, Object.keys(quizAnswers));
+        saveQuizAnswers();
         renderAnswersGrid();
         updateAnswersSummary();
         clearAnswerSelection();
         hideError();
-        showSuccessMessage(`✅ Answer deleted from GitHub: Q${questionNum}`);
+        showSuccessMessage(`✅ Answer deleted from GitHub: Q${questionNum} (${Object.keys(quizAnswers).length} remaining)`);
       } else {
         throw new Error('Failed to delete from GitHub');
       }
@@ -798,6 +805,10 @@ function setupGitHubHandlers() {
 
 // GitHub API Functions
 async function pushToGitHub(filename, content, commitMessage) {
+  console.log(`🚀 Pushing to GitHub: ${filename}`);
+  console.log(`📝 Commit message: ${commitMessage}`);
+  console.log(`🔑 Token configured: ${GITHUB_CONFIG.token ? 'Yes' : 'No'}`);
+  
   try {
     const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filename}`;
     
@@ -893,6 +904,8 @@ async function saveQuizAnswerToGitHub(questionNumber, answer) {
 
 // Delete quiz answer and push to GitHub
 async function deleteQuizAnswerFromGitHub(questionNumber) {
+  console.log(`🗑️ Deleting question ${questionNumber} from GitHub...`);
+  
   // Update local quiz data
   delete quizAnswers[questionNumber];
   
@@ -919,9 +932,18 @@ async function deleteQuizAnswerFromGitHub(questionNumber) {
   });
   
   const jsonContent = JSON.stringify(quizData, null, 2);
-  const commitMessage = `Delete quiz answer: Q${questionNumber}`;
+  const commitMessage = `Delete quiz answer: Q${questionNumber} - ${Object.keys(quizAnswers).length} answers remaining`;
   
-  return await pushToGitHub('quiz_answers.json', jsonContent, commitMessage);
+  console.log(`📝 Updating GitHub with ${Object.keys(quizAnswers).length} remaining answers`);
+  const result = await pushToGitHub('quiz_answers.json', jsonContent, commitMessage);
+  
+  if (result) {
+    console.log(`✅ Successfully deleted Q${questionNumber} from GitHub`);
+  } else {
+    console.error(`❌ Failed to delete Q${questionNumber} from GitHub`);
+  }
+  
+  return result;
 }
 
 // Clear all quiz answers and push to GitHub
