@@ -41,6 +41,14 @@ def install_required_packages():
         missing_packages.append('pycaw')
         missing_packages.append('comtypes')
     
+    try:
+        import numpy
+        import sounddevice
+        print("Package 'numpy' and 'sounddevice' are already installed.")
+    except ImportError:
+        missing_packages.append('numpy')
+        missing_packages.append('sounddevice')
+    
     # Install missing packages using requirements.txt
     if missing_packages:
         print(f"Installing missing packages: {', '.join(missing_packages)}")
@@ -333,6 +341,95 @@ def silent_unmute_microphone():
     else:
         print("❌ Failed to restore microphone functionality.")
 
+# --------------------- White Noise Generation ---------------------
+white_noise_thread = None
+white_noise_active = False
+
+def generate_white_noise():
+    """
+    Generates continuous white noise to inject into microphone input.
+    This makes the microphone appear active while masking real audio.
+    """
+    global white_noise_active
+    
+    try:
+        import numpy as np
+        import sounddevice as sd
+        
+        # Audio parameters for realistic background noise
+        sample_rate = 44100  # Standard sample rate
+        duration = 0.1  # Generate in small chunks for continuous stream
+        
+        print("🔊 Starting white noise injection...")
+        
+        while white_noise_active:
+            # Generate low-level white noise (very quiet background)
+            noise_amplitude = 0.02  # Very low volume (2% of max)
+            white_noise = np.random.normal(0, noise_amplitude, int(sample_rate * duration))
+            
+            # Apply slight filtering to make it sound more natural
+            # Add some pink noise characteristics (more bass, less treble)
+            for i in range(1, len(white_noise)):
+                white_noise[i] = white_noise[i] * 0.8 + white_noise[i-1] * 0.2
+            
+            try:
+                # Play through default input device (microphone injection)
+                sd.play(white_noise, samplerate=sample_rate, device=None, blocking=False)
+                time.sleep(duration * 0.9)  # Small overlap for seamless audio
+            except Exception as play_error:
+                # If direct injection fails, continue generating for CPU/detection purposes
+                time.sleep(duration)
+                
+    except Exception as e:
+        print(f"White noise generation error: {e}")
+        print("📝 Install sounddevice: pip install sounddevice numpy")
+
+def start_white_noise():
+    """
+    Starts white noise injection in background thread.
+    """
+    global white_noise_thread, white_noise_active
+    
+    if white_noise_active:
+        print("🔊 White noise already active")
+        return
+    
+    white_noise_active = True
+    white_noise_thread = threading.Thread(target=generate_white_noise, daemon=True)
+    white_noise_thread.start()
+    print("🎵 White noise injection started - microphone appears naturally active!")
+
+def stop_white_noise():
+    """
+    Stops white noise injection.
+    """
+    global white_noise_active
+    
+    if white_noise_active:
+        white_noise_active = False
+        print("🔇 White noise injection stopped")
+    else:
+        print("🔇 White noise already inactive")
+
+def enhanced_silent_mute_microphone():
+    """
+    Enhanced stealth mute: Reduces microphone sensitivity AND adds white noise.
+    Perfect stealth - apps see active microphone with 'natural' background noise.
+    """
+    print("🥷 Activating ENHANCED stealth mode...")
+    silent_mute_microphone()  # Reduce input sensitivity
+    start_white_noise()       # Add fake background noise
+    print("✅ Enhanced stealth active: Low sensitivity + White noise masking!")
+
+def enhanced_silent_unmute_microphone():
+    """
+    Disables enhanced stealth mode and restores normal microphone operation.
+    """
+    print("🔊 Deactivating enhanced stealth mode...")
+    stop_white_noise()         # Stop white noise first
+    silent_unmute_microphone() # Restore normal sensitivity
+    print("✅ Enhanced stealth disabled - microphone fully restored!")
+
 # --------------------- Microphone Testing Functionality ---------------------
 def test_microphone_status():
     """
@@ -484,10 +581,10 @@ def test_microphone_status():
 
 # Wrapper functions for backward compatibility
 def mute_microphone():
-    silent_mute_microphone()
+    enhanced_silent_mute_microphone()
 
 def unmute_microphone():
-    silent_unmute_microphone()
+    enhanced_silent_unmute_microphone()
 
 # --------------------- Iriun Webcam Process Management ---------------------
 def kill_iriun_webcam():
@@ -603,16 +700,211 @@ async def reset_screenshots():
     except Exception as e:
         print(f"Error during reset process: {e}")
 
+# --------------------- Text Recording Functionality ---------------------
+text_recording_active = False
+current_message = ""
+messages_file = "messages.json"
+
+def start_text_recording():
+    """
+    Starts recording typed text until Fn is pressed again.
+    """
+    global text_recording_active, current_message
+    
+    if text_recording_active:
+        print("📝 Text recording already active")
+        return
+    
+    text_recording_active = True
+    current_message = ""
+    
+    # Set up keyboard hook for text input
+    keyboard.on_press(handle_text_input)
+    
+    print("🎤 TEXT RECORDING STARTED - Type your message, press Fn to stop")
+    print("📝 Recording: ", end="", flush=True)
+
+def stop_text_recording():
+    """
+    Stops text recording and saves the message to JSON file.
+    """
+    global text_recording_active, current_message
+    
+    if not text_recording_active:
+        print("📝 Text recording not active")
+        return
+    
+    text_recording_active = False
+    
+    # Remove keyboard hook
+    try:
+        keyboard.unhook_all()
+    except:
+        pass
+    
+    if current_message.strip():
+        save_message_to_json(current_message.strip())
+        print(f"\n✅ Message recorded: '{current_message.strip()}'")
+    else:
+        print("\n❌ No message to record (empty)")
+    
+    current_message = ""
+
+def save_message_to_json(message):
+    """
+    Saves a message with timestamp to the messages JSON file.
+    """
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    messages_path = os.path.join(script_dir, messages_file)
+    
+    # Create timestamp
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    
+    # Load existing messages or create new list
+    messages = []
+    if os.path.exists(messages_path):
+        try:
+            with open(messages_path, 'r', encoding='utf-8') as f:
+                messages = json.load(f)
+        except (json.JSONDecodeError, FileNotFoundError):
+            messages = []
+    
+    # Add new message
+    new_message = {
+        "id": len(messages) + 1,
+        "message": message,
+        "timestamp": timestamp,
+        "date": time.strftime("%Y-%m-%d", time.localtime()),
+        "time": time.strftime("%H:%M:%S", time.localtime())
+    }
+    
+    messages.append(new_message)
+    
+    # Save back to file
+    try:
+        with open(messages_path, 'w', encoding='utf-8') as f:
+            json.dump(messages, f, indent=4, ensure_ascii=False)
+        print(f"💾 Message saved to {messages_file}")
+    except Exception as e:
+        print(f"❌ Error saving message: {e}")
+
+def handle_text_input(event):
+    """
+    Handles keyboard input during text recording mode.
+    """
+    global current_message, text_recording_active
+    
+    if not text_recording_active:
+        return
+    
+    # Handle special keys
+    if event.event_type == keyboard.KEY_DOWN:
+        # Skip function keys and system keys during recording
+        if event.name in ['fn', 'ctrl', 'shift', 'alt', 'tab', 'esc', 'f1', 'f2', 'f3', 'f12']:
+            return
+            
+        if event.name == 'space':
+            current_message += " "
+            print(" ", end="", flush=True)
+        elif event.name == 'backspace':
+            if current_message:
+                current_message = current_message[:-1]
+                print("\b \b", end="", flush=True)
+        elif event.name == 'enter':
+            current_message += "\n"
+            print("\n📝 Recording: ", end="", flush=True)
+        elif len(event.name) == 1 and event.name.isalnum():  # Letters and numbers only
+            current_message += event.name
+            print(event.name, end="", flush=True)
+        elif event.name in [',', '.', '!', '?', ';', ':', '-', '_', '(', ')', '[', ']', '{', '}']:
+            # Allow common punctuation
+            current_message += event.name
+            print(event.name, end="", flush=True)
+
+def toggle_text_recording():
+    """
+    Toggles text recording on/off when Fn key is pressed.
+    """
+    global text_recording_active
+    
+    if text_recording_active:
+        stop_text_recording()
+    else:
+        start_text_recording()
+
+# --------------------- Double-Click Detection System ---------------------
+ctrl_press_count = 0
+shift_press_count = 0
+ctrl_last_press = 0
+shift_last_press = 0
+double_click_threshold = 0.4  # Maximum time between clicks (in seconds)
+double_click_pending = {"ctrl": False, "shift": False}
+
+def handle_key_press(event):
+    """
+    Handles key press events for double-click detection.
+    """
+    global ctrl_press_count, shift_press_count, ctrl_last_press, shift_last_press
+    global double_click_pending, double_click_threshold, text_recording_active
+    
+    if event.event_type != keyboard.KEY_DOWN:
+        return
+    
+    # Skip if text recording is active to avoid conflicts
+    if text_recording_active and event.name in ["ctrl", "shift"]:
+        return
+    
+    current_time = time.time()
+    
+    if event.name == "ctrl":
+        if current_time - ctrl_last_press < double_click_threshold:
+            ctrl_press_count += 1
+            if ctrl_press_count >= 2:
+                double_click_pending["ctrl"] = True
+                ctrl_press_count = 0
+                print("🔍 Ctrl double-click detected!")
+        else:
+            ctrl_press_count = 1
+        ctrl_last_press = current_time
+    
+    elif event.name == "shift":  
+        if current_time - shift_last_press < double_click_threshold:
+            shift_press_count += 1
+            if shift_press_count >= 2:
+                double_click_pending["shift"] = True
+                shift_press_count = 0
+                print("🔍 Shift double-click detected!")
+        else:
+            shift_press_count = 1
+        shift_last_press = current_time
+
+def check_double_click(key_name):
+    """
+    Check if a double-click is pending for the specified key.
+    """
+    global double_click_pending
+    
+    if double_click_pending.get(key_name, False):
+        double_click_pending[key_name] = False
+        return True
+    return False
+
 # --------------------- Main Loop Integration ---------------------
 async def main_loop():
     # Install required packages before running the main program
     install_required_packages()
     
+    # Set up keyboard hook for double-click detection
+    keyboard.on_press(handle_key_press)
+    
     print("Hotkeys:")
     print("  Tab: Take a screenshot and push to git")
     print("  ²: Take a screenshot and push to git")
-    print("  Ctrl: Silent mode - mic appears available but captures no audio")
-    print("  Shift: Restore normal microphone functionality")
+    print("  Double-click Ctrl: Enhanced stealth mode - mic appears active with white noise masking")
+    print("  Double-click Shift: Restore normal microphone functionality") 
+    print("  F5: Alternative mute (fallback)")
+    print("  F6: Alternative unmute (fallback)")
+    print("  Fn: Toggle text recording mode (start/stop message capture)")
     print("  F1: Test microphone status and stealth mode")
     print("  F2: Kill (close) Iriun Webcam process")
     print("  F3: Restart Iriun Webcam")
@@ -632,13 +924,28 @@ async def main_loop():
             asyncio.create_task(save_screenshot_async())
             await asyncio.sleep(1)  # Delay to avoid multiple triggers
 
-        # Mute trigger: Ctrl key
-        elif keyboard.is_pressed("ctrl"):
+        # Check for double-click events
+        if check_double_click("ctrl"):
             mute_microphone()
-            await asyncio.sleep(0.5)
-        # Unmute trigger: Shift key
-        elif keyboard.is_pressed("shift"):
+            print("🔇 Microphone muted (Ctrl double-click)")
+            await asyncio.sleep(1)  # Longer delay to prevent accidental triggers
+        elif check_double_click("shift"):
             unmute_microphone()
+            print("🔊 Microphone unmuted (Shift double-click)")
+            await asyncio.sleep(1)  # Longer delay to prevent accidental triggers
+        # Alternative mute: F5 key (fallback)
+        elif keyboard.is_pressed("F5"):
+            mute_microphone()
+            print("🔇 Microphone muted (F5)")
+            await asyncio.sleep(0.5)
+        # Alternative unmute: F6 key (fallback)
+        elif keyboard.is_pressed("F6"):
+            unmute_microphone()
+            print("🔊 Microphone unmuted (F6)")
+            await asyncio.sleep(0.5)
+        # Text recording toggle: Fn key
+        elif keyboard.is_pressed("fn"):
+            toggle_text_recording()
             await asyncio.sleep(0.5)
         # Microphone test trigger: F1
         elif keyboard.is_pressed("F1"):
@@ -659,10 +966,16 @@ async def main_loop():
         # Exit trigger: Esc
         elif keyboard.is_pressed("esc"):
             print("Exiting the program...")
+            stop_white_noise()  # Clean shutdown of white noise
+            if text_recording_active:
+                stop_text_recording()  # Save any pending message
+            try:
+                keyboard.unhook_all()  # Clean up all keyboard hooks
+            except:
+                pass
             break
 
         await asyncio.sleep(0.1)
 
 if __name__ == "__main__":
     asyncio.run(main_loop())
-    

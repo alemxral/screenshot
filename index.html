@@ -7,12 +7,35 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>📸 Screenshot Gallery</h1>
+  <div class="header">
+    <h1>📸 Screenshot Gallery</h1>
+    <button id="messages-btn" class="messages-button">💬 View Messages</button>
+  </div>
+  
   <div id="gallery"></div>
 
   <!-- Modal for expanded image -->
   <div id="modal">
     <img id="modal-image" src="" alt="Expanded view">
+  </div>
+
+  <!-- Modal for messages -->
+  <div id="messages-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>📝 Recorded Messages</h2>
+        <span class="close" id="close-messages">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div id="messages-container">
+          <p class="loading">Loading messages...</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="refresh-messages" class="btn btn-primary">🔄 Refresh</button>
+        <button id="clear-messages" class="btn btn-danger">🗑️ Clear All</button>
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>
