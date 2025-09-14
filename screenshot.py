@@ -171,17 +171,20 @@ async def reset_screenshots():
         
         print("Starting reset process...")
         
-        # Delete all JPG files in the screenshots folder
+        # Delete all JPG and PNG files in the screenshots folder
         if os.path.exists(screenshots_dir):
             jpg_files = glob.glob(os.path.join(screenshots_dir, "*.jpg"))
-            for jpg_file in jpg_files:
-                os.remove(jpg_file)
-                print(f"Deleted: {os.path.basename(jpg_file)}")
+            png_files = glob.glob(os.path.join(screenshots_dir, "*.png"))
+            all_image_files = jpg_files + png_files
             
-            if jpg_files:
-                print(f"Deleted {len(jpg_files)} JPG files from screenshots folder.")
+            for image_file in all_image_files:
+                os.remove(image_file)
+                print(f"Deleted: {os.path.basename(image_file)}")
+            
+            if all_image_files:
+                print(f"Deleted {len(jpg_files)} JPG files and {len(png_files)} PNG files from screenshots folder.")
             else:
-                print("No JPG files found in screenshots folder.")
+                print("No JPG or PNG files found in screenshots folder.")
         else:
             print("Screenshots folder does not exist.")
         
@@ -248,7 +251,7 @@ async def main_loop():
     print("  Left Arrow: Unmute microphone")
     print("  F2: Kill (close) Iriun Webcam process")
     print("  F3: Restart Iriun Webcam")
-    print("  F12: Reset screenshots and registry (deletes JPG files and empties registry.json)")
+    print("  F12: Reset screenshots and registry (deletes JPG and PNG files and empties registry.json)")
     print("  Esc: Exit the program")
     
     while True:
