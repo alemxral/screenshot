@@ -965,6 +965,45 @@ async function clearAllQuizAnswersFromGitHub() {
   return await pushToGitHub('quiz_answers.json', jsonContent, commitMessage);
 }
 
+// Handle phone notification request
+async function handlePhoneNotificationRequest() {
+  // Prompt for question number
+  const questionNumber = prompt('📱 Enter question number (1-20) to get vibration alert:');
+  
+  if (!questionNumber) return;
+  
+  const qNum = parseInt(questionNumber);
+  if (isNaN(qNum) || qNum < 1 || qNum > 20) {
+    alert('❌ Please enter a valid question number between 1-20');
+    return;
+  }
+  
+  // Show the Python command to run
+  const command = `python send_vibration.py ${qNum}`;
+  console.log(`🐍 Run this command: ${command}`);
+  
+  try {
+    // Copy command to clipboard if supported
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(command);
+      showSuccessMessage(`📋 Command copied! Run: ${command}`);
+    } else {
+      showSuccessMessage(`📱 Run in terminal: ${command}`);
+    }
+  } catch (error) {
+    showSuccessMessage(`📱 Run in terminal: ${command}`);
+  }
+}
+
+// Add keyboard listener for "!" key
+document.addEventListener("keydown", (e) => {
+  // Phone notification trigger with "!" key (Shift + 1)
+  if (e.key === "!" && e.shiftKey) {
+    e.preventDefault();
+    handlePhoneNotificationRequest();
+  }
+});
+
 // Initialize application
 async function initializeApp() {
   // Load gallery first

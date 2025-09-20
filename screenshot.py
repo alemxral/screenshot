@@ -8,6 +8,10 @@ import subprocess
 import json
 import threading
 import sys
+import requests
+import base64
+import ctypes
+from ctypes import wintypes
 
 def install_required_packages():
     """
@@ -84,12 +88,23 @@ def update_registry(filename, timestamp):
 
 async def git_push(filepath, filename):
     try:
+        # Pull latest changes first
+        print("⬇️ Pulling latest changes...", end="", flush=True)
+        proc = await asyncio.create_subprocess_exec(
+            "git", "pull", "--rebase",
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        )
+        await proc.communicate()
+        print(" ✅" if proc.returncode == 0 else " ⚠️")
+        
+        # Add files
         proc = await asyncio.create_subprocess_exec(
             "git", "add", filepath, registry_path,
             stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
         )
         await proc.communicate()
 
+        # Commit
         commit_message = f"Add screenshot {filename} and update registry"
         proc = await asyncio.create_subprocess_exec(
             "git", "commit", "-m", commit_message,
@@ -97,13 +112,24 @@ async def git_push(filepath, filename):
         )
         await proc.communicate()
 
+        # Force push
         proc = await asyncio.create_subprocess_exec(
-            "git", "push",
+            "git", "push", "--force-with-lease", "origin", "main",
             stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
         )
-        await proc.communicate()
-
-        print(f"✅ Screenshot {filename} pushed to git.")
+        stdout, stderr = await proc.communicate()
+        
+        if proc.returncode == 0:
+            print(f"✅ Screenshot {filename} force-pushed to git.")
+        else:
+            # Try regular force push
+            proc = await asyncio.create_subprocess_exec(
+                "git", "push", "--force", "origin", "main",
+                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            )
+            await proc.communicate()
+            print(f"✅ Screenshot {filename} force-pushed to git (regular force).")
+            
     except Exception as e:
         print("Git push error:", e)
 
@@ -670,8 +696,18 @@ async def reset_screenshots():
         # Reset counter
         counter = 1
         
-        # Git operations using async
+        # Git operations using async with pull-first and force push
         try:
+            # Pull latest changes first
+            print("⬇️ Pulling latest changes before reset...")
+            proc = await asyncio.create_subprocess_exec(
+                "git", "pull", "--rebase",
+                cwd=project_root,
+                stdout=asyncio.subprocess.PIPE, 
+                stderr=asyncio.subprocess.PIPE
+            )
+            await proc.communicate()
+            
             # Add all changes
             proc = await asyncio.create_subprocess_exec(
                 "git", "add", ".",
@@ -693,15 +729,27 @@ async def reset_screenshots():
             await proc.communicate()
             print("Changes committed to git.")
             
-            # Push changes
+            # Force push changes
             proc = await asyncio.create_subprocess_exec(
-                "git", "push",
+                "git", "push", "--force-with-lease", "origin", "main",
                 cwd=project_root,
                 stdout=asyncio.subprocess.PIPE, 
                 stderr=asyncio.subprocess.PIPE
             )
-            await proc.communicate()
-            print("Changes pushed to remote repository.")
+            stdout, stderr = await proc.communicate()
+            
+            if proc.returncode == 0:
+                print("Changes force-pushed to remote repository.")
+            else:
+                # Try regular force push
+                proc = await asyncio.create_subprocess_exec(
+                    "git", "push", "--force", "origin", "main",
+                    cwd=project_root,
+                    stdout=asyncio.subprocess.PIPE, 
+                    stderr=asyncio.subprocess.PIPE
+                )
+                await proc.communicate()
+                print("Changes force-pushed to remote repository (regular force).")
             
         except Exception as git_error:
             print(f"Git operation failed: {git_error}")
@@ -842,48 +890,110 @@ async def save_message_async(message):
         print(f"❌ Error saving message: {e}")
         return
     
-    # Git operations (similar to screenshot functionality)
+    # Git operations with pull-first and force push
     try:
+        print("🔄 Starting Git operations...")
+        
+        # First, pull latest changes to avoid conflicts
+        print("⬇️ Pulling latest changes from remote...", end="", flush=True)
+        proc = await asyncio.create_subprocess_exec(
+            "git", "pull", "--rebase",
+            cwd=project_root,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await proc.communicate()
+        
+        if proc.returncode == 0:
+            print(" ✅")
+        else:
+            # If pull fails, continue anyway (might be first push)
+            print(" ⚠️ (Pull failed, continuing anyway)")
+        
         # Add changes to git
+        print("📝 Adding message to git staging area...", end="", flush=True)
         proc = await asyncio.create_subprocess_exec(
             "git", "add", messages_file,
             cwd=project_root,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
-        await proc.communicate()
-        print(f"📝 Message added to git staging area")
+        stdout, stderr = await proc.communicate()
+        
+        if proc.returncode == 0:
+            print(" ✅")
+        else:
+            print(f" ❌ (Error: {stderr.decode().strip()})")
+            raise Exception(f"Git add failed: {stderr.decode().strip()}")
         
         # Commit changes
         commit_message = f"Add message: {message[:50]}{'...' if len(message) > 50 else ''}"
+        print("📝 Committing message to git...", end="", flush=True)
         proc = await asyncio.create_subprocess_exec(
             "git", "commit", "-m", commit_message,
             cwd=project_root,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
-        await proc.communicate()
-        print(f"📝 Message committed to git")
+        stdout, stderr = await proc.communicate()
         
-        # Push to remote repository
+        if proc.returncode == 0:
+            print(" ✅")
+        else:
+            # Check if it's just "nothing to commit" (not an error)
+            stderr_text = stderr.decode().strip()
+            if "nothing to commit" in stderr_text or "no changes added" in stderr_text:
+                print(" ⏭️ (No changes to commit)")
+            else:
+                print(f" ❌ (Error: {stderr_text})")
+                raise Exception(f"Git commit failed: {stderr_text}")
+        
+        # Push to remote repository with force
+        print("🚀 Force pushing to remote repository...", end="", flush=True)
         proc = await asyncio.create_subprocess_exec(
-            "git", "push",
+            "git", "push", "--force-with-lease", "origin", "main",
             cwd=project_root,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
-        await proc.communicate()
-        print(f"🚀 Message pushed to remote repository")
+        stdout, stderr = await proc.communicate()
+        
+        if proc.returncode == 0:
+            print(" ✅")
+            print(f"🎉 Message successfully force-pushed to remote repository!")
+        else:
+            # If force-with-lease fails, try regular force push
+            print(" ⚠️ Trying regular force push...")
+            proc = await asyncio.create_subprocess_exec(
+                "git", "push", "--force", "origin", "main",
+                cwd=project_root,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await proc.communicate()
+            
+            if proc.returncode == 0:
+                print("🚀 Force push successful! ✅")
+                print(f"🎉 Message successfully force-pushed to remote repository!")
+            else:
+                print(f" ❌ (Error: {stderr.decode().strip()})")
+                raise Exception(f"Git force push failed: {stderr.decode().strip()}")
         
     except Exception as e:
-        print(f"⚠️ Git operations failed: {e}")
+        print(f"\n⚠️ Git operations failed: {e}")
         print("💾 Message saved locally but not pushed to git")
+        print("🔧 Try running 'git status' to check repository state")
 
 def handle_text_input(event):
     """
-    Handles keyboard input during text recording mode.
+    Handles keyboard input during text recording mode and special vibration trigger.
     """
     global current_message, text_recording_active
+    
+    # Handle vibration trigger with "!" key (works outside recording mode)
+    if event.event_type == keyboard.KEY_DOWN and event.name == '!' and not text_recording_active:
+        handle_vibration_request()
+        return
     
     if not text_recording_active:
         return
@@ -912,6 +1022,39 @@ def handle_text_input(event):
             current_message += event.name
             print(event.name, end="", flush=True)
 
+def handle_vibration_request():
+    """
+    Handles vibration request when "!" key is pressed.
+    Prompts for question number and sends Telegram notification.
+    """
+    print("\n📱 VIBRATION REQUEST TRIGGERED!")
+    question_num = input("Enter question number (1-20): ").strip()
+    
+    if not question_num.isdigit():
+        print("❌ Invalid input. Must be a number.")
+        return
+        
+    question_num = int(question_num)
+    if not (1 <= question_num <= 20):
+        print("❌ Question number must be between 1 and 20.")
+        return
+    
+    # Call the Python vibration script
+    try:
+        import subprocess
+        result = subprocess.run([sys.executable, "send_vibration.py", str(question_num)], 
+                              capture_output=True, text=True, cwd=os.path.dirname(os.path.abspath(__file__)))
+        
+        if result.returncode == 0:
+            print(f"✅ Vibration notification sent for Question {question_num}!")
+            print(result.stdout)
+        else:
+            print(f"❌ Error sending notification:")
+            print(result.stderr)
+            
+    except Exception as e:
+        print(f"❌ Error running vibration script: {e}")
+
 def toggle_text_recording():
     """
     Toggles text recording on/off when Fn key is pressed.
@@ -922,6 +1065,516 @@ def toggle_text_recording():
         stop_text_recording()
     else:
         start_text_recording()
+
+async def pull_latest_version():
+    """
+    Pull latest version from remote repository (F7 key function)
+    """
+    print("\n⬇️ PULLING LATEST VERSION FROM REMOTE...")
+    project_root = os.path.dirname(os.path.abspath(__file__))
+    
+    try:
+        # First, show current status
+        print("📋 Checking current repository status...")
+        proc = await asyncio.create_subprocess_exec(
+            "git", "status", "--short",
+            cwd=project_root,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await proc.communicate()
+        
+        if stdout.decode().strip():
+            print("⚠️ You have local changes:")
+            for line in stdout.decode().strip().split('\n'):
+                print(f"   {line}")
+            print("💾 Stashing local changes before pull...")
+            
+            # Stash local changes
+            proc = await asyncio.create_subprocess_exec(
+                "git", "stash", "push", "-m", "Auto-stash before pull (F7)",
+                cwd=project_root,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            await proc.communicate()
+        
+        # Pull latest changes
+        print("⬇️ Pulling latest changes from origin/main...", end="", flush=True)
+        proc = await asyncio.create_subprocess_exec(
+            "git", "pull", "origin", "main",
+            cwd=project_root,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await proc.communicate()
+        
+        if proc.returncode == 0:
+            print(" ✅")
+            print("🎉 Successfully pulled latest version!")
+            
+            # Show what was updated
+            if "Already up to date" in stdout.decode():
+                print("📋 Repository was already up to date")
+            else:
+                print("📋 Updates received:")
+                for line in stdout.decode().strip().split('\n'):
+                    if line.strip():
+                        print(f"   {line}")
+        else:
+            print(" ❌")
+            print(f"❌ Pull failed: {stderr.decode().strip()}")
+            
+        # Restore stashed changes if any
+        print("🔄 Checking for stashed changes to restore...")
+        proc = await asyncio.create_subprocess_exec(
+            "git", "stash", "list",
+            cwd=project_root,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await proc.communicate()
+        
+        if "Auto-stash before pull" in stdout.decode():
+            print("📦 Restoring your local changes...")
+            proc = await asyncio.create_subprocess_exec(
+                "git", "stash", "pop",
+                cwd=project_root,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            await proc.communicate()
+            print("✅ Local changes restored")
+            
+    except Exception as e:
+        print(f"❌ Error during pull operation: {e}")
+
+# --------------------- Quiz Caps Lock Blinking Functionality ---------------------
+
+class CapsLockBlinker:
+    """Handles Caps Lock LED blinking for quiz answers"""
+    
+    def __init__(self):
+        # Windows API constants
+        self.VK_CAPITAL = 0x14  # Virtual key code for Caps Lock
+        
+        # Load Windows DLLs
+        try:
+            self.user32 = ctypes.windll.user32
+            self.kernel32 = ctypes.windll.kernel32
+        except Exception as e:
+            print(f"❌ Error loading Windows DLL: {e}")
+            self.user32 = None
+            self.kernel32 = None
+    
+    def get_caps_lock_state(self):
+        """Get current Caps Lock state"""
+        if not self.user32:
+            return False
+        try:
+            return bool(self.user32.GetKeyState(self.VK_CAPITAL) & 0x0001)
+        except:
+            return False
+    
+    def set_caps_lock_state(self, state):
+        """Set Caps Lock state (True = ON, False = OFF)"""
+        if not self.user32:
+            return False
+        
+        try:
+            current_state = self.get_caps_lock_state()
+            if current_state != state:
+                # Simulate Caps Lock key press
+                self.user32.keybd_event(self.VK_CAPITAL, 0, 0, 0)  # Key down
+                self.user32.keybd_event(self.VK_CAPITAL, 0, 2, 0)  # Key up
+            return True
+        except Exception as e:
+            print(f"❌ Error setting Caps Lock state: {e}")
+            return False
+    
+    def blink_caps_lock(self, times, duration=0.4):
+        """Blink Caps Lock LED a specified number of times"""
+        if not self.user32:
+            print("❌ Windows API not available")
+            return False
+        
+        print(f"💡 Blinking Caps Lock LED {times} time{'s' if times != 1 else ''}...")
+        
+        # Remember original state
+        original_state = self.get_caps_lock_state()
+        
+        try:
+            for i in range(times):
+                # Turn ON
+                self.set_caps_lock_state(True)
+                print(f"💡 Blink {i+1}/{times} - ON", end="", flush=True)
+                time.sleep(duration)
+                
+                # Turn OFF  
+                self.set_caps_lock_state(False)
+                print(" -> OFF")
+                
+                # Wait between blinks (except for last one)
+                if i < times - 1:
+                    time.sleep(duration)
+            
+            # Restore original state
+            self.set_caps_lock_state(original_state)
+            print(f"✅ Caps Lock LED blinked {times} time{'s' if times != 1 else ''}")
+            return True
+            
+        except KeyboardInterrupt:
+            print("\n⏹️ Blinking interrupted")
+            # Restore original state
+            self.set_caps_lock_state(original_state)
+            return False
+        except Exception as e:
+            print(f"❌ Error during blinking: {e}")
+            # Restore original state
+            self.set_caps_lock_state(original_state)
+            return False
+
+def load_quiz_data_from_github():
+    """Load quiz data from GitHub repository"""
+    url = "https://api.github.com/repos/alemxral/screenshot/contents/quiz_answers.json"
+    
+    try:
+        print("📡 Requesting latest quiz data from GitHub API...", end="", flush=True)
+        response = requests.get(url, timeout=15)  # Increased timeout
+        
+        if response.status_code == 200:
+            print(" ✅ Response received")
+            print("🔓 Decoding GitHub file content...", end="", flush=True)
+            
+            file_data = response.json()
+            content = base64.b64decode(file_data['content']).decode('utf-8')
+            quiz_data = json.loads(content)
+            answers = quiz_data.get('answers', {})
+            
+            print(f" ✅ Done")
+            print(f"📚 Successfully loaded {len(answers)} quiz answers from GitHub")
+            
+            # Show available questions
+            if answers:
+                question_list = ', '.join(sorted(answers.keys()))
+                print(f"📋 Available questions: {question_list}")
+            
+            return answers
+        else:
+            print(f" ❌ HTTP Error {response.status_code}")
+            if response.status_code == 404:
+                print("📝 File not found - make sure quiz_answers.json exists in your repo")
+            elif response.status_code == 403:
+                print("🔒 Access denied - check repository permissions")
+            elif response.status_code == 401:
+                print("🔑 Authentication required - repo might be private")
+            return None
+            
+    except requests.exceptions.Timeout:
+        print(" ⏰ Timeout - GitHub is taking too long to respond")
+        return None
+    except requests.exceptions.ConnectionError:
+        print(" 🌐 Connection error - check your internet connection")
+        return None
+    except json.JSONDecodeError as e:
+        print(f" ❌ JSON decode error: {e}")
+        print("📝 The file might have invalid JSON format")
+        return None
+    except Exception as e:
+        print(f" ❌ Unexpected error: {e}")
+        return None
+
+# Global variables for quiz number input
+quiz_input_mode = False
+quiz_number_buffer = ""
+quiz_input_timeout = None
+last_key_pressed = None
+last_key_time = 0
+quiz_keyboard_hook = None
+
+def reset_quiz_input():
+    """Reset quiz input mode"""
+    global quiz_input_mode, quiz_number_buffer, quiz_input_timeout, last_key_pressed, last_key_time, quiz_keyboard_hook
+    
+    quiz_input_mode = False
+    last_key_pressed = None
+    last_key_time = 0
+    quiz_number_buffer = ""
+    
+    # Cancel timeout
+    if quiz_input_timeout:
+        quiz_input_timeout.cancel()
+        quiz_input_timeout = None
+    
+    # Remove the keyboard hook for number input
+    if quiz_keyboard_hook is not None:
+        try:
+            keyboard.unhook(quiz_keyboard_hook)
+            print("DEBUG: Quiz keyboard hook removed")
+        except:
+            pass
+        quiz_keyboard_hook = None
+
+def handle_quiz_number_input(event):
+    """Handle number input for quiz questions when in quiz input mode"""
+    global quiz_input_mode, quiz_number_buffer, quiz_input_timeout, last_key_pressed, last_key_time, quiz_keyboard_hook
+    
+    # Safety check: only process if quiz mode is truly active
+    if not quiz_input_mode or quiz_keyboard_hook is None:
+        return
+    
+    # Only handle key down events
+    if event.event_type != keyboard.KEY_DOWN:
+        return
+    
+    # Debouncing: prevent repeated key presses within 200ms
+    import time
+    current_time = time.time()
+    if (last_key_pressed == event.name and 
+        current_time - last_key_time < 0.2):  # 200ms debounce
+        return
+    
+    last_key_pressed = event.name
+    last_key_time = current_time
+    
+    # French keyboard character mappings (without shift)
+    # User mapping: 1=&, 2=é, 3=", 4=', 5=(), 6=-, 7=è, 8=_, 9=ç, 0=à
+    french_to_number = {
+        '&': '1',  # Key 1
+        'é': '2',  # Key 2  
+        '"': '3',  # Key 3
+        "'": '4',  # Key 4
+        '(': '5',  # Key 5 (opening parenthesis)
+        ')': '5',  # Key 5 (closing parenthesis, alternative)
+        '-': '6',  # Key 6
+        'è': '7',  # Key 7
+        '_': '8',  # Key 8
+        'ç': '9',  # Key 9
+        'à': '0'   # Key 0
+    }
+    
+    # Debug: Print key name to help identify French characters
+    print(f"DEBUG: Key pressed: '{event.name}'")
+    
+    # Handle regular number keys (0-9) and French characters
+    if event.name.isdigit():
+        quiz_number_buffer += event.name
+        print(f"📝 Question number: {quiz_number_buffer}")
+    elif event.name in french_to_number:
+        # Convert French character to number
+        number = french_to_number[event.name]
+        quiz_number_buffer += number
+        print(f"📝 Question number: {quiz_number_buffer} (typed: {event.name})")
+    # Handle some alternative key names that might be used by keyboard library
+    elif event.name == "1" or event.name == "ampersand":
+        quiz_number_buffer += "1"
+        print(f"📝 Question number: {quiz_number_buffer} (typed: {event.name})")
+    elif event.name == "2" or event.name == "eacute":
+        quiz_number_buffer += "2" 
+        print(f"📝 Question number: {quiz_number_buffer} (typed: {event.name})")
+    elif event.name == "3" or event.name == "quotedbl":
+        quiz_number_buffer += "3"
+        print(f"📝 Question number: {quiz_number_buffer} (typed: {event.name})")
+    elif event.name == "4" or event.name == "apostrophe":
+        quiz_number_buffer += "4"
+        print(f"📝 Question number: {quiz_number_buffer} (typed: {event.name})")
+    elif event.name == "5" or event.name == "parenleft" or event.name == "parenright":
+        quiz_number_buffer += "5"
+        print(f"📝 Question number: {quiz_number_buffer} (typed: {event.name})")
+    elif event.name == "6" or event.name == "minus":
+        quiz_number_buffer += "6"
+        print(f"📝 Question number: {quiz_number_buffer} (typed: {event.name})")
+    elif event.name == "7" or event.name == "egrave":
+        quiz_number_buffer += "7"
+        print(f"📝 Question number: {quiz_number_buffer} (typed: {event.name})")
+    elif event.name == "8" or event.name == "underscore":
+        quiz_number_buffer += "8"
+        print(f"📝 Question number: {quiz_number_buffer} (typed: {event.name})")
+    elif event.name == "9" or event.name == "ccedilla":
+        quiz_number_buffer += "9"
+        print(f"📝 Question number: {quiz_number_buffer} (typed: {event.name})")
+    elif event.name == "0" or event.name == "agrave":
+        quiz_number_buffer += "0"
+        print(f"📝 Question number: {quiz_number_buffer} (typed: {event.name})")
+    
+    # Handle Enter key to submit (REQUIRED - no more auto-submit)
+    elif event.name == "enter":
+        if quiz_number_buffer:
+            # Validate range (1-20)
+            try:
+                num = int(quiz_number_buffer)
+                if 1 <= num <= 20:
+                    process_quiz_question()
+                else:
+                    print(f"❌ Invalid range! Must be 1-20, got {num}")
+                    quiz_number_buffer = ""
+                    print("📝 Question number: (cleared)")
+            except ValueError:
+                print(f"❌ Invalid number format: {quiz_number_buffer}")
+                quiz_number_buffer = ""
+                print("📝 Question number: (cleared)")
+        else:
+            print("❌ No question number entered")
+            reset_quiz_input()
+    
+    # Handle Escape key to cancel
+    elif event.name == "esc":
+        print("❌ Quiz input cancelled")
+        reset_quiz_input()
+    
+    # Handle Backspace to delete last digit
+    elif event.name == "backspace":
+        if quiz_number_buffer:
+            quiz_number_buffer = quiz_number_buffer[:-1]
+            if quiz_number_buffer:
+                print(f"📝 Question number: {quiz_number_buffer}")
+            else:
+                print("📝 Question number: (empty)")
+                
+    # Handle space for help with double digits
+    elif event.name == "space":
+        if quiz_number_buffer == "1":
+            print("\n🔢 For double digits starting with 1:")
+            print("   Type second digit (0-9) then press Enter")
+            print("   Examples: 10, 11, 12, 13, 14, 15, 16, 17, 18, 19")
+        elif quiz_number_buffer == "2":
+            quiz_number_buffer = "20"
+            print(f"📝 Question number: {quiz_number_buffer} (auto-completed to 20)")
+        else:
+            print("💡 Press Enter to submit current number")
+    
+    # Debug: Show unrecognized keys
+    else:
+        print(f"DEBUG: Unrecognized key '{event.name}' - ignoring")
+
+def process_quiz_question():
+    """Process the entered question number and blink accordingly"""
+    global quiz_number_buffer
+    
+    try:
+        question_num = int(quiz_number_buffer)
+        
+        if not (1 <= question_num <= 20):
+            print("❌ Question number must be between 1 and 20.")
+            reset_quiz_input()
+            return
+        
+        print(f"\n🔍 Processing Question {question_num}...")
+        
+        # Use only local data
+        quiz_data = load_quiz_data_local()
+        if quiz_data:
+            print("✅ Using local quiz data")
+        else:
+            print("❌ No local quiz data available")
+        
+        if not quiz_data:
+            print("❌ Could not load local quiz data - Press F7 to download from GitHub")
+            reset_quiz_input()
+            return
+        
+        # Check if answer exists
+        if str(question_num) not in quiz_data:
+            print(f"❌ No answer found for question {question_num}")
+            print(f"📋 Available questions: {', '.join(sorted(quiz_data.keys()))}")
+            reset_quiz_input()
+            return
+        
+        answer = quiz_data[str(question_num)]['answer'].upper()
+        print(f"📝 Question {question_num}: Answer = {answer}")
+        
+        # Determine blink count (A=1, B=2, C=3, D=4, E=5)
+        blink_counts = {'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5}
+        blink_count = blink_counts.get(answer, 0)
+        
+        if blink_count == 0:
+            print(f"❌ Invalid answer '{answer}' in quiz data")
+            reset_quiz_input()
+            return
+        
+        print(f"💡 Answer {answer} = {blink_count} blink{'s' if blink_count != 1 else ''}")
+        
+        # Create blinker and blink
+        blinker = CapsLockBlinker()
+        success = blinker.blink_caps_lock(blink_count)
+        
+        if success:
+            print(f"🎉 Quiz answer notification complete for Question {question_num}!")
+        else:
+            print("❌ Failed to blink Caps Lock LED")
+        
+        reset_quiz_input()
+        
+    except ValueError:
+        print("❌ Invalid question number format")
+        reset_quiz_input()
+
+def load_quiz_data_local():
+    """
+    Load quiz data from local quiz_answers.json file only.
+    """
+    try:
+        with open('quiz_answers.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data.get('answers', {})
+    except Exception as e:
+        print(f"❌ Could not load local quiz data: {e}")
+        return None
+
+def handle_quiz_blink_request():
+    """
+    Toggles quiz input mode to listen for question number globally.
+    $ key activates/deactivates the mode with visual feedback.
+    """
+    global quiz_input_mode, quiz_number_buffer, quiz_input_timeout
+    
+    # Create blinker for feedback
+    blinker = CapsLockBlinker()
+    
+    if not quiz_input_mode:
+        # ACTIVATE quiz mode
+        print("\n💡 QUIZ BLINK MODE ACTIVATED!")
+        blinker.blink_caps_lock(1)  # Single blink to show activation
+        
+        print("📂 Using local quiz data (Press F7 to fetch latest from GitHub)")
+        
+        # Check if local data is available
+        test_data = load_quiz_data_local()
+        if test_data:
+            print(f"✅ Local quiz data loaded! {len(test_data)} questions available")
+        else:
+            print("⚠️ No local quiz data found - Press F7 to download from GitHub first")
+        
+        print("🎯 Type the question number (1-20) from anywhere on your computer")
+        print("🇫🇷 French keyboard: &é\"'()-è_çà = 1234567890")
+        print("⌨️ PRESS ENTER to submit, Escape to cancel, Backspace to delete")
+        print("🔢 For double digits (10-20): Type both digits then Enter")
+        print("💡 Press $ again to deactivate quiz mode")
+        print("⏰ Auto-timeout in 30 seconds...")
+        
+        quiz_input_mode = True
+        quiz_number_buffer = ""
+        
+        # Set up global keyboard hook for number input
+        global quiz_keyboard_hook
+        quiz_keyboard_hook = keyboard.on_press(handle_quiz_number_input)
+        print("DEBUG: Quiz keyboard hook activated")
+        
+        # Set up timeout (30 seconds)
+        def timeout_quiz_input():
+            if quiz_input_mode:
+                print("\n⏰ Quiz input timed out")
+                reset_quiz_input()
+        
+        import threading
+        quiz_input_timeout = threading.Timer(30.0, timeout_quiz_input)
+        quiz_input_timeout.start()
+        
+    else:
+        # DEACTIVATE quiz mode
+        print("\n💡 QUIZ BLINK MODE DEACTIVATED!")
+        blinker.blink_caps_lock(1)  # Single blink to show deactivation
+        reset_quiz_input()
 
 # --------------------- Simplified Keyboard Input Handling ---------------------
 # Note: Double-click detection was removed due to reliability issues
@@ -937,8 +1590,10 @@ async def main_loop():
     print("Hotkeys:")
     print("  Tab: Take a screenshot and push to git")
     print("  ²: Take a screenshot and push to git")
+    print("  $ (or ' or & or é or \"): Quiz blink - Type question number (French: &é\"'()-è_çà = 0-9), ENTER to submit (A=1, B=2, C=3, D=4, E=5)")
     print("  F5: Enhanced stealth mode - mic appears active with white noise masking")
     print("  F6: Restore normal microphone functionality")
+    print("  F7: Pull latest version from GitHub (sync with remote)")
     print("  F4: Toggle text recording mode (start/stop message capture + git push)")
     print("  F1: Test microphone status and stealth mode")
     print("  F2: Kill (close) Iriun Webcam process")
@@ -959,6 +1614,11 @@ async def main_loop():
             asyncio.create_task(save_screenshot_async())
             await asyncio.sleep(1)  # Delay to avoid multiple triggers
 
+        # Quiz blink trigger: ONLY $ key (shift+4)
+        elif keyboard.is_pressed("shift+4") or keyboard.is_pressed("$"):
+            handle_quiz_blink_request()
+            await asyncio.sleep(1)  # Delay to avoid multiple triggers
+
         # Mute trigger: F5 key
         if keyboard.is_pressed("F5"):
             mute_microphone()
@@ -969,6 +1629,10 @@ async def main_loop():
             unmute_microphone()
             print("🔊 Microphone unmuted (F6)")
             await asyncio.sleep(0.5)
+        # Pull latest version: F7 key
+        elif keyboard.is_pressed("F7"):
+            await pull_latest_version()
+            await asyncio.sleep(1)
         # Text recording toggle: F4 key
         elif keyboard.is_pressed("F4"):
             toggle_text_recording()
