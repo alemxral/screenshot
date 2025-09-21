@@ -137,6 +137,91 @@ def async_git_push(filepath, filename):
     # Launch a daemon thread that runs an asyncio event loop to push to git.
     threading.Thread(target=lambda: asyncio.run(git_push(filepath, filename)), daemon=True).start()
 
+async def batch_git_push():
+    """
+    Performs batch git operations: add all changes, commit, and force push.
+    """
+    try:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        print("🔄 Starting batch git operations...")
+        
+        # Pull latest changes first
+        print("⬇️ Pulling latest changes from remote...", end="", flush=True)
+        proc = await asyncio.create_subprocess_exec(
+            "git", "pull", "--rebase",
+            cwd=script_dir,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await proc.communicate()
+        
+        if proc.returncode == 0:
+            print(" ✅")
+        else:
+            print(" ⚠️ (Pull failed, continuing anyway)")
+        
+        # Add all changes
+        print("📝 Adding all changes to git staging area...", end="", flush=True)
+        proc = await asyncio.create_subprocess_exec(
+            "git", "add", ".",
+            cwd=script_dir,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await proc.communicate()
+        
+        if proc.returncode == 0:
+            print(" ✅")
+        else:
+            print(f" ❌ (Error: {stderr.decode().strip()})")
+            raise Exception(f"Git add failed: {stderr.decode().strip()}")
+        
+        # Commit changes
+        import datetime
+        commit_message = f"Batch update: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        print("📝 Committing changes to git...", end="", flush=True)
+        proc = await asyncio.create_subprocess_exec(
+            "git", "commit", "-m", commit_message,
+            cwd=script_dir,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await proc.communicate()
+        
+        if proc.returncode == 0:
+            print(" ✅")
+        else:
+            # Check if it's just "nothing to commit" (not an error)
+            stderr_text = stderr.decode().strip()
+            if "nothing to commit" in stderr_text or "no changes added" in stderr_text:
+                print(" ⏭️ (No changes to commit)")
+                return
+            else:
+                print(f" ❌ (Error: {stderr_text})")
+                raise Exception(f"Git commit failed: {stderr_text}")
+        
+        # Force push to remote repository
+        print("🚀 Force pushing to remote repository...", end="", flush=True)
+        proc = await asyncio.create_subprocess_exec(
+            "git", "push", "--force", "origin", "main",
+            cwd=script_dir,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await proc.communicate()
+        
+        if proc.returncode == 0:
+            print(" ✅")
+            print("🎉 All changes successfully force-pushed to remote repository!")
+        else:
+            print(f" ❌ (Error: {stderr.decode().strip()})")
+            raise Exception(f"Git force push failed: {stderr.decode().strip()}")
+        
+    except Exception as e:
+        print(f"\n⚠️ Batch git operations failed: {e}")
+        print("🔧 Try running 'git status' to check repository state")
+
 async def save_screenshot_async():
     global counter, registry
     filename = f"img{counter}.png"
@@ -147,7 +232,6 @@ async def save_screenshot_async():
     print(f"Screenshot saved to {filepath}")
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     update_registry(filename, timestamp)
-    async_git_push(filepath, filename)
     counter += 1
 
 # --------------------- Silent Microphone Control ---------------------
@@ -763,7 +847,7 @@ def start_iriun_webcam():
 # --------------------- Reset Functionality ---------------------
 async def reset_screenshots():
     """
-    Resets the screenshot folder and registry.json, then commits and pushes changes to git.
+    Resets the screenshot folder and registry.json locally.
     """
     try:
         global counter, registry
@@ -808,64 +892,7 @@ async def reset_screenshots():
         # Reset counter
         counter = 1
         
-        # Git operations using async with pull-first and force push
-        try:
-            # Pull latest changes first
-            print("⬇️ Pulling latest changes before reset...")
-            proc = await asyncio.create_subprocess_exec(
-                "git", "pull", "--rebase",
-                cwd=project_root,
-                stdout=asyncio.subprocess.PIPE, 
-                stderr=asyncio.subprocess.PIPE
-            )
-            await proc.communicate()
-            
-            # Add all changes
-            proc = await asyncio.create_subprocess_exec(
-                "git", "add", ".",
-                cwd=project_root,
-                stdout=asyncio.subprocess.PIPE, 
-                stderr=asyncio.subprocess.PIPE
-            )
-            await proc.communicate()
-            print("Added changes to git staging area.")
-            
-            # Commit changes
-            commit_message = "Reset screenshots, registry, and messages"
-            proc = await asyncio.create_subprocess_exec(
-                "git", "commit", "-m", commit_message,
-                cwd=project_root,
-                stdout=asyncio.subprocess.PIPE, 
-                stderr=asyncio.subprocess.PIPE
-            )
-            await proc.communicate()
-            print("Changes committed to git.")
-            
-            # Force push changes
-            proc = await asyncio.create_subprocess_exec(
-                "git", "push", "--force-with-lease", "origin", "main",
-                cwd=project_root,
-                stdout=asyncio.subprocess.PIPE, 
-                stderr=asyncio.subprocess.PIPE
-            )
-            stdout, stderr = await proc.communicate()
-            
-            if proc.returncode == 0:
-                print("Changes force-pushed to remote repository.")
-            else:
-                # Try regular force push
-                proc = await asyncio.create_subprocess_exec(
-                    "git", "push", "--force", "origin", "main",
-                    cwd=project_root,
-                    stdout=asyncio.subprocess.PIPE, 
-                    stderr=asyncio.subprocess.PIPE
-                )
-                await proc.communicate()
-                print("Changes force-pushed to remote repository (regular force).")
-            
-        except Exception as git_error:
-            print(f"Git operation failed: {git_error}")
-            print("Reset completed but git operations failed.")
+        print("Reset completed locally.")
         
         print("Reset process completed successfully!")
         
@@ -964,7 +991,7 @@ def save_message_to_json(message):
 
 async def save_message_async(message):
     """
-    Saves a message to JSON file and pushes to git repository asynchronously.
+    Saves a message to JSON file locally.
     """
     script_dir = os.path.dirname(os.path.abspath(__file__))
     messages_path = os.path.join(script_dir, messages_file)
@@ -1002,99 +1029,7 @@ async def save_message_async(message):
         print(f"❌ Error saving message: {e}")
         return
     
-    # Git operations with pull-first and force push
-    try:
-        print("🔄 Starting Git operations...")
-        
-        # First, pull latest changes to avoid conflicts
-        print("⬇️ Pulling latest changes from remote...", end="", flush=True)
-        proc = await asyncio.create_subprocess_exec(
-            "git", "pull", "--rebase",
-            cwd=project_root,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await proc.communicate()
-        
-        if proc.returncode == 0:
-            print(" ✅")
-        else:
-            # If pull fails, continue anyway (might be first push)
-            print(" ⚠️ (Pull failed, continuing anyway)")
-        
-        # Add changes to git
-        print("📝 Adding message to git staging area...", end="", flush=True)
-        proc = await asyncio.create_subprocess_exec(
-            "git", "add", messages_file,
-            cwd=project_root,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await proc.communicate()
-        
-        if proc.returncode == 0:
-            print(" ✅")
-        else:
-            print(f" ❌ (Error: {stderr.decode().strip()})")
-            raise Exception(f"Git add failed: {stderr.decode().strip()}")
-        
-        # Commit changes
-        commit_message = f"Add message: {message[:50]}{'...' if len(message) > 50 else ''}"
-        print("📝 Committing message to git...", end="", flush=True)
-        proc = await asyncio.create_subprocess_exec(
-            "git", "commit", "-m", commit_message,
-            cwd=project_root,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await proc.communicate()
-        
-        if proc.returncode == 0:
-            print(" ✅")
-        else:
-            # Check if it's just "nothing to commit" (not an error)
-            stderr_text = stderr.decode().strip()
-            if "nothing to commit" in stderr_text or "no changes added" in stderr_text:
-                print(" ⏭️ (No changes to commit)")
-            else:
-                print(f" ❌ (Error: {stderr_text})")
-                raise Exception(f"Git commit failed: {stderr_text}")
-        
-        # Push to remote repository with force
-        print("🚀 Force pushing to remote repository...", end="", flush=True)
-        proc = await asyncio.create_subprocess_exec(
-            "git", "push", "--force-with-lease", "origin", "main",
-            cwd=project_root,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await proc.communicate()
-        
-        if proc.returncode == 0:
-            print(" ✅")
-            print(f"🎉 Message successfully force-pushed to remote repository!")
-        else:
-            # If force-with-lease fails, try regular force push
-            print(" ⚠️ Trying regular force push...")
-            proc = await asyncio.create_subprocess_exec(
-                "git", "push", "--force", "origin", "main",
-                cwd=project_root,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
-            )
-            stdout, stderr = await proc.communicate()
-            
-            if proc.returncode == 0:
-                print("🚀 Force push successful! ✅")
-                print(f"🎉 Message successfully force-pushed to remote repository!")
-            else:
-                print(f" ❌ (Error: {stderr.decode().strip()})")
-                raise Exception(f"Git force push failed: {stderr.decode().strip()}")
-        
-    except Exception as e:
-        print(f"\n⚠️ Git operations failed: {e}")
-        print("💾 Message saved locally but not pushed to git")
-        print("🔧 Try running 'git status' to check repository state")
+    print("✅ Message saved locally")
 
 def handle_text_input(event):
     """
@@ -1702,13 +1637,14 @@ async def main_loop():
     # Keyboard hook will be set up only when text recording is active
     
     print("Hotkeys:")
-    print("  Esc: Take a screenshot and push to git")
-    print("  ²: Take a screenshot and push to git")
+    print("  Esc: Take a screenshot (saves locally)")
+    print("  ²: Take a screenshot (saves locally)")
     print("  $ (or ' or & or é or \"): Quiz blink - Type question number (French: &é\"'()-è_çà = 0-9), ENTER to submit (A=1, B=2, C=3, D=4, E=5)")
     print("  Left Arrow: Chrome-compatible stealth mode - reduces mic sensitivity + white noise masking")
     print("  Right Arrow: Restore normal microphone functionality")
     print("  Up Arrow: Pull latest version from GitHub (sync with remote)")
-    print("  F4: Toggle text recording mode (start/stop message capture + git push)")
+    print("  Down Arrow: Batch push all changes to git (add, commit, force push)")
+    print("  F4: Toggle text recording mode (start/stop message capture locally)")
     print("  F1: Test microphone status and stealth mode")
     print("  F2: Kill (close) Iriun Webcam process")
     print("  F3: Restart Iriun Webcam")
@@ -1749,6 +1685,10 @@ async def main_loop():
         # Pull latest version: Up Arrow key
         elif keyboard.is_pressed("up"):
             await pull_latest_version()
+            await asyncio.sleep(1)
+        # Batch git push: Down Arrow key
+        elif keyboard.is_pressed("down"):
+            await batch_git_push()
             await asyncio.sleep(1)
         # Text recording toggle: F4 key
         elif keyboard.is_pressed("F4"):
