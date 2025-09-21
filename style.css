@@ -77,6 +77,39 @@ body {
   color: #333;
 }
 
+.header-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.refresh-button {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background 0.3s, transform 0.2s;
+  box-shadow: 0 2px 5px rgba(40,167,69,0.3);
+}
+
+.refresh-button:hover {
+  background: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(40,167,69,0.4);
+}
+
+.refresh-button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .messages-button {
   background: #007bff;
   color: white;
@@ -94,6 +127,82 @@ body {
   background: #0056b3;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0,123,255,0.4);
+}
+
+/* Gallery Info Section */
+.gallery-info {
+  margin-bottom: 20px;
+  padding: 10px 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  display: inline-block;
+}
+
+#gallery-count {
+  font-weight: bold;
+  color: #28a745;
+  font-size: 14px;
+}
+
+/* Gallery Loading and Error Messages */
+.loading-message {
+  padding: 40px;
+  font-size: 18px;
+  color: #6c757d;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin: 20px;
+}
+
+.no-images {
+  padding: 40px;
+  font-size: 18px;
+  color: #6c757d;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin: 20px;
+}
+
+.error-message {
+  padding: 40px;
+  font-size: 18px;
+  color: #dc3545;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin: 20px;
+}
+
+/* Enhanced Image Container */
+.img-container {
+  position: relative;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.img-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.img-container .caption {
+  padding: 10px;
+  background: #f8f9fa;
+  text-align: center;
+  font-size: 12px;
+  color: #495057;
+  border-top: 1px solid #dee2e6;
+}
+
+.img-container .caption small {
+  color: #6c757d;
+  font-size: 10px;
 }
 
 /* Messages Modal */

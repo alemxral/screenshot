@@ -9,7 +9,14 @@
 <body>
   <div class="header">
     <h1>📸 Screenshot Gallery</h1>
-    <button id="messages-btn" class="messages-button">💬 View Messages</button>
+    <div class="header-controls">
+      <button id="refresh-gallery" class="refresh-button">🔄 Refresh Gallery</button>
+      <button id="messages-btn" class="messages-button">💬 View Messages</button>
+    </div>
+  </div>
+  
+  <div class="gallery-info">
+    <span id="gallery-count">Loading images...</span>
   </div>
   
   <div id="gallery"></div>

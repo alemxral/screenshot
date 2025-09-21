@@ -4,46 +4,328 @@ const modal = document.getElementById("modal");
 const modalImage = document.getElementById("modal-image");
 const basePath = "screenshots/";
 
-// Load registry.json and display each unique image with its filename and upload time.
-function loadGallery() {
-  fetch("registry.json")
-    .then(response => {
-      if (!response.ok) throw new Error("Could not load registry.json");
-      return response.json();
-    })
-    .then(data => {
-      const seen = new Set(); // To avoid duplicate filenames.
-      data.forEach(({ filename, upload_time }) => {
-        if (seen.has(filename)) return;
-        seen.add(filename);
+// Enhanced gallery loader that discovers all images automatically
+async function loadGallery() {
+  console.log("🔄 Loading gallery...");
+  
+  // Clear existing gallery
+  gallery.innerHTML = '<div class="loading-message">🔄 Discovering images...</div>';
+  
+  // Update counter
+  const galleryCount = document.getElementById("gallery-count");
+  if (galleryCount) galleryCount.textContent = "Discovering images...";
+  
+  try {
+    // Method 1: Try to load from registry.json (with timestamps)
+    const registryData = await loadFromRegistry();
+    
+    // Method 2: Auto-discover all images in screenshots folder
+    const discoveredImages = await discoverAllImages();
+    
+    // Combine and deduplicate
+    const allImages = combineImageSources(registryData, discoveredImages);
+    
+    // Clear loading message
+    gallery.innerHTML = '';
+    
+    if (allImages.length === 0) {
+      gallery.innerHTML = '<div class="no-images">📷 No images found in screenshots folder</div>';
+      if (galleryCount) galleryCount.textContent = "No images found";
+      return;
+    }
+    
+    // Sort images by filename (newest first - higher numbers first)
+    allImages.sort((a, b) => {
+      const numA = parseInt(a.filename.match(/\d+/)?.[0] || 0);
+      const numB = parseInt(b.filename.match(/\d+/)?.[0] || 0);
+      return numB - numA;
+    });
+    
+    console.log(`📸 Loading ${allImages.length} images...`);
+    
+    // Load all images
+    let loadedCount = 0;
+    const promises = allImages.map(imageInfo => loadSingleImage(imageInfo, () => {
+      loadedCount++;
+      if (galleryCount) {
+        galleryCount.textContent = `Loaded ${loadedCount}/${allImages.length} images`;
+      }
+    }));
+    
+    await Promise.allSettled(promises);
+    
+    if (galleryCount) {
+      galleryCount.textContent = `${allImages.length} images loaded`;
+    }
+    
+    console.log(`✅ Gallery loaded: ${allImages.length} images`);
+    
+  } catch (error) {
+    console.error("❌ Error loading gallery:", error);
+    gallery.innerHTML = '<div class="error-message">❌ Error loading gallery. Check console for details.</div>';
+    if (galleryCount) galleryCount.textContent = "Error loading images";
+  }
+}
 
+// Load image data from registry.json
+async function loadFromRegistry() {
+  try {
+    const response = await fetch("registry.json");
+    if (!response.ok) throw new Error("Could not load registry.json");
+    const data = await response.json();
+    
+    console.log(`📋 Registry: ${data.length} images found`);
+    return data.map(item => ({
+      filename: item.filename,
+      upload_time: item.upload_time || 'Unknown time',
+      source: 'registry'
+    }));
+  } catch (error) {
+    console.log("⚠️ Registry not available, using auto-discovery only");
+    return [];
+  }
+}
+
+// Fetch all images directly from GitHub repository
+async function discoverAllImages() {
+  const githubApiUrl = 'https://api.github.com/repos/alemxral/screenshot/contents/screenshots';
+  const githubRawUrl = 'https://raw.githubusercontent.com/alemxral/screenshot/main/screenshots/';
+  
+  console.log(`🔍 Fetching images from GitHub repository...`);
+  
+  try {
+    // Fetch directory contents from GitHub API
+    const response = await fetch(githubApiUrl, {
+      headers: {
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'Screenshot-Gallery-App'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`GitHub API request failed: ${response.status} ${response.statusText}`);
+    }
+    
+    const files = await response.json();
+    console.log(`📡 GitHub API response: ${files.length} items found`);
+    
+    // Filter only image files
+    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'];
+    const imageFiles = files.filter(file => {
+      const ext = file.name.toLowerCase().substr(file.name.lastIndexOf('.'));
+      return file.type === 'file' && imageExtensions.includes(ext);
+    });
+    
+    console.log(`🖼️ Filtered to ${imageFiles.length} image files`);
+    
+    // Convert to our format with GitHub data
+    const discoveredImages = imageFiles.map(file => ({
+      filename: file.name,
+      upload_time: new Date(file.sha ? 'GitHub commit' : Date.now()).toLocaleString(),
+      source: 'github',
+      size: file.size,
+      download_url: file.download_url || `${githubRawUrl}${file.name}`,
+      github_url: file.html_url,
+      sha: file.sha
+    }));
+    
+    // Sort by filename (newest first - higher numbers first)
+    discoveredImages.sort((a, b) => {
+      const numA = parseInt(a.filename.match(/\d+/)?.[0] || 0);
+      const numB = parseInt(b.filename.match(/\d+/)?.[0] || 0);
+      return numB - numA;
+    });
+    
+    console.log(`✅ GitHub discovery: ${discoveredImages.length} images found and sorted`);
+    return discoveredImages;
+    
+  } catch (error) {
+    console.error('❌ GitHub API fetch failed:', error);
+    
+    // Fallback to local discovery if GitHub fails
+    console.log('🔄 Falling back to local image discovery...');
+    return await discoverLocalImages();
+  }
+}
+
+// Fallback local image discovery (original method)
+async function discoverLocalImages() {
+  const discoveredImages = [];
+  
+  // Try to discover images by attempting to load common filename patterns
+  const patterns = [
+    // Standard pattern: img1.png, img2.png, etc.
+    ...Array.from({length: 100}, (_, i) => `img${i + 1}.png`),
+    // Alternative patterns
+    ...Array.from({length: 100}, (_, i) => `img${i + 1}.jpg`),
+    ...Array.from({length: 50}, (_, i) => `screenshot${i + 1}.png`),
+    ...Array.from({length: 50}, (_, i) => `image${i + 1}.png`),
+  ];
+  
+  console.log(`🔍 Local auto-discovering images...`);
+  
+  // Test each pattern in batches to avoid overwhelming the browser
+  const batchSize = 20;
+  for (let i = 0; i < patterns.length; i += batchSize) {
+    const batch = patterns.slice(i, i + batchSize);
+    const batchPromises = batch.map(async filename => {
+      try {
         const imgPath = `${basePath}${filename}`;
-        const imgContainer = document.createElement("div");
-        imgContainer.classList.add("img-container");
+        const response = await fetch(imgPath, { method: 'HEAD' });
+        if (response.ok) {
+          // Get file modification time from headers if available
+          const lastModified = response.headers.get('last-modified');
+          const upload_time = lastModified ? new Date(lastModified).toLocaleString() : 'Auto-discovered';
+          
+          return {
+            filename,
+            upload_time,
+            source: 'local',
+            download_url: imgPath
+          };
+        }
+      } catch (error) {
+        // File doesn't exist, ignore
+      }
+      return null;
+    });
+    
+    const batchResults = await Promise.allSettled(batchPromises);
+    batchResults.forEach(result => {
+      if (result.status === 'fulfilled' && result.value) {
+        discoveredImages.push(result.value);
+      }
+    });
+    
+    // Small delay to prevent overwhelming the browser
+    if (i + batchSize < patterns.length) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+  }
+  
+  console.log(`🔍 Local discovery: ${discoveredImages.length} images found`);
+  return discoveredImages;
+}
 
-        const img = new Image();
-        img.src = imgPath;
-        img.alt = filename;
+// Combine registry and discovered images, avoiding duplicates
+function combineImageSources(registryData, discoveredImages) {
+  const combined = new Map();
+  
+  // Add registry data first (has timestamps)
+  registryData.forEach(img => {
+    combined.set(img.filename, img);
+  });
+  
+  // Add discovered images (only if not already in registry)
+  discoveredImages.forEach(img => {
+    if (!combined.has(img.filename)) {
+      combined.set(img.filename, img);
+    }
+  });
+  
+  return Array.from(combined.values());
+}
 
-        img.onload = () => {
-          // Create a caption that shows both the filename and upload time.
-          const caption = document.createElement("div");
-          caption.classList.add("caption");
-          caption.textContent = `${filename} - Uploaded: ${upload_time}`;
-          imgContainer.appendChild(img);
-          imgContainer.appendChild(caption);
-          gallery.appendChild(imgContainer);
-        };
-
-        img.addEventListener("click", () => {
-          modalImage.src = img.src;
-          modal.style.display = "flex";
-        });
-
-        img.onerror = () => console.error(`Image not found: ${imgPath}`);
+// Load a single image and add it to the gallery
+function loadSingleImage(imageInfo, onLoad) {
+  return new Promise((resolve) => {
+    const { filename, upload_time, source, download_url, size, github_url } = imageInfo;
+    
+    // Use GitHub raw URL if available, otherwise use local path
+    const imgPath = download_url || `${basePath}${filename}`;
+    
+    const imgContainer = document.createElement("div");
+    imgContainer.classList.add("img-container");
+    
+    const img = new Image();
+    img.src = imgPath;
+    img.alt = filename;
+    img.crossOrigin = "anonymous"; // Enable CORS for GitHub images
+    
+    img.onload = () => {
+      // Create caption with enhanced source indicator
+      const caption = document.createElement("div");
+      caption.classList.add("caption");
+      
+      let sourceIcon = '🔍';
+      let sourceText = 'Local';
+      
+      if (source === 'registry') {
+        sourceIcon = '📋';
+        sourceText = 'Registry';
+      } else if (source === 'github') {
+        sourceIcon = '�';
+        sourceText = 'GitHub';
+      } else if (source === 'local') {
+        sourceIcon = '💾';
+        sourceText = 'Local';
+      }
+      
+      // Build caption with file info
+      let captionHTML = `${sourceIcon} ${filename}`;
+      captionHTML += `<br><small>📅 ${upload_time}</small>`;
+      
+      if (size) {
+        const sizeKB = Math.round(size / 1024);
+        captionHTML += `<br><small>📊 ${sizeKB} KB</small>`;
+      }
+      
+      captionHTML += `<br><small>🔗 ${sourceText}</small>`;
+      
+      caption.innerHTML = captionHTML;
+      
+      imgContainer.appendChild(img);
+      imgContainer.appendChild(caption);
+      gallery.appendChild(imgContainer);
+      
+      // Add click handler for modal
+      img.addEventListener("click", () => {
+        modalImage.src = img.src;
+        modal.style.display = "flex";
       });
-    })
-    .catch(error => console.error("Error loading registry:", error));
+      
+      // Add right-click context menu for GitHub images
+      if (github_url) {
+        img.addEventListener("contextmenu", (e) => {
+          e.preventDefault();
+          window.open(github_url, '_blank');
+        });
+        img.title = `Right-click to view on GitHub: ${filename}`;
+      } else {
+        img.title = filename;
+      }
+      
+      if (onLoad) onLoad();
+      resolve();
+    };
+    
+    img.onerror = () => {
+      console.error(`❌ Image not found: ${imgPath}`);
+      
+      // If GitHub image fails, try local fallback
+      if (source === 'github' && imgPath.includes('githubusercontent.com')) {
+        console.log(`🔄 Trying local fallback for: ${filename}`);
+        const fallbackPath = `${basePath}${filename}`;
+        
+        const fallbackImg = new Image();
+        fallbackImg.src = fallbackPath;
+        fallbackImg.alt = filename;
+        
+        fallbackImg.onload = () => {
+          console.log(`✅ Local fallback successful: ${filename}`);
+          // Update the original img src to the working fallback
+          img.src = fallbackPath;
+        };
+        
+        fallbackImg.onerror = () => {
+          console.error(`❌ Both GitHub and local failed for: ${filename}`);
+          resolve();
+        };
+      } else {
+        resolve();
+      }
+    };
+  });
 }
 
 // Close the modal when clicking anywhere on it.
@@ -1006,6 +1288,9 @@ document.addEventListener("keydown", (e) => {
 
 // Initialize application
 async function initializeApp() {
+  // Setup refresh button for gallery
+  setupGalleryRefreshButton();
+  
   // Load gallery first
   loadGallery();
   
@@ -1018,6 +1303,103 @@ async function initializeApp() {
     await initializeQuiz();
   } else {
     showGitHubSetup();
+  }
+}
+
+// Setup gallery refresh button and auto-refresh
+function setupGalleryRefreshButton() {
+  const refreshBtn = document.getElementById("refresh-gallery");
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", async () => {
+      console.log("🔄 Manual gallery refresh triggered");
+      await refreshGallery(refreshBtn);
+    });
+  }
+  
+  let lastImageCount = 0;
+  let lastGithubCheck = null;
+  
+  // Setup smart auto-refresh every 15 seconds
+  setInterval(async () => {
+    try {
+      // Quick check: count current images
+      const currentImages = gallery.querySelectorAll('.img-container').length;
+      
+      // Fast GitHub API check for new images (HEAD request)
+      const githubApiUrl = 'https://api.github.com/repos/alemxral/screenshot/contents/screenshots';
+      const quickCheck = await fetch(githubApiUrl, { 
+        method: 'HEAD',
+        headers: { 'Accept': 'application/vnd.github.v3+json' }
+      });
+      
+      const lastModified = quickCheck.headers.get('last-modified');
+      const etag = quickCheck.headers.get('etag');
+      const currentCheck = `${lastModified}-${etag}`;
+      
+      // Only refresh if there are changes
+      if (currentCheck !== lastGithubCheck || currentImages !== lastImageCount) {
+        console.log(`🔄 Auto-refresh detected changes: images=${currentImages}→?, github=${lastGithubCheck}→${currentCheck}`);
+        await loadGallery();
+        
+        lastImageCount = gallery.querySelectorAll('.img-container').length;
+        lastGithubCheck = currentCheck;
+        
+        console.log(`✅ Auto-refresh completed: ${lastImageCount} images loaded`);
+      } else {
+        console.log(`⏭️ Auto-refresh: no changes detected`);
+      }
+      
+    } catch (error) {
+      console.log(`⚠️ Auto-refresh check failed: ${error.message}`);
+      // Fallback to full refresh on error
+      if (Date.now() % 60000 < 15000) { // Every minute if checks fail
+        await loadGallery();
+      }
+    }
+  }, 15000); // 15 seconds
+  
+  console.log("✅ Smart gallery auto-refresh enabled (every 15 seconds)");
+}
+
+// Refresh gallery with button state management
+async function refreshGallery(button) {
+  if (!button) button = document.getElementById("refresh-gallery");
+  
+  // Update button state
+  const originalText = button.innerHTML;
+  button.innerHTML = "🔄 Refreshing...";
+  button.disabled = true;
+  
+  try {
+    // Clear any cached data
+    await loadGallery();
+    
+    // Get stats for feedback
+    const galleryImages = gallery.querySelectorAll('.img-container');
+    const githubImages = Array.from(galleryImages).filter(img => 
+      img.querySelector('.caption')?.textContent?.includes('📡')
+    ).length;
+    const localImages = galleryImages.length - githubImages;
+    
+    console.log(`✅ Gallery refresh completed: ${galleryImages.length} total (GitHub: ${githubImages}, Local: ${localImages})`);
+    
+    // Show detailed success feedback
+    button.innerHTML = `✅ ${galleryImages.length} images (📡${githubImages} 💾${localImages})`;
+    setTimeout(() => {
+      button.innerHTML = originalText;
+    }, 3000);
+    
+  } catch (error) {
+    console.error("❌ Gallery refresh failed:", error);
+    
+    // Show error feedback
+    button.innerHTML = "❌ Error";
+    setTimeout(() => {
+      button.innerHTML = originalText;
+    }, 2000);
+  } finally {
+    // Restore button state
+    button.disabled = false;
   }
 }
 
