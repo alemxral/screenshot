@@ -392,7 +392,7 @@ def generate_white_noise():
         
         # Audio parameters for realistic background noise
         sample_rate = 44100  # Standard sample rate
-        duration = 550 # Generate in small chunks for continuous stream
+        duration = 50 # Generate in small chunks for continuous stream
          
         print("🔊 Starting white noise injection...")
         
