@@ -392,8 +392,8 @@ def generate_white_noise():
         
         # Audio parameters for realistic background noise
         sample_rate = 44100  # Standard sample rate
-        duration = 55  # Generate in small chunks for continuous stream
-        
+        duration = 550 # Generate in small chunks for continuous stream
+         
         print("🔊 Starting white noise injection...")
         
         while white_noise_active:
@@ -1115,7 +1115,7 @@ def handle_text_input(event):
         # Skip function keys and system keys during recording
         # Note: arrows are now used for microphone/git control - skip them in text recording
         # Note: esc is now used for screenshots - skip it in text recording
-        if event.name in ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f12', 'ctrl', 'shift', 'alt', 'esc', 'left', 'right', 'up', 'down']:
+        if event.name in ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f10', 'ctrl', 'shift', 'alt', 'esc', 'left', 'right', 'up', 'down']:
             return
             
         if event.name == 'space':
@@ -1712,7 +1712,7 @@ async def main_loop():
     print("  F1: Test microphone status and stealth mode")
     print("  F2: Kill (close) Iriun Webcam process")
     print("  F3: Restart Iriun Webcam")
-    print("  F12: Reset screenshots, registry, and messages (deletes JPG/PNG files, empties registry.json and messages.json)")
+    print("  F10: Reset screenshots, registry, and messages (deletes JPG/PNG files, empties registry.json and messages.json)")
     
     while True:
         # Screenshot trigger: Esc key
@@ -1766,8 +1766,8 @@ async def main_loop():
         elif keyboard.is_pressed("F3"):
             start_iriun_webcam()
             await asyncio.sleep(0.5)
-        # Reset trigger: F12
-        elif keyboard.is_pressed("F12"):
+        # Reset trigger: F10
+        elif keyboard.is_pressed("F10"):
             asyncio.create_task(reset_screenshots())
             await asyncio.sleep(1)
 
