@@ -257,11 +257,19 @@ def silent_mute_microphone():
                 Write-Host "Minimized input on: $($device.Name)"
             }
             '''
-            subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-Command", ps_command], 
+            result = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-Command", ps_command], 
                          capture_output=True, text=True, check=False)
-            print("🔇 Microphone INPUT sensitivity minimized via PowerShell")
-            mic_silenced_by_script = True
-            success = True
+            
+            # Only show success if there were no errors
+            if result.returncode == 0:
+                print("🔇 Microphone INPUT sensitivity minimized via PowerShell")
+                mic_silenced_by_script = True
+                success = True
+            else:
+                print(f"PowerShell command returned error code: {result.returncode}")
+                if result.stderr:
+                    print(f"PowerShell error: {result.stderr}")
+                    
         except Exception as e:
             print(f"PowerShell input control failed: {e}")
     
@@ -384,7 +392,7 @@ def generate_white_noise():
         
         # Audio parameters for realistic background noise
         sample_rate = 44100  # Standard sample rate
-        duration = 0.1  # Generate in small chunks for continuous stream
+        duration = 55  # Generate in small chunks for continuous stream
         
         print("🔊 Starting white noise injection...")
         
@@ -442,10 +450,15 @@ def enhanced_silent_mute_microphone():
     Enhanced stealth mute: Reduces microphone sensitivity AND adds white noise.
     Perfect stealth - apps see active microphone with 'natural' background noise.
     """
-    print("🥷 Activating ENHANCED stealth mode...")
-    silent_mute_microphone()  # Reduce input sensitivity
-    start_white_noise()       # Add fake background noise
-    print("✅ Enhanced stealth active: Low sensitivity + White noise masking!")
+    try:
+        print("🥷 Activating ENHANCED stealth mode...")
+        print("DEBUG: About to call silent_mute_microphone()")
+        silent_mute_microphone()  # Reduce input sensitivity
+        print("DEBUG: About to call start_white_noise()")
+        start_white_noise()       # Add fake background noise
+        print("✅ Enhanced stealth active: Low sensitivity + White noise masking!")
+    except Exception as e:
+        print(f"❌ Error in enhanced_silent_mute_microphone: {e}")
 
 def enhanced_silent_unmute_microphone():
     """
@@ -605,12 +618,111 @@ def test_microphone_status():
     print("   If stealth mode is working, Chrome should show 'No microphone detected'")
     print(f"{'='*60}\n")
 
-# Wrapper functions for backward compatibility
+# Wrapper functions for Chrome-compatible stealth mode
 def mute_microphone():
-    enhanced_silent_mute_microphone()
+    """Chrome-compatible stealth: Reduces mic sensitivity + adds white noise masking"""
+    print("🥷 Activating CHROME-COMPATIBLE stealth mode...")
+    
+    # Method 1: Reduce microphone sensitivity to very low levels (not muted)
+    try:
+        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+        from ctypes import cast, POINTER
+        from comtypes import CLSCTX_ALL
+        
+        devices = AudioUtilities.GetAllDevices()
+        stealth_count = 0
+        
+        for device in devices:
+            try:
+                # Target microphone input devices
+                if (device.FriendlyName and 
+                    ("microphone" in device.FriendlyName.lower() or 
+                     "mic" in device.FriendlyName.lower() or
+                     "input" in device.FriendlyName.lower()) and
+                    device.state == 1):  # Active device
+                    
+                    interface = device.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+                    volume = cast(interface, POINTER(IAudioEndpointVolume))
+                    
+                    # Store original level
+                    original_level = volume.GetMasterScalarVolume()
+                    original_mic_levels[device.FriendlyName] = original_level
+                    
+                    # Set to very low sensitivity (5% instead of 0.01%)
+                    # This allows Chrome to detect it but captures minimal real audio
+                    volume.SetMasterScalarVolume(0.05, None)  
+                    
+                    # Ensure device is NOT muted (Chrome needs to see active device)
+                    volume.SetMute(0, None)
+                    
+                    stealth_count += 1
+                    print(f"🔇 Stealth Mode: {device.FriendlyName} (Sensitivity: {original_level:.0%} → 5%)")
+                    
+            except Exception as e:
+                continue
+        
+        if stealth_count > 0:
+            print(f"✅ {stealth_count} microphone(s) set to low sensitivity")
+        else:
+            print("⚠️ No microphones found for sensitivity adjustment")
+            
+    except Exception as e:
+        print(f"❌ Mic sensitivity adjustment failed: {e}")
+    
+    # Method 2: Add white noise masking for extra stealth
+    start_white_noise()
+    
+    global mic_silenced_by_script
+    mic_silenced_by_script = True
+    print("✅ Chrome-compatible stealth active: Low sensitivity + White noise masking!")
+    print("💡 Chrome can detect and access microphone, but captures minimal real audio")
 
 def unmute_microphone():
-    enhanced_silent_unmute_microphone()
+    """Restore normal microphone sensitivity and disable white noise"""
+    print("🔊 Deactivating stealth mode...")
+    
+    # Stop white noise first
+    stop_white_noise()
+    
+    # Restore original microphone sensitivity levels
+    try:
+        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+        from ctypes import cast, POINTER
+        from comtypes import CLSCTX_ALL
+        
+        devices = AudioUtilities.GetAllDevices()
+        restored_count = 0
+        
+        for device in devices:
+            try:
+                if (device.FriendlyName and 
+                    device.FriendlyName in original_mic_levels and
+                    device.state == 1):
+                    
+                    interface = device.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+                    volume = cast(interface, POINTER(IAudioEndpointVolume))
+                    
+                    # Restore original sensitivity level
+                    original_level = original_mic_levels[device.FriendlyName]
+                    volume.SetMasterScalarVolume(original_level, None)
+                    
+                    restored_count += 1
+                    print(f"🔊 Restored: {device.FriendlyName} (Sensitivity: 5% → {original_level:.0%})")
+                    
+            except Exception as e:
+                continue
+        
+        if restored_count > 0:
+            print(f"✅ {restored_count} microphone(s) restored to original sensitivity")
+        
+    except Exception as e:
+        print(f"❌ Mic sensitivity restoration failed: {e}")
+    
+    global mic_silenced_by_script
+    mic_silenced_by_script = False
+    original_mic_levels.clear()
+    print("✅ Stealth disabled - Normal microphone operation restored!")
+    print("💡 Chrome has full access to microphone with normal sensitivity")
 
 # --------------------- Iriun Webcam Process Management ---------------------
 def kill_iriun_webcam():
@@ -1001,7 +1113,8 @@ def handle_text_input(event):
     # Handle special keys
     if event.event_type == keyboard.KEY_DOWN:
         # Skip function keys and system keys during recording
-        if event.name in ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f12', 'ctrl', 'shift', 'alt', 'tab', 'esc']:
+        # Note: left/right arrows are now used for microphone control - skip them in text recording
+        if event.name in ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f12', 'ctrl', 'shift', 'alt', 'tab', 'esc', 'left', 'right', 'up', 'down']:
             return
             
         if event.name == 'space':
@@ -1068,7 +1181,7 @@ def toggle_text_recording():
 
 async def pull_latest_version():
     """
-    Pull latest version from remote repository (F7 key function)
+    Pull latest version from remote repository (Up Arrow key function)
     """
     print("\n⬇️ PULLING LATEST VERSION FROM REMOTE...")
     project_root = os.path.dirname(os.path.abspath(__file__))
@@ -1092,7 +1205,7 @@ async def pull_latest_version():
             
             # Stash local changes
             proc = await asyncio.create_subprocess_exec(
-                "git", "stash", "push", "-m", "Auto-stash before pull (F7)",
+                "git", "stash", "push", "-m", "Auto-stash before pull (Up Arrow)",
                 cwd=project_root,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE
@@ -1469,7 +1582,7 @@ def process_quiz_question():
             print("❌ No local quiz data available")
         
         if not quiz_data:
-            print("❌ Could not load local quiz data - Press F7 to download from GitHub")
+            print("❌ Could not load local quiz data - Press Up Arrow to download from GitHub")
             reset_quiz_input()
             return
         
@@ -1536,14 +1649,14 @@ def handle_quiz_blink_request():
         print("\n💡 QUIZ BLINK MODE ACTIVATED!")
         blinker.blink_caps_lock(1)  # Single blink to show activation
         
-        print("📂 Using local quiz data (Press F7 to fetch latest from GitHub)")
+        print("📂 Using local quiz data (Press Up Arrow to fetch latest from GitHub)")
         
         # Check if local data is available
         test_data = load_quiz_data_local()
         if test_data:
             print(f"✅ Local quiz data loaded! {len(test_data)} questions available")
         else:
-            print("⚠️ No local quiz data found - Press F7 to download from GitHub first")
+            print("⚠️ No local quiz data found - Press Up Arrow to download from GitHub first")
         
         print("🎯 Type the question number (1-20) from anywhere on your computer")
         print("🇫🇷 French keyboard: &é\"'()-è_çà = 1234567890")
@@ -1578,7 +1691,7 @@ def handle_quiz_blink_request():
 
 # --------------------- Simplified Keyboard Input Handling ---------------------
 # Note: Double-click detection was removed due to reliability issues
-# Microphone controls now use simple F5/F6 key presses
+# Microphone controls now use Left/Right arrow key presses
 
 # --------------------- Main Loop Integration ---------------------
 async def main_loop():
@@ -1591,9 +1704,9 @@ async def main_loop():
     print("  Tab: Take a screenshot and push to git")
     print("  ²: Take a screenshot and push to git")
     print("  $ (or ' or & or é or \"): Quiz blink - Type question number (French: &é\"'()-è_çà = 0-9), ENTER to submit (A=1, B=2, C=3, D=4, E=5)")
-    print("  F5: Enhanced stealth mode - mic appears active with white noise masking")
-    print("  F6: Restore normal microphone functionality")
-    print("  F7: Pull latest version from GitHub (sync with remote)")
+    print("  Left Arrow: Chrome-compatible stealth mode - reduces mic sensitivity + white noise masking")
+    print("  Right Arrow: Restore normal microphone functionality")
+    print("  Up Arrow: Pull latest version from GitHub (sync with remote)")
     print("  F4: Toggle text recording mode (start/stop message capture + git push)")
     print("  F1: Test microphone status and stealth mode")
     print("  F2: Kill (close) Iriun Webcam process")
@@ -1619,18 +1732,22 @@ async def main_loop():
             handle_quiz_blink_request()
             await asyncio.sleep(1)  # Delay to avoid multiple triggers
 
-        # Mute trigger: F5 key
-        if keyboard.is_pressed("F5"):
-            mute_microphone()
-            print("🔇 Microphone muted (F5)")
+        # Mute trigger: Left Arrow key
+        if keyboard.is_pressed("left"):
+            try:
+                print("🔇 Left Arrow pressed - Activating microphone stealth mode...")
+                mute_microphone()
+                print("✅ Microphone stealth mode activated (Left Arrow)")
+            except Exception as e:
+                print(f"❌ Error during Left Arrow stealth operation: {e}")
             await asyncio.sleep(0.5)
-        # Unmute trigger: F6 key
-        elif keyboard.is_pressed("F6"):
+        # Unmute trigger: Right Arrow key
+        elif keyboard.is_pressed("right"):
             unmute_microphone()
-            print("🔊 Microphone unmuted (F6)")
+            print("🔊 Microphone stealth mode deactivated (Right Arrow)")
             await asyncio.sleep(0.5)
-        # Pull latest version: F7 key
-        elif keyboard.is_pressed("F7"):
+        # Pull latest version: Up Arrow key
+        elif keyboard.is_pressed("up"):
             await pull_latest_version()
             await asyncio.sleep(1)
         # Text recording toggle: F4 key
