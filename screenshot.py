@@ -1113,8 +1113,9 @@ def handle_text_input(event):
     # Handle special keys
     if event.event_type == keyboard.KEY_DOWN:
         # Skip function keys and system keys during recording
-        # Note: left/right arrows are now used for microphone control - skip them in text recording
-        if event.name in ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f12', 'ctrl', 'shift', 'alt', 'tab', 'esc', 'left', 'right', 'up', 'down']:
+        # Note: arrows are now used for microphone/git control - skip them in text recording
+        # Note: esc is now used for screenshots - skip it in text recording
+        if event.name in ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f12', 'ctrl', 'shift', 'alt', 'esc', 'left', 'right', 'up', 'down']:
             return
             
         if event.name == 'space':
@@ -1701,7 +1702,7 @@ async def main_loop():
     # Keyboard hook will be set up only when text recording is active
     
     print("Hotkeys:")
-    print("  Tab: Take a screenshot and push to git")
+    print("  Esc: Take a screenshot and push to git")
     print("  ²: Take a screenshot and push to git")
     print("  $ (or ' or & or é or \"): Quiz blink - Type question number (French: &é\"'()-è_çà = 0-9), ENTER to submit (A=1, B=2, C=3, D=4, E=5)")
     print("  Left Arrow: Chrome-compatible stealth mode - reduces mic sensitivity + white noise masking")
@@ -1712,11 +1713,10 @@ async def main_loop():
     print("  F2: Kill (close) Iriun Webcam process")
     print("  F3: Restart Iriun Webcam")
     print("  F12: Reset screenshots, registry, and messages (deletes JPG/PNG files, empties registry.json and messages.json)")
-    print("  Esc: Exit the program")
     
     while True:
-        # Screenshot trigger: Tab key
-        if keyboard.is_pressed("tab"):
+        # Screenshot trigger: Esc key
+        if keyboard.is_pressed("esc"):
             # Create an asynchronous screenshot task.
             asyncio.create_task(save_screenshot_async())
             await asyncio.sleep(1)  # Delay to avoid multiple triggers
@@ -1770,17 +1770,6 @@ async def main_loop():
         elif keyboard.is_pressed("F12"):
             asyncio.create_task(reset_screenshots())
             await asyncio.sleep(1)
-        # Exit trigger: Esc
-        elif keyboard.is_pressed("esc"):
-            print("Exiting the program...")
-            stop_white_noise()  # Clean shutdown of white noise
-            if text_recording_active:
-                stop_text_recording()  # Save any pending message
-            try:
-                keyboard.unhook_all()  # Clean up all keyboard hooks
-            except:
-                pass
-            break
 
         await asyncio.sleep(0.1)
 
