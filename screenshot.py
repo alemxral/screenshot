@@ -301,8 +301,8 @@ def silent_mute_microphone():
                     original_input_level = volume.GetMasterScalarVolume()
                     original_mic_levels[device.FriendlyName] = original_input_level
                     
-                    # Set INPUT capture level to absolute minimum (0.0001 = nearly silent)
-                    volume.SetMasterScalarVolume(0.0001, None)  # Minimal input sensitivity
+                    # Set INPUT capture level to low but active (0.02 = 2% sensitivity)
+                    volume.SetMasterScalarVolume(0.02, None)  # Low input sensitivity but still active
                     
                     # Ensure microphone is NOT system-muted (device appears available)
                     volume.SetMute(0, None)
@@ -758,9 +758,9 @@ def mute_microphone():
                     original_level = volume.GetMasterScalarVolume()
                     original_mic_levels[device.FriendlyName] = original_level
                     
-                    # Set to very low sensitivity (5% instead of 0.01%)
+                    # Set to low sensitivity (8% instead of 0.01%)
                     # This allows Chrome to detect it but captures minimal real audio
-                    volume.SetMasterScalarVolume(0.05, None)  
+                    volume.SetMasterScalarVolume(0.08, None)  
                     
                     # Ensure device is NOT muted (Chrome needs to see active device)
                     volume.SetMute(0, None)
