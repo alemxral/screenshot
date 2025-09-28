@@ -199,13 +199,10 @@ async def batch_git_push():
                 
                 # Still provide confirmation feedback for "no changes" case
                 try:
-                    import winsound
-                    winsound.Beep(600, 200)  # Lower tone, shorter beep for "no changes"
-                    
                     blinker = CapsLockBlinker()
                     blinker.blink_caps_lock(1)  # Single blink for "no changes"
                     
-                    print("🔔 No changes confirmation: beep + caps lock blink")
+                    print("🔔 No changes confirmation: caps lock blink")
                 except Exception as confirm_error:
                     print(f"⚠️ Confirmation failed: {confirm_error}")
                 return
@@ -227,17 +224,13 @@ async def batch_git_push():
             print(" ✅")
             print("🎉 All changes successfully force-pushed to remote repository!")
             
-            # Success confirmation: beep and caps lock blink
+            # Success confirmation: caps lock blink only
             try:
-                # System beep (Windows)
-                import winsound
-                winsound.Beep(800, 300)  # 800 Hz for 300ms
-                
                 # Caps lock blink confirmation
                 blinker = CapsLockBlinker()
                 blinker.blink_caps_lock(2)  # Double blink for success
                 
-                print("🔔 Success confirmation: beep + caps lock blink")
+                print("🔔 Success confirmation: caps lock blink")
             except Exception as confirm_error:
                 print(f"⚠️ Confirmation failed: {confirm_error}")
         else:
