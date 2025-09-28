@@ -1,9 +1,28 @@
 {
   "quiz_session": {
-    "created_at": "2025-09-28T15:25:36.859Z",
-    "last_updated": "2025-09-28T15:25:36.859Z",
+    "created_at": "2025-09-28T15:42:53.910Z",
+    "last_updated": "2025-09-28T15:42:53.910Z",
     "total_questions": 20,
-    "answered_questions": 0
+    "answered_questions": 3
   },
-  "answers": {}
+  "answers": {
+    "1": {
+      "answer": "A",
+      "answered_at": "2025-09-28T15:42:53.910Z",
+      "date": "2025-09-28",
+      "time": "17:42:53"
+    },
+    "2": {
+      "answer": "B",
+      "answered_at": "2025-09-28T15:42:53.910Z",
+      "date": "2025-09-28",
+      "time": "17:42:53"
+    },
+    "3": {
+      "answer": "A",
+      "answered_at": "2025-09-28T15:42:53.910Z",
+      "date": "2025-09-28",
+      "time": "17:42:53"
+    }
+  }
 }
