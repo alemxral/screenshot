@@ -8,10 +8,25 @@ import subprocess
 import json
 import threading
 import sys
+CREATE_NO_WINDOW = 0x08000000  # For subprocess.run/exec to suppress console windows on Windows
 import requests
 import base64
 import ctypes
 from ctypes import wintypes
+
+# --- Prevent multiple instances using Windows mutex (pywin32) ---
+try:
+    import win32event
+    import win32api
+    import winerror
+    import sys
+    mutex = win32event.CreateMutex(None, False, 'screenshot_app_unique_mutex')
+    if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
+        print("Another instance of this program is already running. Exiting.")
+        sys.exit(0)
+except ImportError:
+    print("pywin32 is not installed. Multiple instance prevention is disabled.")
+# --- End mutex section ---
 
 def install_required_packages():
     """
@@ -57,7 +72,7 @@ def install_required_packages():
     if missing_packages:
         print(f"Installing missing packages: {', '.join(missing_packages)}")
         try:
-            subprocess.run([sys.executable, '-m', 'pip', 'install', '-r', requirements_file], check=True)
+            subprocess.run([sys.executable, '-m', 'pip', 'install', '-r', requirements_file], check=True, creationflags=CREATE_NO_WINDOW)
             print("All required packages installed successfully from requirements.txt.")
         except subprocess.CalledProcessError as e:
             print(f"Failed to install packages from requirements.txt: {e}")
@@ -92,7 +107,7 @@ async def git_push(filepath, filename):
         print("⬇️ Pulling latest changes...", end="", flush=True)
         proc = await asyncio.create_subprocess_exec(
             "git", "pull", "--rebase",
-            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, creationflags=CREATE_NO_WINDOW
         )
         await proc.communicate()
         print(" ✅" if proc.returncode == 0 else " ⚠️")
@@ -100,7 +115,7 @@ async def git_push(filepath, filename):
         # Add files
         proc = await asyncio.create_subprocess_exec(
             "git", "add", filepath, registry_path,
-            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, creationflags=CREATE_NO_WINDOW
         )
         await proc.communicate()
 
@@ -108,14 +123,14 @@ async def git_push(filepath, filename):
         commit_message = f"Add screenshot {filename} and update registry"
         proc = await asyncio.create_subprocess_exec(
             "git", "commit", "-m", commit_message,
-            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, creationflags=CREATE_NO_WINDOW
         )
         await proc.communicate()
 
         # Force push
         proc = await asyncio.create_subprocess_exec(
             "git", "push", "--force-with-lease", "origin", "main",
-            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, creationflags=CREATE_NO_WINDOW
         )
         stdout, stderr = await proc.communicate()
         
@@ -125,7 +140,7 @@ async def git_push(filepath, filename):
             # Try regular force push
             proc = await asyncio.create_subprocess_exec(
                 "git", "push", "--force", "origin", "main",
-                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, creationflags=CREATE_NO_WINDOW
             )
             await proc.communicate()
             print(f"✅ Screenshot {filename} force-pushed to git (regular force).")
@@ -152,7 +167,8 @@ async def batch_git_push():
             "git", "pull", "--rebase",
             cwd=script_dir,
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+            stderr=asyncio.subprocess.PIPE,
+            creationflags=CREATE_NO_WINDOW
         )
         stdout, stderr = await proc.communicate()
         
@@ -167,7 +183,8 @@ async def batch_git_push():
             "git", "add", ".",
             cwd=script_dir,
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+            stderr=asyncio.subprocess.PIPE,
+            creationflags=CREATE_NO_WINDOW
         )
         stdout, stderr = await proc.communicate()
         
@@ -185,7 +202,8 @@ async def batch_git_push():
             "git", "commit", "-m", commit_message,
             cwd=script_dir,
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+            stderr=asyncio.subprocess.PIPE,
+            creationflags=CREATE_NO_WINDOW
         )
         stdout, stderr = await proc.communicate()
         
@@ -216,7 +234,8 @@ async def batch_git_push():
             "git", "push", "--force", "origin", "main",
             cwd=script_dir,
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+            stderr=asyncio.subprocess.PIPE,
+            creationflags=CREATE_NO_WINDOW
         )
         stdout, stderr = await proc.communicate()
         
