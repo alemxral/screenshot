@@ -1422,7 +1422,7 @@ def handle_quiz_number_input(event):
     }
     
     # Debug: Print key name to help identify French characters
-    print(f"DEBUG: Key pressed: '{event.name}'")
+    print(f"DEBUG: Key pressed: '{event.name}' (scan_code={getattr(event, 'scan_code', None)})")
     
     # Handle regular number keys (0-9) and French characters
     if event.name.isdigit():
@@ -1465,8 +1465,8 @@ def handle_quiz_number_input(event):
         quiz_number_buffer += "0"
         print(f"📝 Question number: {quiz_number_buffer} (typed: {event.name})")
     
-    # Handle Enter key to submit (REQUIRED - no more auto-submit)
-    elif event.name == "enter":
+    # Handle Left Arrow key to submit (REQUIRED - no more auto-submit)
+    elif event.name == "gauche" or event.name == "left":
         if quiz_number_buffer:
             # Validate range (1-20)
             try:
@@ -1658,9 +1658,10 @@ async def main_loop():
     print("Hotkeys:")
     print("  Esc: Take a screenshot (saves locally)")
     print("  ²: Take a screenshot (saves locally)")
-    print("  $ (or ' or & or é or \"): Quiz blink - Type question number (French: &é\"'()-è_çà = 0-9), ENTER to submit (A=1, B=2, C=3, D=4, E=5)")
-    print("  Left Arrow: Chrome-compatible stealth mode - reduces mic sensitivity + white noise masking")
-    print("  Right Arrow: Restore normal microphone functionality")
+    print("  $ (or ' or & or é or \"): Quiz blink - Type question number (French: &é\"'()-è_çà = 0-9), RIGHT ARROW to submit (A=1, B=2, C=3, D=4, E=5)")
+    print("  ù: Chrome-compatible stealth mode - reduces mic sensitivity + white noise masking")
+    print("  $: Restore normal microphone functionality")
+    print("  Right Arrow: Activate quiz blink mode / confirm quiz answer")
     print("  Up Arrow: Pull latest version from GitHub (sync with remote)")
     print("  Down Arrow: Batch push all changes to git (add, commit, force push)")
     print("  F4: Toggle text recording mode (start/stop message capture locally)")
@@ -1682,24 +1683,24 @@ async def main_loop():
             asyncio.create_task(save_screenshot_async())
             await asyncio.sleep(1)  # Delay to avoid multiple triggers
 
-        # Quiz blink trigger: ONLY $ key (shift+4)
-        elif keyboard.is_pressed("shift+4") or keyboard.is_pressed("$"):
-            handle_quiz_blink_request()
-            await asyncio.sleep(1)  # Delay to avoid multiple triggers
-
-        # Mute trigger: Left Arrow key
-        if keyboard.is_pressed("left"):
-            try:
-                print("🔇 Left Arrow pressed - Activating microphone stealth mode...")
-                mute_microphone()
-                print("✅ Microphone stealth mode activated (Left Arrow)")
-            except Exception as e:
-                print(f"❌ Error during Left Arrow stealth operation: {e}")
-            await asyncio.sleep(0.5)
-        # Unmute trigger: Right Arrow key
+        # Quiz blink trigger: Right Arrow key
         elif keyboard.is_pressed("right"):
+            handle_quiz_blink_request()
+            await asyncio.sleep(1)
+
+        # Mute trigger: ù key
+        if keyboard.is_pressed("ù"):
+            try:
+                print("🔇 ù pressed - Activating microphone stealth mode...")
+                mute_microphone()
+                print("✅ Microphone stealth mode activated (ù)")
+            except Exception as e:
+                print(f"❌ Error during ù stealth operation: {e}")
+            await asyncio.sleep(0.5)
+        # Unmute trigger: $ key
+        elif keyboard.is_pressed("$"):
             unmute_microphone()
-            print("🔊 Microphone stealth mode deactivated (Right Arrow)")
+            print("🔊 Microphone stealth mode deactivated ($)")
             await asyncio.sleep(0.5)
         # Pull latest version: Up Arrow key
         elif keyboard.is_pressed("up"):
