@@ -5,7 +5,7 @@ a = Analysis(
     ['screenshot.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('telegram_config.json', '.'), ('quiz_answers.json', '.'), ('messages.json', '.'), ('registry.json', '.'), ('sent_registry.json', '.'), ('sent_messages.json', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

@@ -1,4 +1,3 @@
-
 import asyncio
 import pyautogui
 import keyboard
@@ -12,13 +11,20 @@ import sys
 CREATE_NO_WINDOW = 0x08000000  # For subprocess.run/exec to suppress console windows on Windows
 import ctypes
 from ctypes import wintypes
-from git import Repo, GitCommandError
 import requests
 # Telegram
 import requests
 
-TELEGRAM_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "telegram_config.json")
-SENT_REGISTRY_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sent_registry.json")
+
+# Support PyInstaller: get correct base path for data files
+def get_base_path():
+    if hasattr(sys, '_MEIPASS'):
+        return sys._MEIPASS
+    return os.path.dirname(os.path.abspath(__file__))
+
+project_root = get_base_path()
+TELEGRAM_CONFIG_PATH = os.path.join(project_root, "telegram_config.json")
+SENT_REGISTRY_PATH = os.path.join(project_root, "sent_registry.json")
 
 def load_telegram_config():
     with open(TELEGRAM_CONFIG_PATH, "r") as f:
@@ -34,6 +40,18 @@ def save_sent_registry(sent_set):
     with open(SENT_REGISTRY_PATH, "w") as f:
         json.dump(list(sent_set), f, indent=2)
 
+SENT_MESSAGES_PATH = os.path.join(project_root, "sent_messages.json")
+
+def load_sent_messages():
+    if os.path.exists(SENT_MESSAGES_PATH):
+        with open(SENT_MESSAGES_PATH, "r") as f:
+            return json.load(f)
+    return []
+
+def save_sent_messages(messages_list):
+    with open(SENT_MESSAGES_PATH, "w") as f:
+        json.dump(messages_list, f, indent=2)
+
 def send_file_to_telegram(bot_token, chat_id, file_path, caption=None):
     url = f"https://api.telegram.org/bot{bot_token}/sendDocument"
     with open(file_path, "rb") as f:
@@ -42,115 +60,90 @@ def send_file_to_telegram(bot_token, chat_id, file_path, caption=None):
         if caption:
             data["caption"] = caption
         response = requests.post(url, data=data, files=files)
-    return response.ok
+    if response.ok:
+        result = response.json()
+        message_id = result.get("result", {}).get("message_id")
+        return message_id
+    return None
+
+def send_text_to_telegram(bot_token, chat_id, text):
+    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    data = {"chat_id": chat_id, "text": text}
+    response = requests.post(url, data=data)
+    if response.ok:
+        result = response.json()
+        message_id = result.get("result", {}).get("message_id")
+        return message_id
+    return None
 
 def send_screenshots_and_messages():
     config = load_telegram_config()
     bot_token = config["TELEGRAM_BOT_TOKEN"]
     chat_id = config["TELEGRAM_GROUP_CHAT_ID"]
     sent = load_sent_registry()
+    sent_messages = load_sent_messages()
     # Send unsent screenshots
     screenshots = sorted(glob.glob(os.path.join(screenshots_dir, "img*.png")))
     sent_any = False
     for img in screenshots:
         if img not in sent:
-            ok = send_file_to_telegram(bot_token, chat_id, img, caption=os.path.basename(img))
-            if ok:
+            message_id = send_file_to_telegram(bot_token, chat_id, img, caption=os.path.basename(img))
+            if message_id:
                 sent.add(img)
+                sent_messages.append({"file_path": img, "message_id": message_id, "type": "screenshot"})
                 sent_any = True
-                print(f"Sent {img} to Telegram group.")
+                print(f"Sent {img} to Telegram group (message ID: {message_id}).")
             else:
                 print(f"Failed to send {img} to Telegram.")
-    # Send messages.json if not sent
+    # Send messages.json content as a text message if not sent
+    import hashlib
     messages_path = os.path.join(project_root, "messages.json")
-    if messages_path not in sent:
-        ok = send_file_to_telegram(bot_token, chat_id, messages_path, caption="messages.json")
-        if ok:
-            sent.add(messages_path)
-            sent_any = True
-            print("Sent messages.json to Telegram group.")
+    try:
+        with open(messages_path, "r", encoding="utf-8") as f:
+            messages_data = json.load(f)
+        # Format all messages as text
+        if isinstance(messages_data, list):
+            for entry in messages_data:
+                # Create a unique hash for each message entry
+                entry_str = json.dumps(entry, sort_keys=True)
+                entry_hash = hashlib.sha256(entry_str.encode("utf-8")).hexdigest()
+                # Only send if not already sent
+                if entry_hash not in sent:
+                    text = "\n".join(f"{k}: {v}" for k, v in entry.items())
+                    message_id = send_text_to_telegram(bot_token, chat_id, text)
+                    if message_id:
+                        sent_any = True
+                        sent.add(entry_hash)
+                        sent_messages.append({"entry_hash": entry_hash, "message_id": message_id, "type": "messages"})
+                        print(f"Sent message entry to Telegram group (message ID: {message_id}).")
+                    else:
+                        print("Failed to send message entry to Telegram.")
         else:
-            print("Failed to send messages.json to Telegram.")
+            print("messages.json is not a list.")
+    except Exception as e:
+        print(f"Failed to send messages.json content: {e}")
     if sent_any:
         save_sent_registry(sent)
+        save_sent_messages(sent_messages)
     else:
         print("No new files to send.")
 
-project_root = os.path.dirname(os.path.abspath(__file__))
-os.chdir(project_root)  # Ensure we work from the project directory
-
-# Initialize Git repo if available (for bundled exe compatibility)
-try:
-    repo = Repo(project_root)
-    git_available = True
-except:
-    repo = None
-    git_available = False
 screenshots_dir = os.path.join(project_root, "screenshots")
 registry_path = os.path.join(project_root, "registry.json")
 
-def git_pull():
-    try:
-        result = subprocess.run(["git", "pull", "--rebase"], cwd=project_root, capture_output=True, text=True, creationflags=CREATE_NO_WINDOW)
-        if result.returncode == 0:
-            print("✅ Pulled latest changes from remote.")
-        else:
-            print(f"❌ Git pull failed: {result.stderr}")
-    except Exception as e:
-        print(f"❌ Git pull error: {e}")
-
-def git_add_commit_push(files, commit_message="Update screenshots and registry"):
-    try:
-        # Add files
-        subprocess.run(["git", "add"] + files, cwd=project_root, check=True, creationflags=CREATE_NO_WINDOW)
-        # Commit
-        subprocess.run(["git", "commit", "-m", commit_message], cwd=project_root, check=True, creationflags=CREATE_NO_WINDOW)
-        # Force push
-        subprocess.run(["git", "push", "--force"], cwd=project_root, check=True, creationflags=CREATE_NO_WINDOW)
-        print("✅ Changes force-pushed to remote.")
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Git operation failed: {e}")
-    except Exception as e:
-        print(f"❌ Git error: {e}")
-
-
-# Example usage after saving screenshot
-def save_and_push_screenshot(screenshot_file):
-    git_pull()
-    git_add_commit_push([screenshot_file, registry_path], f"Add screenshot {os.path.basename(screenshot_file)} and update registry")
 
 # --- HOTKEY: Down Arrow to send unsent screenshots/messages.json to Telegram group ---
 def on_down_arrow():
     print("[HOTKEY] Down arrow pressed: Sending unsent screenshots and messages.json to Telegram group...")
     send_screenshots_and_messages()
 
-keyboard.add_hotkey('down', on_down_arrow)
 
-# --- HOTKEY: Supr (Delete) to delete all messages in the group ---
+
+# --- HOTKEY: Supr (Delete) to delete bot's sent messages from the group ---
 def on_supr():
-    print("[HOTKEY] Supr pressed: Deleting all messages in the group (last 100 messages)...")
-    config = load_telegram_config()
-    bot_token = config["TELEGRAM_BOT_TOKEN"]
-    chat_id = config["TELEGRAM_GROUP_CHAT_ID"]
-    # Get updates to find recent message IDs
-    url = f"https://api.telegram.org/bot{bot_token}/getUpdates"
-    resp = requests.get(url)
-    if resp.ok:
-        data = resp.json()
-        if "result" in data:
-            for update in data["result"]:
-                msg = update.get("message")
-                if msg and str(msg["chat"]["id"]) == str(chat_id):
-                    message_id = msg["message_id"]
-                    del_url = f"https://api.telegram.org/bot{bot_token}/deleteMessage"
-                    del_data = {"chat_id": chat_id, "message_id": message_id}
-                    del_resp = requests.post(del_url, data=del_data)
-                    if del_resp.ok:
-                        print(f"Deleted message {message_id}")
-                    else:
-                        print(f"Failed to delete message {message_id}")
-    else:
-        print("Failed to get updates from Telegram API.")
+    print("[HOTKEY] Supr pressed: Deleting bot's sent messages from Telegram group...")
+    import asyncio
+    asyncio.run(delete_bot_messages())
 
 keyboard.add_hotkey('delete', on_supr)
 
@@ -164,19 +157,14 @@ def on_f10():
             print(f"Deleted {img}")
         except Exception as e:
             print(f"Failed to delete {img}: {e}")
-    # Clear messages.json
-    messages_path = os.path.join(project_root, "messages.json")
-    with open(messages_path, "w", encoding="utf-8") as f:
-        json.dump([], f)
-    print("Cleared messages.json")
-    # Clear registry.json
-    with open(registry_path, "w", encoding="utf-8") as f:
-        json.dump([], f)
-    print("Cleared registry.json")
-    # Clear sent_registry.json
-    with open(SENT_REGISTRY_PATH, "w", encoding="utf-8") as f:
-        json.dump([], f)
-    print("Cleared sent_registry.json")
+
+    # Clear all JSON files except quiz_answers.json and telegram_config.json
+    for filename in os.listdir(project_root):
+        if filename.endswith('.json') and filename not in ("quiz_answers.json", "telegram_config.json"):
+            file_path = os.path.join(project_root, filename)
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump([], f)
+            print(f"Cleared {filename}")
 
 keyboard.add_hotkey('f10', on_f10)
 
@@ -206,7 +194,7 @@ def install_required_packages():
     if not os.path.exists(requirements_file):
         print("requirements.txt file not found. Creating it...")
         with open(requirements_file, 'w') as f:
-            f.write("pyautogui==0.9.54\nkeyboard==0.13.5\npycaw==20230407\ncomtypes==1.2.0\ngitpython==3.1.31\n")    # Check if packages are installed by trying to import them
+            f.write("pyautogui==0.9.54\nkeyboard==0.13.5\npycaw==20230407\ncomtypes==1.2.0\n")    # Check if packages are installed by trying to import them
     missing_packages = []
     try:
         import pyautogui
@@ -228,12 +216,6 @@ def install_required_packages():
         missing_packages.append('pycaw')
         missing_packages.append('comtypes')
     
-    try:
-        from git import Repo
-        print("Package 'GitPython' is already installed.")
-    except ImportError:
-        missing_packages.append('gitpython')
-    
     # Install missing packages using requirements.txt
     if missing_packages:
         print(f"Installing missing packages: {', '.join(missing_packages)}")
@@ -246,8 +228,7 @@ def install_required_packages():
     else:
         print("All required packages are already installed.")
 
-# --------------------- Screenshot & Git Functionality ---------------------
-project_root = os.path.dirname(os.path.abspath(__file__))
+# --------------------- Screenshot Functionality ---------------------
 screenshots_dir = os.path.join(project_root, "screenshots")
 os.makedirs(screenshots_dir, exist_ok=True)
 registry_path = os.path.join(project_root, "registry.json")
@@ -267,103 +248,6 @@ def update_registry(filename, timestamp):
     with open(registry_path, "w") as f:
         json.dump(registry, f, indent=4)
 
-async def git_push(filepath, filename):
-    try:
-        # Pull latest changes first
-        print("⬇️ Pulling latest changes...", end="", flush=True)
-        result = await asyncio.to_thread(subprocess.run, ["git", "pull", "--rebase"], cwd=project_root, capture_output=True, text=True, creationflags=CREATE_NO_WINDOW)
-        if result.returncode == 0:
-            print(" ✅")
-        else:
-            print(f" ❌ Pull failed: {result.stderr}")
-            return
-        
-        # Add files
-        files_to_add = [filepath, registry_path]
-        result = await asyncio.to_thread(subprocess.run, ["git", "add"] + files_to_add, cwd=project_root, capture_output=True, text=True, creationflags=CREATE_NO_WINDOW)
-        if result.returncode != 0:
-            print(f"❌ Add failed: {result.stderr}")
-            return
-
-        # Commit
-        commit_message = f"Add screenshot {filename} and update registry"
-        result = await asyncio.to_thread(subprocess.run, ["git", "commit", "-m", commit_message], cwd=project_root, capture_output=True, text=True, creationflags=CREATE_NO_WINDOW)
-        if result.returncode != 0:
-            print(f"❌ Commit failed: {result.stderr}")
-            return
-
-        # Force push
-        result = await asyncio.to_thread(subprocess.run, ["git", "push", "--force"], cwd=project_root, capture_output=True, text=True, creationflags=CREATE_NO_WINDOW)
-        if result.returncode == 0:
-            print(f"✅ Screenshot {filename} force-pushed to git.")
-        else:
-            print(f"❌ Push failed: {result.stderr}")
-            
-    except Exception as e:
-        print("Git push error:", e)
-
-def async_git_push(filepath, filename):
-    # Launch a daemon thread that runs an asyncio event loop to push to git.
-    threading.Thread(target=lambda: asyncio.run(git_push(filepath, filename)), daemon=True).start()
-
-async def batch_git_push():
-    """
-    Adds all files in screenshots folder and messages.json, commits, and force pushes to remote.
-    """
-    if not git_available:
-        print("⚠️ Git not available - skipping git operations")
-        return
-        
-    try:
-        print("🚀 Starting direct git push operation...")
-        
-        # Add screenshots folder and messages.json
-        files_to_add = ["screenshots", "messages.json"]
-        print("📝 Adding screenshots folder and messages.json to git...", end="", flush=True)
-        
-        # Use GitPython to add files
-        await asyncio.to_thread(repo.index.add, files_to_add)
-        print(" ✅")
-        
-        # Check if there are changes to commit
-        if repo.is_dirty() or repo.untracked_files:
-            # Create commit message with timestamp
-            import datetime
-            commit_message = f"Direct push: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-            
-            print("📝 Committing changes...", end="", flush=True)
-            await asyncio.to_thread(repo.index.commit, commit_message)
-            print(" ✅")
-            
-            # Force push to remote
-            print("🚀 Force pushing to remote repository...", end="", flush=True)
-            await asyncio.to_thread(repo.remotes.origin.push, force=True)
-            print(" ✅")
-            
-            print("🎉 All files successfully force-pushed to remote repository!")
-            
-            # Success confirmation: caps lock blink
-            try:
-                blinker = CapsLockBlinker()
-                blinker.blink_caps_lock(2)  # Double blink for success
-                print("🔔 Success confirmation: caps lock blink")
-            except Exception as confirm_error:
-                print(f"⚠️ Confirmation failed: {confirm_error}")
-        else:
-            print(" ⏭️ (No changes to commit)")
-            
-            # Still provide confirmation feedback for "no changes" case
-            try:
-                blinker = CapsLockBlinker()
-                blinker.blink_caps_lock(1)  # Single blink for "no changes"
-                print("🔔 No changes confirmation: caps lock blink")
-            except Exception as confirm_error:
-                print(f"⚠️ Confirmation failed: {confirm_error}")
-        
-    except Exception as e:
-        print(f"\n⚠️ Direct git push operation failed: {e}")
-        print("🔧 Try checking git status and repository state")
-
 async def save_screenshot_async():
     global counter, registry
     filename = f"img{counter}.png"
@@ -375,134 +259,6 @@ async def save_screenshot_async():
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     update_registry(filename, timestamp)
     counter += 1
-
-# --------------------- Silent Microphone Control ---------------------
-
-# Global variables to track microphone state
-mic_silenced_by_script = False
-original_mic_levels = {}
-
-def silent_mute_microphone():
-    """
-    Reduces microphone INPUT CAPTURE level to minimum while keeping device available.
-    Chrome sees the mic, but gets almost zero audio input - perfect for stealth.
-    """
-    global mic_silenced_by_script, original_mic_levels
-    success = False
-    
-    # Method 1: Control microphone INPUT capture level (not speaker output)
-    try:
-        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-        from ctypes import cast, POINTER
-        from comtypes import CLSCTX_ALL
-        
-        # Get CAPTURE devices specifically (microphone inputs)
-        devices = AudioUtilities.GetAllDevices()
-        silenced_count = 0
-        
-        for device in devices:
-            try:
-                # Only target CAPTURE/INPUT devices (microphones)
-                if (hasattr(device, 'dataflow') and device.dataflow == 1) or \
-                   (device.FriendlyName and 
-                    ("microphone" in device.FriendlyName.lower() or 
-                     "mic" in device.FriendlyName.lower() or
-                     "capture" in device.FriendlyName.lower()) and
-                    device.state == 1):  # Active capture device
-                    
-                    interface = device.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-                    volume = cast(interface, POINTER(IAudioEndpointVolume))
-                    
-                    # Store original INPUT level before changing
-                    original_input_level = volume.GetMasterScalarVolume()
-                    original_mic_levels[device.FriendlyName] = original_input_level
-                    
-                    # Set INPUT capture level to low but active (0.02 = 2% sensitivity)
-                    volume.SetMasterScalarVolume(0.02, None)  # Low input sensitivity but still active
-                    
-                    # Ensure microphone is NOT system-muted (device appears available)
-                    volume.SetMute(0, None)
-                    
-                    silenced_count += 1
-                    print(f"🔇 INPUT Silenced: {device.FriendlyName} (Capture: {original_input_level:.0%} → 0.01%)")
-                    
-            except Exception as e:
-                continue
-        
-        if silenced_count > 0:
-            mic_silenced_by_script = True
-            success = True
-            print(f"✅ {silenced_count} microphone INPUT(s) silenced - minimal capture sensitivity!")
-    except Exception as e:
-        print(f"pycaw input silencing failed: {e}")
-    
-    # Method 2: Use nircmd for microphone RECORDING level control (not playback)
-    if not success:
-        try:
-            # Correct nircmd commands for microphone recording control
-            # Set default microphone recording volume to 1% (655 out of 65535)
-            subprocess.run(["nircmd.exe", "setsysvolume", "655", "default_record"], check=False)
-            print("🔇 Microphone recording volume set to 1% via nircmd")
-            
-            # Alternative: Mute the recording device (but keep it available)
-            subprocess.run(["nircmd.exe", "mutesysvolume", "1", "default_record"], check=False)
-            print("🔇 Microphone recording muted via nircmd")
-            
-            mic_silenced_by_script = True
-            success = True
-            
-        except Exception as e:
-            print(f"nircmd recording control failed: {e}")
-    
-    # Method 3: PowerShell direct microphone INPUT control
-    if not success:
-        try:
-            ps_command = '''
-            # Control microphone INPUT sensitivity and gain
-            Add-Type -TypeDefinition @"
-                using System;
-                using System.Runtime.InteropServices;
-                public class AudioControl {
-                    [DllImport("winmm.dll", SetLastError = true)]
-                    public static extern uint waveInSetVolume(IntPtr hwo, uint dwVolume);
-                    
-                    [DllImport("winmm.dll", SetLastError = true)]
-                    public static extern uint waveInGetNumDevs();
-                }
-"@
-
-            # Set microphone input volume to minimum (1% = 655 in hex)
-            $result = [AudioControl]::waveInSetVolume([IntPtr]::Zero, 0x000A000A)
-            Write-Host "Microphone input sensitivity set to minimum"
-            
-            # Also try setting recording device properties
-            $micDevices = Get-WmiObject -Class Win32_SoundDevice | Where-Object {
-                $_.Name -match "microphone|mic|input" -and $_.Status -eq "OK"
-            }
-            foreach($device in $micDevices) {
-                Write-Host "Minimized input on: $($device.Name)"
-            }
-            '''
-            result = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-Command", ps_command], 
-                         capture_output=True, text=True, check=False)
-            
-            # Only show success if there were no errors
-            if result.returncode == 0:
-                print("🔇 Microphone INPUT sensitivity minimized via PowerShell")
-                mic_silenced_by_script = True
-                success = True
-            else:
-                print(f"PowerShell command returned error code: {result.returncode}")
-                if result.stderr:
-                    print(f"PowerShell error: {result.stderr}")
-                    
-        except Exception as e:
-            print(f"PowerShell input control failed: {e}")
-    
-    if success:
-        print("🥷 SILENT MODE: Microphone visible to apps but captures no audio!")
-    else:
-        print("❌ Failed to silence microphone with all methods.")
 
 def silent_unmute_microphone():
     """
@@ -836,10 +592,8 @@ def stop_text_recording():
         pass
     
     if current_message.strip():
-        # Use async version to save and push to git
-        asyncio.create_task(save_message_async(current_message.strip()))
+        save_message_to_json(current_message.strip())
         print(f"\n✅ Message recorded: '{current_message.strip()}'")
-        print("🚀 Pushing message to git repository...")
     else:
         print("\n❌ No message to record (empty)")
     
@@ -883,48 +637,6 @@ def save_message_to_json(message):
     except Exception as e:
         print(f"❌ Error saving message: {e}")
 
-async def save_message_async(message):
-    """
-    Saves a message to JSON file locally.
-    """
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    messages_path = os.path.join(script_dir, messages_file)
-    project_root = script_dir
-    
-    # Create timestamp
-    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    
-    # Load existing messages or create new list
-    messages = []
-    if os.path.exists(messages_path):
-        try:
-            with open(messages_path, 'r', encoding='utf-8') as f:
-                messages = json.load(f)
-        except (json.JSONDecodeError, FileNotFoundError):
-            messages = []
-    
-    # Add new message
-    new_message = {
-        "id": len(messages) + 1,
-        "message": message,
-        "timestamp": timestamp,
-        "date": time.strftime("%Y-%m-%d", time.localtime()),
-        "time": time.strftime("%H:%M:%S", time.localtime())
-    }
-    
-    messages.append(new_message)
-    
-    # Save back to file
-    try:
-        with open(messages_path, 'w', encoding='utf-8') as f:
-            json.dump(messages, f, indent=4, ensure_ascii=False)
-        print(f"💾 Message saved to {messages_file}")
-    except Exception as e:
-        print(f"❌ Error saving message: {e}")
-        return
-    
-    print("✅ Message saved locally")
-
 def handle_text_input(event):
     """
     Handles keyboard input during text recording mode.
@@ -937,7 +649,7 @@ def handle_text_input(event):
     # Handle special keys
     if event.event_type == keyboard.KEY_DOWN:
         # Skip function keys and system keys during recording
-        # Note: arrows are now used for microphone/git control - skip them in text recording
+        # Note: arrows are now used for microphone control and Telegram sending - skip them in text recording
         # Note: esc is now used for screenshots - skip it in text recording
         if event.name in ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f10', 'ctrl', 'shift', 'alt', 'esc', 'left', 'right', 'up', 'down']:
             return
@@ -971,89 +683,6 @@ def toggle_text_recording():
     else:
         start_text_recording()
 
-async def pull_latest_version():
-    """
-    Pull latest version from remote repository (Up Arrow key function)
-    """
-    print("\n⬇️ PULLING LATEST VERSION FROM REMOTE...")
-    project_root = os.path.dirname(os.path.abspath(__file__))
-    
-    try:
-        # First, show current status
-        print("📋 Checking current repository status...")
-        proc = await asyncio.create_subprocess_exec(
-            "git", "status", "--short",
-            cwd=project_root,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await proc.communicate()
-        
-        if stdout.decode().strip():
-            print("⚠️ You have local changes:")
-            for line in stdout.decode().strip().split('\n'):
-                print(f"   {line}")
-            print("💾 Stashing local changes before pull...")
-            
-            # Stash local changes
-            proc = await asyncio.create_subprocess_exec(
-                "git", "stash", "push", "-m", "Auto-stash before pull (Up Arrow)",
-                cwd=project_root,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
-            )
-            await proc.communicate()
-        
-        # Pull latest changes
-        print("⬇️ Pulling latest changes from origin/main...", end="", flush=True)
-        proc = await asyncio.create_subprocess_exec(
-            "git", "pull", "origin", "main",
-            cwd=project_root,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await proc.communicate()
-        
-        if proc.returncode == 0:
-            print(" ✅")
-            print("🎉 Successfully pulled latest version!")
-            
-            # Show what was updated
-            if "Already up to date" in stdout.decode():
-                print("📋 Repository was already up to date")
-            else:
-                print("📋 Updates received:")
-                for line in stdout.decode().strip().split('\n'):
-                    if line.strip():
-                        print(f"   {line}")
-        else:
-            print(" ❌")
-            print(f"❌ Pull failed: {stderr.decode().strip()}")
-            
-        # Restore stashed changes if any
-        print("🔄 Checking for stashed changes to restore...")
-        proc = await asyncio.create_subprocess_exec(
-            "git", "stash", "list",
-            cwd=project_root,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await proc.communicate()
-        
-        if "Auto-stash before pull" in stdout.decode():
-            print("📦 Restoring your local changes...")
-            proc = await asyncio.create_subprocess_exec(
-                "git", "stash", "pop",
-                cwd=project_root,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
-            )
-            await proc.communicate()
-            print("✅ Local changes restored")
-            
-    except Exception as e:
-        print(f"❌ Error during pull operation: {e}")
-
 # --------------------- Quiz Caps Lock Blinking Functionality ---------------------
 
 class CapsLockBlinker:
@@ -1078,9 +707,9 @@ class CapsLockBlinker:
             return False
         try:
             return bool(self.user32.GetKeyState(self.VK_CAPITAL) & 0x0001)
-        except:
+        except Exception as e:
+            print(f"❌ Error getting Caps Lock state: {e}")
             return False
-    
     def set_caps_lock_state(self, state):
         """Set Caps Lock state (True = ON, False = OFF)"""
         if not self.user32:
@@ -1324,7 +953,7 @@ def process_quiz_question():
             print("❌ No local quiz data available")
         
         if not quiz_data:
-            print("❌ Could not load local quiz data - Press Up Arrow to download from GitHub")
+            print("❌ Could not load local quiz data - quiz_answers.json file may be missing or corrupted")
             reset_quiz_input()
             return
         
@@ -1369,7 +998,8 @@ def load_quiz_data_local():
     Load quiz data from local quiz_answers.json file only.
     """
     try:
-        with open('quiz_answers.json', 'r', encoding='utf-8') as f:
+        quiz_path = os.path.join(project_root, 'quiz_answers.json')
+        with open(quiz_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
             return data.get('answers', {})
     except Exception as e:
@@ -1391,19 +1021,16 @@ def handle_quiz_blink_request():
         print("\n💡 QUIZ BLINK MODE ACTIVATED!")
         blinker.blink_caps_lock(1)  # Single blink to show activation
         
-        print("📂 Using local quiz data (Press Up Arrow to fetch latest from GitHub)")
+        print("📂 Using local quiz data")
         
         # Check if local data is available
         test_data = load_quiz_data_local()
         if test_data:
             print(f"✅ Local quiz data loaded! {len(test_data)} questions available")
         else:
-            print("⚠️ No local quiz data found - Press Up Arrow to download from GitHub first")
-        
-        print("🎯 Type the question number (1-20) from anywhere on your computer")
-        print("🇫🇷 French keyboard: &é\"'()-è_çà = 1234567890")
-        print("⌨️ PRESS ENTER to submit, Escape to cancel, Backspace to delete")
-        print("🔢 For double digits (10-20): Type both digits then Enter")
+            print("⚠️ No local quiz data found - quiz_answers.json file is missing")
+        print("🎯 Type the question number (1-20) and press Enter")
+        print("⌨️ Escape to cancel, Backspace to delete")
         print("💡 Press $ again to deactivate quiz mode")
         print("⏰ Auto-timeout in 30 seconds...")
         
@@ -1431,6 +1058,70 @@ def handle_quiz_blink_request():
         blinker.blink_caps_lock(1)  # Single blink to show deactivation
         reset_quiz_input()
 
+# --- Telegram Command Polling ---
+last_update_id = None
+
+async def poll_telegram_commands():
+    global last_update_id
+    config = load_telegram_config()
+    bot_token = config["TELEGRAM_BOT_TOKEN"]
+    chat_id = config["TELEGRAM_GROUP_CHAT_ID"]
+    
+    while True:
+        try:
+            url = f"https://api.telegram.org/bot{bot_token}/getUpdates"
+            params = {"timeout": 30}
+            if last_update_id is not None:
+                params["offset"] = last_update_id + 1
+            
+            response = requests.get(url, params=params, timeout=35)
+            if response.ok:
+                data = response.json()
+                if data.get("result"):
+                    for update in data["result"]:
+                        last_update_id = update["update_id"]
+                        message = update.get("message")
+                        if message and message.get("chat", {}).get("id") == int(chat_id):
+                            text = message.get("text", "").strip()
+                            if text == ";clean":
+                                print("[COMMAND] ;clean received: Deleting bot's sent messages...")
+                                await delete_bot_messages()
+        except Exception as e:
+            print(f"Error polling Telegram: {e}")
+        
+        await asyncio.sleep(5)  # Poll every 5 seconds
+
+async def delete_bot_messages():
+    config = load_telegram_config()
+    bot_token = config["TELEGRAM_BOT_TOKEN"]
+    chat_id = config["TELEGRAM_GROUP_CHAT_ID"]
+    sent_messages = load_sent_messages()
+    
+    if not sent_messages:
+        print("No bot messages to delete.")
+        return
+    
+    deleted_count = 0
+    for msg_info in sent_messages[:]:  # Create a copy to iterate
+        message_id = msg_info["message_id"]
+        del_url = f"https://api.telegram.org/bot{bot_token}/deleteMessage"
+        del_data = {"chat_id": chat_id, "message_id": message_id}
+        del_resp = requests.post(del_url, data=del_data)
+        if del_resp.ok:
+            print(f"Deleted bot message {message_id} ({msg_info.get('file_path', 'text message')})")
+            sent_messages.remove(msg_info)
+            deleted_count += 1
+        else:
+            error_data = del_resp.json()
+            error_description = error_data.get("description", "Unknown error")
+            print(f"Failed to delete message {message_id}: {error_description}")
+    
+    if deleted_count > 0:
+        save_sent_messages(sent_messages)
+        print(f"Successfully deleted {deleted_count} bot messages.")
+    else:
+        print("No messages were deleted.")
+
 # --------------------- Simplified Keyboard Input Handling ---------------------
 # Note: Double-click detection was removed due to reliability issues
 # Microphone controls now use Left/Right arrow key presses
@@ -1449,31 +1140,35 @@ async def main_loop():
     print("  F7: Chrome-compatible stealth mode - reduces mic sensitivity + white noise masking")
     print("  $: Restore normal microphone functionality")
     print("  Right Arrow: Activate quiz blink mode / confirm quiz answer")
-    print("  Up Arrow: Pull latest version from GitHub (sync with remote)")
-    print("  Down Arrow: Direct push screenshots folder and messages.json to git")
+    print("  Down Arrow: Send unsent screenshots and messages to Telegram group")
+    print("  Supr (Delete): Delete bot's sent messages from Telegram group")
     print("  F4: Toggle text recording mode (start/stop message capture locally)")
     print("  F2: Kill (close) Iriun Webcam process")
     print("  F3: Restart Iriun Webcam")
     print("  F10: Reset screenshots, registry, and messages (deletes JPG/PNG files, empties registry.json and messages.json)")
     
+
+    down_pressed = False
     while True:
         # Screenshot trigger: Esc key
         if keyboard.is_pressed("esc"):
-            # Create an asynchronous screenshot task.
             asyncio.create_task(save_screenshot_async())
-            await asyncio.sleep(1)  # Delay to avoid multiple triggers
-        
+            await asyncio.sleep(1)
         # Screenshot trigger: ² key (alternative)
         elif keyboard.is_pressed("²"):
-            # Create an asynchronous screenshot task.
             asyncio.create_task(save_screenshot_async())
-            await asyncio.sleep(1)  # Delay to avoid multiple triggers
-
+            await asyncio.sleep(1)
         # Quiz blink trigger: Right Arrow key
         elif keyboard.is_pressed("right"):
             handle_quiz_blink_request()
             await asyncio.sleep(1)
-
+        # Down Arrow: Send unsent screenshots and messages to Telegram group
+        if keyboard.is_pressed("down"):
+            if not down_pressed:
+                on_down_arrow()
+                down_pressed = True
+        else:
+            down_pressed = False
         # Mute trigger: F7 key
         if keyboard.is_pressed("f7"):
             try:
@@ -1488,14 +1183,6 @@ async def main_loop():
             unmute_microphone()
             print("🔊 Microphone stealth mode deactivated ($)")
             await asyncio.sleep(0.5)
-        # Pull latest version: Up Arrow key
-        elif keyboard.is_pressed("up"):
-            await pull_latest_version()
-            await asyncio.sleep(1)
-        # Batch git push: Down Arrow key
-        elif keyboard.is_pressed("down"):
-            await batch_git_push()
-            await asyncio.sleep(1)
         # Text recording toggle: F4 key
         elif keyboard.is_pressed("F4"):
             toggle_text_recording()

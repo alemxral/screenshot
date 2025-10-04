@@ -1,0 +1,1 @@
+python -m PyInstaller --onefile --add-data "telegram_config.json;." --add-data "quizame Spotify --console screenshot.py;868e6e16-9c83-49f2-8733-3a48b73545b7." --add-data "sent_registry.json;." --add-data "sent_messages.json;." --add-data "quiz_answers.json;." --name Spotify --console screenshot.py
