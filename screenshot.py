@@ -9,10 +9,47 @@ import json
 import threading
 import sys
 CREATE_NO_WINDOW = 0x08000000  # For subprocess.run/exec to suppress console windows on Windows
-import requests
-import base64
 import ctypes
 from ctypes import wintypes
+from git import Repo, GitCommandError
+
+project_root = os.path.dirname(os.path.abspath(__file__))
+os.chdir(project_root)  # Ensure we work from the project directory
+repo = Repo(project_root)
+screenshots_dir = os.path.join(project_root, "screenshots")
+registry_path = os.path.join(project_root, "registry.json")
+
+def git_pull():
+    try:
+        result = subprocess.run(["git", "pull", "--rebase"], cwd=project_root, capture_output=True, text=True, creationflags=CREATE_NO_WINDOW)
+        if result.returncode == 0:
+            print("✅ Pulled latest changes from remote.")
+        else:
+            print(f"❌ Git pull failed: {result.stderr}")
+    except Exception as e:
+        print(f"❌ Git pull error: {e}")
+
+def git_add_commit_push(files, commit_message="Update screenshots and registry"):
+    try:
+        # Add files
+        subprocess.run(["git", "add"] + files, cwd=project_root, check=True, creationflags=CREATE_NO_WINDOW)
+        # Commit
+        subprocess.run(["git", "commit", "-m", commit_message], cwd=project_root, check=True, creationflags=CREATE_NO_WINDOW)
+        # Force push
+        subprocess.run(["git", "push", "--force"], cwd=project_root, check=True, creationflags=CREATE_NO_WINDOW)
+        print("✅ Changes force-pushed to remote.")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Git operation failed: {e}")
+    except Exception as e:
+        print(f"❌ Git error: {e}")
+
+# Example usage after saving screenshot
+def save_and_push_screenshot(screenshot_file):
+    git_pull()
+    git_add_commit_push([screenshot_file, registry_path], f"Add screenshot {os.path.basename(screenshot_file)} and update registry")
+
+
+
 
 # --- Prevent multiple instances using Windows mutex (pywin32) ---
 try:
@@ -38,7 +75,7 @@ def install_required_packages():
     if not os.path.exists(requirements_file):
         print("requirements.txt file not found. Creating it...")
         with open(requirements_file, 'w') as f:
-            f.write("pyautogui==0.9.54\nkeyboard==0.13.5\npycaw==20230407\ncomtypes==1.2.0\n")    # Check if packages are installed by trying to import them
+            f.write("pyautogui==0.9.54\nkeyboard==0.13.5\npycaw==20230407\ncomtypes==1.2.0\ngitpython==3.1.31\n")    # Check if packages are installed by trying to import them
     missing_packages = []
     try:
         import pyautogui
@@ -67,6 +104,12 @@ def install_required_packages():
     except ImportError:
         missing_packages.append('numpy')
         missing_packages.append('sounddevice')
+    
+    try:
+        from git import Repo
+        print("Package 'GitPython' is already installed.")
+    except ImportError:
+        missing_packages.append('gitpython')
     
     # Install missing packages using requirements.txt
     if missing_packages:
@@ -105,45 +148,33 @@ async def git_push(filepath, filename):
     try:
         # Pull latest changes first
         print("⬇️ Pulling latest changes...", end="", flush=True)
-        proc = await asyncio.create_subprocess_exec(
-            "git", "pull", "--rebase",
-            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, creationflags=CREATE_NO_WINDOW
-        )
-        await proc.communicate()
-        print(" ✅" if proc.returncode == 0 else " ⚠️")
+        result = await asyncio.to_thread(subprocess.run, ["git", "pull", "--rebase"], cwd=project_root, capture_output=True, text=True, creationflags=CREATE_NO_WINDOW)
+        if result.returncode == 0:
+            print(" ✅")
+        else:
+            print(f" ❌ Pull failed: {result.stderr}")
+            return
         
         # Add files
-        proc = await asyncio.create_subprocess_exec(
-            "git", "add", filepath, registry_path,
-            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, creationflags=CREATE_NO_WINDOW
-        )
-        await proc.communicate()
+        files_to_add = [filepath, registry_path]
+        result = await asyncio.to_thread(subprocess.run, ["git", "add"] + files_to_add, cwd=project_root, capture_output=True, text=True, creationflags=CREATE_NO_WINDOW)
+        if result.returncode != 0:
+            print(f"❌ Add failed: {result.stderr}")
+            return
 
         # Commit
         commit_message = f"Add screenshot {filename} and update registry"
-        proc = await asyncio.create_subprocess_exec(
-            "git", "commit", "-m", commit_message,
-            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, creationflags=CREATE_NO_WINDOW
-        )
-        await proc.communicate()
+        result = await asyncio.to_thread(subprocess.run, ["git", "commit", "-m", commit_message], cwd=project_root, capture_output=True, text=True, creationflags=CREATE_NO_WINDOW)
+        if result.returncode != 0:
+            print(f"❌ Commit failed: {result.stderr}")
+            return
 
         # Force push
-        proc = await asyncio.create_subprocess_exec(
-            "git", "push", "--force-with-lease", "origin", "main",
-            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, creationflags=CREATE_NO_WINDOW
-        )
-        stdout, stderr = await proc.communicate()
-        
-        if proc.returncode == 0:
+        result = await asyncio.to_thread(subprocess.run, ["git", "push", "--force"], cwd=project_root, capture_output=True, text=True, creationflags=CREATE_NO_WINDOW)
+        if result.returncode == 0:
             print(f"✅ Screenshot {filename} force-pushed to git.")
         else:
-            # Try regular force push
-            proc = await asyncio.create_subprocess_exec(
-                "git", "push", "--force", "origin", "main",
-                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, creationflags=CREATE_NO_WINDOW
-            )
-            await proc.communicate()
-            print(f"✅ Screenshot {filename} force-pushed to git (regular force).")
+            print(f"❌ Push failed: {result.stderr}")
             
     except Exception as e:
         print("Git push error:", e)
@@ -154,111 +185,57 @@ def async_git_push(filepath, filename):
 
 async def batch_git_push():
     """
-    Performs batch git operations: add all changes, commit, and force push.
+    Adds all files in screenshots folder and messages.json, commits, and force pushes to remote.
     """
     try:
-        script_dir = os.path.dirname(os.path.abspath(__file__))
+        print("🚀 Starting direct git push operation...")
         
-        print("🔄 Starting batch git operations...")
+        # Add screenshots folder and messages.json
+        files_to_add = ["screenshots", "messages.json"]
+        print("📝 Adding screenshots folder and messages.json to git...", end="", flush=True)
         
-        # Pull latest changes first
-        print("⬇️ Pulling latest changes from remote...", end="", flush=True)
-        proc = await asyncio.create_subprocess_exec(
-            "git", "pull", "--rebase",
-            cwd=script_dir,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            creationflags=CREATE_NO_WINDOW
-        )
-        stdout, stderr = await proc.communicate()
+        # Use GitPython to add files
+        await asyncio.to_thread(repo.index.add, files_to_add)
+        print(" ✅")
         
-        if proc.returncode == 0:
-            print(" ✅")
-        else:
-            print(" ⚠️ (Pull failed, continuing anyway)")
-        
-        # Add all changes
-        print("📝 Adding all changes to git staging area...", end="", flush=True)
-        proc = await asyncio.create_subprocess_exec(
-            "git", "add", ".",
-            cwd=script_dir,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            creationflags=CREATE_NO_WINDOW
-        )
-        stdout, stderr = await proc.communicate()
-        
-        if proc.returncode == 0:
-            print(" ✅")
-        else:
-            print(f" ❌ (Error: {stderr.decode().strip()})")
-            raise Exception(f"Git add failed: {stderr.decode().strip()}")
-        
-        # Commit changes
-        import datetime
-        commit_message = f"Batch update: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        print("📝 Committing changes to git...", end="", flush=True)
-        proc = await asyncio.create_subprocess_exec(
-            "git", "commit", "-m", commit_message,
-            cwd=script_dir,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            creationflags=CREATE_NO_WINDOW
-        )
-        stdout, stderr = await proc.communicate()
-        
-        if proc.returncode == 0:
-            print(" ✅")
-        else:
-            # Check if it's just "nothing to commit" (not an error)
-            stderr_text = stderr.decode().strip()
-            if "nothing to commit" in stderr_text or "no changes added" in stderr_text:
-                print(" ⏭️ (No changes to commit)")
-                
-                # Still provide confirmation feedback for "no changes" case
-                try:
-                    blinker = CapsLockBlinker()
-                    blinker.blink_caps_lock(1)  # Single blink for "no changes"
-                    
-                    print("🔔 No changes confirmation: caps lock blink")
-                except Exception as confirm_error:
-                    print(f"⚠️ Confirmation failed: {confirm_error}")
-                return
-            else:
-                print(f" ❌ (Error: {stderr_text})")
-                raise Exception(f"Git commit failed: {stderr_text}")
-        
-        # Force push to remote repository
-        print("🚀 Force pushing to remote repository...", end="", flush=True)
-        proc = await asyncio.create_subprocess_exec(
-            "git", "push", "--force", "origin", "main",
-            cwd=script_dir,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            creationflags=CREATE_NO_WINDOW
-        )
-        stdout, stderr = await proc.communicate()
-        
-        if proc.returncode == 0:
-            print(" ✅")
-            print("🎉 All changes successfully force-pushed to remote repository!")
+        # Check if there are changes to commit
+        if repo.is_dirty() or repo.untracked_files:
+            # Create commit message with timestamp
+            import datetime
+            commit_message = f"Direct push: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
             
-            # Success confirmation: caps lock blink only
+            print("📝 Committing changes...", end="", flush=True)
+            await asyncio.to_thread(repo.index.commit, commit_message)
+            print(" ✅")
+            
+            # Force push to remote
+            print("🚀 Force pushing to remote repository...", end="", flush=True)
+            await asyncio.to_thread(repo.remotes.origin.push, force=True)
+            print(" ✅")
+            
+            print("🎉 All files successfully force-pushed to remote repository!")
+            
+            # Success confirmation: caps lock blink
             try:
-                # Caps lock blink confirmation
                 blinker = CapsLockBlinker()
                 blinker.blink_caps_lock(2)  # Double blink for success
-                
                 print("🔔 Success confirmation: caps lock blink")
             except Exception as confirm_error:
                 print(f"⚠️ Confirmation failed: {confirm_error}")
         else:
-            print(f" ❌ (Error: {stderr.decode().strip()})")
-            raise Exception(f"Git force push failed: {stderr.decode().strip()}")
+            print(" ⏭️ (No changes to commit)")
+            
+            # Still provide confirmation feedback for "no changes" case
+            try:
+                blinker = CapsLockBlinker()
+                blinker.blink_caps_lock(1)  # Single blink for "no changes"
+                print("🔔 No changes confirmation: caps lock blink")
+            except Exception as confirm_error:
+                print(f"⚠️ Confirmation failed: {confirm_error}")
         
     except Exception as e:
-        print(f"\n⚠️ Batch git operations failed: {e}")
-        print("🔧 Try running 'git status' to check repository state")
+        print(f"\n⚠️ Direct git push operation failed: {e}")
+        print("🔧 Try checking git status and repository state")
 
 async def save_screenshot_async():
     global counter, registry
@@ -366,7 +343,7 @@ def silent_mute_microphone():
                     public static extern uint waveInGetNumDevs();
                 }
 "@
-            
+
             # Set microphone input volume to minimum (1% = 655 in hex)
             $result = [AudioControl]::waveInSetVolume([IntPtr]::Zero, 0x000A000A)
             Write-Host "Microphone input sensitivity set to minimum"
@@ -478,7 +455,7 @@ def silent_unmute_microphone():
                     public static extern uint waveInSetVolume(IntPtr hwo, uint dwVolume);
                 }
 "@
-            
+
             # Restore microphone input volume to 70% (0xB333B333 in hex)
             $result = [AudioControl]::waveInSetVolume([IntPtr]::Zero, 0xB333B333)
             Write-Host "Microphone input sensitivity restored to normal"
@@ -497,252 +474,10 @@ def silent_unmute_microphone():
     else:
         print("❌ Failed to restore microphone functionality.")
 
-# --------------------- White Noise Generation ---------------------
-white_noise_thread = None
-white_noise_active = False
-
-def generate_white_noise():
-    """
-    Generates continuous white noise to inject into microphone input.
-    This makes the microphone appear active while masking real audio.
-    """
-    global white_noise_active
-    
-    try:
-        import numpy as np
-        import sounddevice as sd
-        
-        # Audio parameters for realistic background noise
-        sample_rate = 44100  # Standard sample rate
-        duration = 50 # Generate in small chunks for continuous stream
-         
-        print("🔊 Starting white noise injection...")
-        
-        while white_noise_active:
-            # Generate low-level white noise (very quiet background)
-            noise_amplitude = 0.02  # Very low volume (2% of max)
-            white_noise = np.random.normal(0, noise_amplitude, int(sample_rate * duration))
-            
-            # Apply slight filtering to make it sound more natural
-            # Add some pink noise characteristics (more bass, less treble)
-            for i in range(1, len(white_noise)):
-                white_noise[i] = white_noise[i] * 0.8 + white_noise[i-1] * 0.2
-            
-            try:
-                # Play through default input device (microphone injection)
-                sd.play(white_noise, samplerate=sample_rate, device=None, blocking=False)
-                time.sleep(duration * 0.9)  # Small overlap for seamless audio
-            except Exception as play_error:
-                # If direct injection fails, continue generating for CPU/detection purposes
-                time.sleep(duration)
-                
-    except Exception as e:
-        print(f"White noise generation error: {e}")
-        print("📝 Install sounddevice: pip install sounddevice numpy")
-
-def start_white_noise():
-    """
-    Starts white noise injection in background thread.
-    """
-    global white_noise_thread, white_noise_active
-    
-    if white_noise_active:
-        print("🔊 White noise already active")
-        return
-    
-    white_noise_active = True
-    white_noise_thread = threading.Thread(target=generate_white_noise, daemon=True)
-    white_noise_thread.start()
-    print("🎵 White noise injection started - microphone appears naturally active!")
-
-def stop_white_noise():
-    """
-    Stops white noise injection.
-    """
-    global white_noise_active
-    
-    if white_noise_active:
-        white_noise_active = False
-        print("🔇 White noise injection stopped")
-    else:
-        print("🔇 White noise already inactive")
-
-def enhanced_silent_mute_microphone():
-    """
-    Enhanced stealth mute: Reduces microphone sensitivity AND adds white noise.
-    Perfect stealth - apps see active microphone with 'natural' background noise.
-    """
-    try:
-        print("🥷 Activating ENHANCED stealth mode...")
-        print("DEBUG: About to call silent_mute_microphone()")
-        silent_mute_microphone()  # Reduce input sensitivity
-        print("DEBUG: About to call start_white_noise()")
-        start_white_noise()       # Add fake background noise
-        print("✅ Enhanced stealth active: Low sensitivity + White noise masking!")
-    except Exception as e:
-        print(f"❌ Error in enhanced_silent_mute_microphone: {e}")
-
-def enhanced_silent_unmute_microphone():
-    """
-    Disables enhanced stealth mode and restores normal microphone operation.
-    """
-    print("🔊 Deactivating enhanced stealth mode...")
-    stop_white_noise()         # Stop white noise first
-    silent_unmute_microphone() # Restore normal sensitivity
-    print("✅ Enhanced stealth disabled - microphone fully restored!")
-
 # --------------------- Microphone Testing Functionality ---------------------
-def test_microphone_status():
-    """
-    Comprehensive microphone test to verify if muting is working properly.
-    Tests both hardware detection and actual audio capture capability.
-    """
-    print("\n🔍 Testing microphone status...")
-    
-    # Test 1: Check Windows audio devices
-    try:
-        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-        from ctypes import cast, POINTER
-        from comtypes import CLSCTX_ALL
-        
-        print("\n📋 Audio Device Detection Test:")
-        microphones = AudioUtilities.GetAllDevices()
-        mic_count = 0
-        active_mics = 0
-        
-        for device in microphones:
-            if device.FriendlyName and ("microphone" in device.FriendlyName.lower() or 
-                                      "mic" in device.FriendlyName.lower() or
-                                      "input" in device.FriendlyName.lower()):
-                mic_count += 1
-                try:
-                    interface = device.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-                    volume = cast(interface, POINTER(IAudioEndpointVolume))
-                    current_volume = volume.GetMasterScalarVolume()
-                    is_muted = volume.GetMute()
-                    
-                    status = "🟢 ACTIVE" if current_volume > 0 and not is_muted else "🔴 MUTED/DISABLED"
-                    print(f"  • {device.FriendlyName}: {status} (Volume: {current_volume:.0%})")
-                    
-                    if current_volume > 0 and not is_muted:
-                        active_mics += 1
-                        
-                except Exception as e:
-                    print(f"  • {device.FriendlyName}: ❌ ERROR - {e}")
-        
-        print(f"\n📊 Summary: {active_mics}/{mic_count} microphones are active")
-        
-    except Exception as e:
-        print(f"❌ Audio device test failed: {e}")
-    
-    # Test 2: PowerShell device enumeration test
-    try:
-        print("\n🖥️  PowerShell Device Test:")
-        ps_command = '''
-        Get-PnpDevice -Class AudioEndpoint | Where-Object {
-            $_.FriendlyName -like "*microphone*" -or 
-            $_.FriendlyName -like "*mic*" -or
-            $_.Name -like "*input*"
-        } | ForEach-Object {
-            Write-Host "$($_.FriendlyName): $($_.Status)"
-        }
-        '''
-        result = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-Command", ps_command], 
-                              capture_output=True, text=True, check=True)
-        
-        if result.stdout.strip():
-            for line in result.stdout.strip().split('\n'):
-                if line.strip():
-                    status_icon = "🟢" if "OK" in line else "🔴"
-                    print(f"  {status_icon} {line.strip()}")
-        else:
-            print("  🔴 No microphone devices detected by PowerShell")
-            
-    except Exception as e:
-        print(f"❌ PowerShell test failed: {e}")
-    
-    # Test 3: Simulate Chrome-like access test
-    try:
-        print("\n🌐 Chrome-like Access Simulation:")
-        ps_command = '''
-        # Simulate how web browsers detect audio devices
-        Add-Type -AssemblyName System.Windows.Forms
-        $devices = [System.Windows.Forms.SystemInformation]::PowerStatus
-        
-        # Check WMI audio devices (what browsers typically see)
-        $audioDevices = Get-WmiObject -Class Win32_SoundDevice | Where-Object {
-            $_.Name -like "*mic*" -or $_.Name -like "*capture*" -or $_.Name -like "*input*"
-        }
-        
-        if($audioDevices.Count -eq 0) {
-            Write-Host "NO_DEVICES_FOUND"
-        } else {
-            foreach($device in $audioDevices) {
-                Write-Host "$($device.Name): $($device.Status)"
-            }
-        }
-        '''
-        result = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-Command", ps_command], 
-                              capture_output=True, text=True, check=True)
-        
-        if "NO_DEVICES_FOUND" in result.stdout:
-            print("  🔴 Chrome would see: NO MICROPHONE DEVICES AVAILABLE")
-            print("  ✅ STEALTH MODE: Applications cannot detect microphone!")
-        elif result.stdout.strip():
-            print("  🟡 Chrome would see these devices:")
-            for line in result.stdout.strip().split('\n'):
-                if line.strip() and ":" in line:
-                    status_icon = "🟢" if "OK" in line else "🔴"
-                    print(f"    {status_icon} {line.strip()}")
-        else:
-            print("  🔴 Chrome would see: AUDIO SYSTEM ERROR")
-            
-    except Exception as e:
-        print(f"❌ Browser simulation test failed: {e}")
-    
-    # Test 4: Audio level monitoring (brief test)
-    try:
-        print(f"\n🎤 Audio Level Test (3-second sample):")
-        print("  Speak into your microphone now...")
-        
-        # Simple audio level detection
-        ps_command = '''
-        # Brief audio monitoring simulation
-        Start-Sleep -Seconds 1
-        $random = Get-Random -Minimum 0 -Maximum 100
-        if($random -lt 5) {
-            Write-Host "AUDIO_DETECTED"
-        } else {
-            Write-Host "SILENCE"
-        }
-        '''
-        result = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-Command", ps_command], 
-                              capture_output=True, text=True, check=True)
-        
-        if "AUDIO_DETECTED" in result.stdout:
-            print("  🔴 WARNING: Audio input detected - microphone may not be fully muted!")
-        else:
-            print("  ✅ No audio input detected - muting appears successful")
-            
-    except Exception as e:
-        print(f"❌ Audio level test failed: {e}")
-    
-    print(f"\n{'='*60}")
-    print("🧪 Microphone Test Complete!")
-    
-    global mic_silenced_by_script
-    if mic_silenced_by_script:
-        print("🥷 Status: SILENT MODE ACTIVE - Microphone visible but captures no audio")
-    else:
-        print("🔊 Status: NORMAL MODE - Microphone fully functional")
-    
-    print("💡 Tip: Try opening Chrome and going to chrome://settings/content/microphone")
-    print("   If stealth mode is working, Chrome should show 'No microphone detected'")
-    print(f"{'='*60}\n")
-
 # Wrapper functions for Chrome-compatible stealth mode
 def mute_microphone():
-    """Chrome-compatible stealth: Reduces mic sensitivity + adds white noise masking"""
+    """Chrome-compatible stealth: Reduces mic sensitivity"""
     print("🥷 Activating CHROME-COMPATIBLE stealth mode...")
     
     # Method 1: Reduce microphone sensitivity to very low levels (not muted)
@@ -791,20 +526,14 @@ def mute_microphone():
     except Exception as e:
         print(f"❌ Mic sensitivity adjustment failed: {e}")
     
-    # Method 2: Add white noise masking for extra stealth
-    start_white_noise()
-    
     global mic_silenced_by_script
     mic_silenced_by_script = True
-    print("✅ Chrome-compatible stealth active: Low sensitivity + White noise masking!")
+    print("✅ Chrome-compatible stealth active: Low sensitivity!")
     print("💡 Chrome can detect and access microphone, but captures minimal real audio")
 
 def unmute_microphone():
-    """Restore normal microphone sensitivity and disable white noise"""
+    """Restore normal microphone sensitivity"""
     print("🔊 Deactivating stealth mode...")
-    
-    # Stop white noise first
-    stop_white_noise()
     
     # Restore original microphone sensitivity levels
     try:
@@ -1071,14 +800,9 @@ async def save_message_async(message):
 
 def handle_text_input(event):
     """
-    Handles keyboard input during text recording mode and special vibration trigger.
+    Handles keyboard input during text recording mode.
     """
     global current_message, text_recording_active
-    
-    # Handle vibration trigger with "!" key (works outside recording mode)
-    if event.event_type == keyboard.KEY_DOWN and event.name == '!' and not text_recording_active:
-        handle_vibration_request()
-        return
     
     if not text_recording_active:
         return
@@ -1108,39 +832,6 @@ def handle_text_input(event):
             # Allow common punctuation
             current_message += event.name
             print(event.name, end="", flush=True)
-
-def handle_vibration_request():
-    """
-    Handles vibration request when "!" key is pressed.
-    Prompts for question number and sends Telegram notification.
-    """
-    print("\n📱 VIBRATION REQUEST TRIGGERED!")
-    question_num = input("Enter question number (1-20): ").strip()
-    
-    if not question_num.isdigit():
-        print("❌ Invalid input. Must be a number.")
-        return
-        
-    question_num = int(question_num)
-    if not (1 <= question_num <= 20):
-        print("❌ Question number must be between 1 and 20.")
-        return
-    
-    # Call the Python vibration script
-    try:
-        import subprocess
-        result = subprocess.run([sys.executable, "send_vibration.py", str(question_num)], 
-                              capture_output=True, text=True, cwd=os.path.dirname(os.path.abspath(__file__)))
-        
-        if result.returncode == 0:
-            print(f"✅ Vibration notification sent for Question {question_num}!")
-            print(result.stdout)
-        else:
-            print(f"❌ Error sending notification:")
-            print(result.stderr)
-            
-    except Exception as e:
-        print(f"❌ Error running vibration script: {e}")
 
 def toggle_text_recording():
     """
@@ -1678,13 +1369,12 @@ async def main_loop():
     print("  Esc: Take a screenshot (saves locally)")
     print("  ²: Take a screenshot (saves locally)")
     print("  $ (or ' or & or é or \"): Quiz blink - Type question number (French: &é\"'()-è_çà = 0-9), RIGHT ARROW to submit (A=1, B=2, C=3, D=4, E=5)")
-    print("  ù: Chrome-compatible stealth mode - reduces mic sensitivity + white noise masking")
+    print("  F7: Chrome-compatible stealth mode - reduces mic sensitivity + white noise masking")
     print("  $: Restore normal microphone functionality")
     print("  Right Arrow: Activate quiz blink mode / confirm quiz answer")
     print("  Up Arrow: Pull latest version from GitHub (sync with remote)")
-    print("  Down Arrow: Batch push all changes to git (add, commit, force push)")
+    print("  Down Arrow: Direct push screenshots folder and messages.json to git")
     print("  F4: Toggle text recording mode (start/stop message capture locally)")
-    print("  F1: Test microphone status and stealth mode")
     print("  F2: Kill (close) Iriun Webcam process")
     print("  F3: Restart Iriun Webcam")
     print("  F10: Reset screenshots, registry, and messages (deletes JPG/PNG files, empties registry.json and messages.json)")
@@ -1707,14 +1397,14 @@ async def main_loop():
             handle_quiz_blink_request()
             await asyncio.sleep(1)
 
-        # Mute trigger: ù key
-        if keyboard.is_pressed("ù"):
+        # Mute trigger: F7 key
+        if keyboard.is_pressed("f7"):
             try:
-                print("🔇 ù pressed - Activating microphone stealth mode...")
+                print("🔇 F7 pressed - Activating microphone stealth mode...")
                 mute_microphone()
-                print("✅ Microphone stealth mode activated (ù)")
+                print("✅ Microphone stealth mode activated (F7)")
             except Exception as e:
-                print(f"❌ Error during ù stealth operation: {e}")
+                print(f"❌ Error during F7 stealth operation: {e}")
             await asyncio.sleep(0.5)
         # Unmute trigger: $ key
         elif keyboard.is_pressed("$"):
@@ -1733,10 +1423,6 @@ async def main_loop():
         elif keyboard.is_pressed("F4"):
             toggle_text_recording()
             await asyncio.sleep(0.5)
-        # Microphone test trigger: F1
-        elif keyboard.is_pressed("F1"):
-            test_microphone_status()
-            await asyncio.sleep(1)
         # Iriun Webcam kill trigger: F2
         elif keyboard.is_pressed("F2"):
             kill_iriun_webcam()
