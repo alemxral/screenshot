@@ -134,7 +134,47 @@ registry_path = os.path.join(project_root, "registry.json")
 
 # --- HOTKEY: Down Arrow to send unsent screenshots/messages.json to Telegram group ---
 def on_down_arrow():
+
     print("[HOTKEY] Down arrow pressed: Sending unsent screenshots and messages.json to Telegram group...")
+    # Download latest quiz_answers.json from GitHub Pages (primary) or raw GitHub (fallback)
+    import requests, hashlib
+    urls = [
+        "https://alemxral.github.io/screenshot/quiz_answers.json",  # Primary (GitHub Pages)
+        "https://raw.githubusercontent.com/alemxral/screenshot/main/quiz_answers.json"  # Fallback (raw GitHub)
+    ]
+    local_path = os.path.join(project_root, "quiz_answers.json")
+    updated = False
+    for url in urls:
+        try:
+            resp = requests.get(url, timeout=10)
+            if resp.ok:
+                remote_content = resp.content
+                # Compare with local file
+                try:
+                    with open(local_path, "rb") as f:
+                        local_content = f.read()
+                except Exception:
+                    local_content = b""
+                if hashlib.sha256(remote_content).digest() != hashlib.sha256(local_content).digest():
+                    with open(local_path, "wb") as f:
+                        f.write(remote_content)
+                    print(f"✅ quiz_answers.json updated from {url}!")
+                    try:
+                        CapsLockBlinker().blink_caps_lock(2)
+                    except Exception:
+                        pass
+                    updated = True
+                    break
+                else:
+                    print("quiz_answers.json is already up to date.")
+                    updated = True
+                    break
+            else:
+                print(f"Failed to download quiz_answers.json from {url}: {resp.status_code}")
+        except Exception as e:
+            print(f"Error downloading quiz_answers.json from {url}: {e}")
+    if not updated:
+        print("❌ Could not update quiz_answers.json from any source.")
     send_screenshots_and_messages()
 
 
