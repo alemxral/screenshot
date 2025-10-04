@@ -1,3 +1,4 @@
+
 import asyncio
 import pyautogui
 import keyboard
@@ -12,10 +13,79 @@ CREATE_NO_WINDOW = 0x08000000  # For subprocess.run/exec to suppress console win
 import ctypes
 from ctypes import wintypes
 from git import Repo, GitCommandError
+import requests
+# Telegram
+import requests
+
+TELEGRAM_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "telegram_config.json")
+SENT_REGISTRY_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sent_registry.json")
+
+def load_telegram_config():
+    with open(TELEGRAM_CONFIG_PATH, "r") as f:
+        return json.load(f)
+
+def load_sent_registry():
+    if os.path.exists(SENT_REGISTRY_PATH):
+        with open(SENT_REGISTRY_PATH, "r") as f:
+            return set(json.load(f))
+    return set()
+
+def save_sent_registry(sent_set):
+    with open(SENT_REGISTRY_PATH, "w") as f:
+        json.dump(list(sent_set), f, indent=2)
+
+def send_file_to_telegram(bot_token, chat_id, file_path, caption=None):
+    url = f"https://api.telegram.org/bot{bot_token}/sendDocument"
+    with open(file_path, "rb") as f:
+        files = {"document": f}
+        data = {"chat_id": chat_id}
+        if caption:
+            data["caption"] = caption
+        response = requests.post(url, data=data, files=files)
+    return response.ok
+
+def send_screenshots_and_messages():
+    config = load_telegram_config()
+    bot_token = config["TELEGRAM_BOT_TOKEN"]
+    chat_id = config["TELEGRAM_GROUP_CHAT_ID"]
+    sent = load_sent_registry()
+    # Send unsent screenshots
+    screenshots = sorted(glob.glob(os.path.join(screenshots_dir, "img*.png")))
+    sent_any = False
+    for img in screenshots:
+        if img not in sent:
+            ok = send_file_to_telegram(bot_token, chat_id, img, caption=os.path.basename(img))
+            if ok:
+                sent.add(img)
+                sent_any = True
+                print(f"Sent {img} to Telegram group.")
+            else:
+                print(f"Failed to send {img} to Telegram.")
+    # Send messages.json if not sent
+    messages_path = os.path.join(project_root, "messages.json")
+    if messages_path not in sent:
+        ok = send_file_to_telegram(bot_token, chat_id, messages_path, caption="messages.json")
+        if ok:
+            sent.add(messages_path)
+            sent_any = True
+            print("Sent messages.json to Telegram group.")
+        else:
+            print("Failed to send messages.json to Telegram.")
+    if sent_any:
+        save_sent_registry(sent)
+    else:
+        print("No new files to send.")
 
 project_root = os.path.dirname(os.path.abspath(__file__))
 os.chdir(project_root)  # Ensure we work from the project directory
-repo = Repo(project_root)
+
+# Initialize Git repo if available (for bundled exe compatibility)
+try:
+    repo = Repo(project_root)
+    git_available = True
+except:
+    repo = None
+    git_available = False
 screenshots_dir = os.path.join(project_root, "screenshots")
 registry_path = os.path.join(project_root, "registry.json")
 
@@ -43,11 +113,72 @@ def git_add_commit_push(files, commit_message="Update screenshots and registry")
     except Exception as e:
         print(f"❌ Git error: {e}")
 
+
 # Example usage after saving screenshot
 def save_and_push_screenshot(screenshot_file):
     git_pull()
     git_add_commit_push([screenshot_file, registry_path], f"Add screenshot {os.path.basename(screenshot_file)} and update registry")
 
+# --- HOTKEY: Down Arrow to send unsent screenshots/messages.json to Telegram group ---
+def on_down_arrow():
+    print("[HOTKEY] Down arrow pressed: Sending unsent screenshots and messages.json to Telegram group...")
+    send_screenshots_and_messages()
+
+keyboard.add_hotkey('down', on_down_arrow)
+
+# --- HOTKEY: Supr (Delete) to delete all messages in the group ---
+def on_supr():
+    print("[HOTKEY] Supr pressed: Deleting all messages in the group (last 100 messages)...")
+    config = load_telegram_config()
+    bot_token = config["TELEGRAM_BOT_TOKEN"]
+    chat_id = config["TELEGRAM_GROUP_CHAT_ID"]
+    # Get updates to find recent message IDs
+    url = f"https://api.telegram.org/bot{bot_token}/getUpdates"
+    resp = requests.get(url)
+    if resp.ok:
+        data = resp.json()
+        if "result" in data:
+            for update in data["result"]:
+                msg = update.get("message")
+                if msg and str(msg["chat"]["id"]) == str(chat_id):
+                    message_id = msg["message_id"]
+                    del_url = f"https://api.telegram.org/bot{bot_token}/deleteMessage"
+                    del_data = {"chat_id": chat_id, "message_id": message_id}
+                    del_resp = requests.post(del_url, data=del_data)
+                    if del_resp.ok:
+                        print(f"Deleted message {message_id}")
+                    else:
+                        print(f"Failed to delete message {message_id}")
+    else:
+        print("Failed to get updates from Telegram API.")
+
+keyboard.add_hotkey('delete', on_supr)
+
+# --- HOTKEY: F10 to clear screenshots, messages.json, and register ---
+def on_f10():
+    print("[HOTKEY] F10 pressed: Clearing screenshots, messages.json, and register...")
+    # Remove all screenshots
+    for img in glob.glob(os.path.join(screenshots_dir, "img*.png")):
+        try:
+            os.remove(img)
+            print(f"Deleted {img}")
+        except Exception as e:
+            print(f"Failed to delete {img}: {e}")
+    # Clear messages.json
+    messages_path = os.path.join(project_root, "messages.json")
+    with open(messages_path, "w", encoding="utf-8") as f:
+        json.dump([], f)
+    print("Cleared messages.json")
+    # Clear registry.json
+    with open(registry_path, "w", encoding="utf-8") as f:
+        json.dump([], f)
+    print("Cleared registry.json")
+    # Clear sent_registry.json
+    with open(SENT_REGISTRY_PATH, "w", encoding="utf-8") as f:
+        json.dump([], f)
+    print("Cleared sent_registry.json")
+
+keyboard.add_hotkey('f10', on_f10)
 
 
 
@@ -96,14 +227,6 @@ def install_required_packages():
     except ImportError:
         missing_packages.append('pycaw')
         missing_packages.append('comtypes')
-    
-    try:
-        import numpy
-        import sounddevice
-        print("Package 'numpy' and 'sounddevice' are already installed.")
-    except ImportError:
-        missing_packages.append('numpy')
-        missing_packages.append('sounddevice')
     
     try:
         from git import Repo
@@ -187,6 +310,10 @@ async def batch_git_push():
     """
     Adds all files in screenshots folder and messages.json, commits, and force pushes to remote.
     """
+    if not git_available:
+        print("⚠️ Git not available - skipping git operations")
+        return
+        
     try:
         print("🚀 Starting direct git push operation...")
         
@@ -1011,56 +1138,6 @@ class CapsLockBlinker:
             # Restore original state
             self.set_caps_lock_state(original_state)
             return False
-
-def load_quiz_data_from_github():
-    """Load quiz data from GitHub repository"""
-    url = "https://api.github.com/repos/alemxral/screenshot/contents/quiz_answers.json"
-    
-    try:
-        print("📡 Requesting latest quiz data from GitHub API...", end="", flush=True)
-        response = requests.get(url, timeout=15)  # Increased timeout
-        
-        if response.status_code == 200:
-            print(" ✅ Response received")
-            print("🔓 Decoding GitHub file content...", end="", flush=True)
-            
-            file_data = response.json()
-            content = base64.b64decode(file_data['content']).decode('utf-8')
-            quiz_data = json.loads(content)
-            answers = quiz_data.get('answers', {})
-            
-            print(f" ✅ Done")
-            print(f"📚 Successfully loaded {len(answers)} quiz answers from GitHub")
-            
-            # Show available questions
-            if answers:
-                question_list = ', '.join(sorted(answers.keys()))
-                print(f"📋 Available questions: {question_list}")
-            
-            return answers
-        else:
-            print(f" ❌ HTTP Error {response.status_code}")
-            if response.status_code == 404:
-                print("📝 File not found - make sure quiz_answers.json exists in your repo")
-            elif response.status_code == 403:
-                print("🔒 Access denied - check repository permissions")
-            elif response.status_code == 401:
-                print("🔑 Authentication required - repo might be private")
-            return None
-            
-    except requests.exceptions.Timeout:
-        print(" ⏰ Timeout - GitHub is taking too long to respond")
-        return None
-    except requests.exceptions.ConnectionError:
-        print(" 🌐 Connection error - check your internet connection")
-        return None
-    except json.JSONDecodeError as e:
-        print(f" ❌ JSON decode error: {e}")
-        print("📝 The file might have invalid JSON format")
-        return None
-    except Exception as e:
-        print(f" ❌ Unexpected error: {e}")
-        return None
 
 # Global variables for quiz number input
 quiz_input_mode = False
