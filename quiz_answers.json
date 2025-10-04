@@ -1,9 +1,16 @@
 {
   "quiz_session": {
-    "created_at": "2025-10-04T14:16:23.282Z",
-    "last_updated": "2025-10-04T14:16:23.282Z",
+    "created_at": "2025-10-04T14:16:27.740Z",
+    "last_updated": "2025-10-04T14:16:27.740Z",
     "total_questions": 20,
-    "answered_questions": 0
+    "answered_questions": 1
   },
-  "answers": {}
+  "answers": {
+    "3": {
+      "answer": "B",
+      "answered_at": "2025-10-04T14:16:27.740Z",
+      "date": "2025-10-04",
+      "time": "16:16:27"
+    }
+  }
 }
