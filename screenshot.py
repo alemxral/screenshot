@@ -1316,6 +1316,12 @@ async def main_loop():
             last_esc_time = now
             if esc_count == 2:
                 print("[EXIT] Double F12 detected. Exiting program.")
+                # Blink Caps Lock LED 3 times to confirm exit
+                try:
+                    blinker = CapsLockBlinker()
+                    blinker.blink_caps_lock(3, duration=0.2)
+                except Exception as e:
+                    print(f"[EXIT] Blink failed: {e}")
                 sys.exit(0)
             await asyncio.sleep(0.3)
         # Mute trigger: F7 key
