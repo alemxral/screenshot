@@ -1212,12 +1212,14 @@ async def main_loop():
     print("  F7: Chrome-compatible stealth mode - reduces mic sensitivity + white noise masking")
     print("  $: Restore normal microphone functionality")
     print("  Right Arrow: Activate quiz blink mode / confirm quiz answer")
-    print("  Down Arrow: Send unsent screenshots and messages to Telegram group")
+    print("  Down Arrow: Download latest quiz answers, send unsent screenshots and messages to Telegram group")
+    print("  Up Arrow: Send unsent screenshots and messages to Telegram group")
     print("  Supr (Delete): Delete bot's sent messages from Telegram group")
     print("  F4: Toggle text recording mode (start/stop message capture locally)")
     print("  F2: Kill (close) Iriun Webcam process")
     print("  F3: Restart Iriun Webcam")
     print("  F10: Reset screenshots, registry, and messages (deletes JPG/PNG files, empties registry.json and messages.json)")
+    print("  Double F12: Exit the program immediately")
     
 
     down_pressed = False
@@ -1254,8 +1256,8 @@ async def main_loop():
         else:
             up_pressed = False
 
-        # Double press Esc or Echap (French) to exit
-        if keyboard.is_pressed("esc") or keyboard.is_pressed("echap"):
+        # Double press F12 to exit
+        if keyboard.is_pressed("f12"):
             now = _time.time()
             if now - last_esc_time < 0.5:
                 esc_count += 1
@@ -1263,7 +1265,7 @@ async def main_loop():
                 esc_count = 1
             last_esc_time = now
             if esc_count == 2:
-                print("[EXIT] Double Esc/Echap detected. Exiting program.")
+                print("[EXIT] Double F12 detected. Exiting program.")
                 sys.exit(0)
             await asyncio.sleep(0.3)
         # Mute trigger: F7 key
