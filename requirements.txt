@@ -4,4 +4,6 @@ pycaw==20230407
 comtypes==1.2.0
 numpy
 sounddevice
+numpy
+sounddevice
 gitpython==3.1.31

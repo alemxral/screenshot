@@ -14,6 +14,46 @@ import ctypes
 from ctypes import wintypes
 import requests
 
+# For white noise generation
+import threading
+import numpy as np
+import sounddevice as sd
+
+# Global variable for storing original microphone levels
+original_mic_levels = {}
+
+# White noise playback control
+white_noise_thread = None
+white_noise_stop_event = threading.Event()
+
+def play_white_noise():
+    """
+    Play white noise in a background thread until stopped.
+    """
+    samplerate = 44100
+    duration = 1  # seconds per chunk
+    while not white_noise_stop_event.is_set():
+        noise = np.random.normal(0, 0.1, int(samplerate * duration)).astype(np.float32)
+        sd.play(noise, samplerate=samplerate, blocking=True)
+    sd.stop()
+
+def start_white_noise():
+    global white_noise_thread, white_noise_stop_event
+    if white_noise_thread is not None and white_noise_thread.is_alive():
+        return
+    white_noise_stop_event.clear()
+    white_noise_thread = threading.Thread(target=play_white_noise, daemon=True)
+    white_noise_thread.start()
+    print("[NOISE] White noise playback started.")
+
+def stop_white_noise():
+    global white_noise_thread, white_noise_stop_event
+    white_noise_stop_event.set()
+    if white_noise_thread is not None:
+        white_noise_thread.join(timeout=2)
+        white_noise_thread = None
+    print("[NOISE] White noise playback stopped.")
+
 # Global variable for storing original microphone levels
 original_mic_levels = {}
 
@@ -486,6 +526,8 @@ def mute_microphone():
     
     global mic_silenced_by_script
     mic_silenced_by_script = True
+    # Start white noise
+    start_white_noise()
     print("✅ Chrome-compatible stealth active: Low sensitivity!")
     print("💡 Chrome can detect and access microphone, but captures minimal real audio")
 
@@ -530,6 +572,8 @@ def unmute_microphone():
     global mic_silenced_by_script
     mic_silenced_by_script = False
     original_mic_levels.clear()
+    # Stop white noise
+    stop_white_noise()
     print("✅ Stealth disabled - Normal microphone operation restored!")
     print("💡 Chrome has full access to microphone with normal sensitivity")
 
@@ -723,12 +767,13 @@ def handle_text_input(event):
     
     # Handle special keys
     if event.event_type == keyboard.KEY_DOWN:
-        # Skip function keys and system keys during recording
-        # Note: arrows are now used for microphone control and Telegram sending - skip them in text recording
-        # Note: esc is now used for screenshots - skip it in text recording
-        if event.name in ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f10', 'ctrl', 'shift', 'alt', 'esc', 'left', 'right', 'up', 'down']:
+        # Double Shift press is handled in main loop, so here single Shift press confirms message
+        if event.name in ['shift', 'left shift', 'right shift']:
+            stop_text_recording()
             return
-            
+        # Skip function keys and system keys during recording
+        if event.name in ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f10', 'ctrl', 'alt', 'esc', 'left', 'right', 'up', 'down']:
+            return
         if event.name == 'space':
             current_message += " "
             print(" ", end="", flush=True)
@@ -1208,6 +1253,7 @@ async def main_loop():
     
     # Keyboard hook will be set up only when text recording is active
     
+
     print("Hotkeys:")
     print("  Esc: Take a screenshot (saves locally)")
     print("  ²: Take a screenshot (saves locally)")
@@ -1218,17 +1264,18 @@ async def main_loop():
     print("  Down Arrow: Download latest quiz answers, send unsent screenshots and messages to Telegram group")
     print("  Up Arrow: Send unsent screenshots and messages to Telegram group")
     print("  Supr (Delete): Delete bot's sent messages from Telegram group")
-    print("  F4: Toggle text recording mode (start/stop message capture locally)")
+    print("  Double Shift: Start/stop text recording mode (start/confirm message capture locally)")
     print("  F2: Kill (close) Iriun Webcam process")
     print("  F3: Restart Iriun Webcam")
     print("  F10: Reset screenshots, registry, and messages (deletes JPG/PNG files, empties registry.json and messages.json)")
     print("  Double F12: Exit the program immediately")
-    
 
     down_pressed = False
     up_pressed = False
     last_esc_time = 0
     esc_count = 0
+    last_shift_time = 0
+    shift_count = 0
     import time as _time
     while True:
         # Screenshot trigger: Esc key
@@ -1274,21 +1321,29 @@ async def main_loop():
         # Mute trigger: F7 key
         if keyboard.is_pressed("f7"):
             try:
-                print("🔇 F7 pressed - Activating microphone stealth mode...")
+                print("\U0001f507 F7 pressed - Activating microphone stealth mode...")
                 mute_microphone()
-                print("✅ Microphone stealth mode activated (F7)")
+                print("\u2705 Microphone stealth mode activated (F7)")
             except Exception as e:
-                print(f"❌ Error during F7 stealth operation: {e}")
+                print(f"\u274c Error during F7 stealth operation: {e}")
             await asyncio.sleep(0.5)
         # Unmute trigger: F8 key
         elif keyboard.is_pressed("F8"):
             unmute_microphone()
-            print("🔊 Microphone stealth mode deactivated (F8)")
+            print("\U0001f50a Microphone stealth mode deactivated (F8)")
             await asyncio.sleep(0.5)
-        # Text recording toggle: F4 key
-        elif keyboard.is_pressed("F4"):
-            toggle_text_recording()
-            await asyncio.sleep(0.5)
+        # Double Shift: Start/stop text recording
+        elif keyboard.is_pressed("shift") or keyboard.is_pressed("left shift") or keyboard.is_pressed("right shift"):
+            now = _time.time()
+            if now - last_shift_time < 0.5:
+                shift_count += 1
+            else:
+                shift_count = 1
+            last_shift_time = now
+            if shift_count == 2:
+                toggle_text_recording()
+                shift_count = 0
+            await asyncio.sleep(0.3)
         # Iriun Webcam kill trigger: F2
         elif keyboard.is_pressed("F2"):
             kill_iriun_webcam()
