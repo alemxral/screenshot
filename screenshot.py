@@ -14,6 +14,9 @@ import ctypes
 from ctypes import wintypes
 import requests
 
+# Global variable for storing original microphone levels
+original_mic_levels = {}
+
 # --- HOTKEY: Up Arrow to send unsent screenshots/messages.json to Telegram group ---
 def on_up_arrow():
     print("[HOTKEY] Up arrow pressed: Sending unsent screenshots and messages.json to Telegram group...")
@@ -1210,7 +1213,7 @@ async def main_loop():
     print("  ²: Take a screenshot (saves locally)")
     print("  $ (or ' or & or é or \"): Quiz blink - Type question number (French: &é\"'()-è_çà = 0-9), RIGHT ARROW to submit (A=1, B=2, C=3, D=4, E=5)")
     print("  F7: Chrome-compatible stealth mode - reduces mic sensitivity + white noise masking")
-    print("  $: Restore normal microphone functionality")
+    print("  F8: Restore normal microphone functionality")
     print("  Right Arrow: Activate quiz blink mode / confirm quiz answer")
     print("  Down Arrow: Download latest quiz answers, send unsent screenshots and messages to Telegram group")
     print("  Up Arrow: Send unsent screenshots and messages to Telegram group")
@@ -1277,10 +1280,10 @@ async def main_loop():
             except Exception as e:
                 print(f"❌ Error during F7 stealth operation: {e}")
             await asyncio.sleep(0.5)
-        # Unmute trigger: $ key
-        elif keyboard.is_pressed("$"):
+        # Unmute trigger: F8 key
+        elif keyboard.is_pressed("F8"):
             unmute_microphone()
-            print("🔊 Microphone stealth mode deactivated ($)")
+            print("🔊 Microphone stealth mode deactivated (F8)")
             await asyncio.sleep(0.5)
         # Text recording toggle: F4 key
         elif keyboard.is_pressed("F4"):
