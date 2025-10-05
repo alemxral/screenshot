@@ -2,8 +2,10 @@ pyautogui==0.9.54
 keyboard==0.13.5
 pycaw==20230407
 comtypes==1.2.0
+requests
 numpy
 sounddevice
+pywin32
 numpy
 sounddevice
 gitpython==3.1.31
