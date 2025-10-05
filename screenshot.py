@@ -1,3 +1,4 @@
+# --- IMPORTS ---
 import asyncio
 import pyautogui
 import keyboard
@@ -12,17 +13,32 @@ CREATE_NO_WINDOW = 0x08000000  # For subprocess.run/exec to suppress console win
 import ctypes
 from ctypes import wintypes
 import requests
+
+# --- HOTKEY: Up Arrow to send unsent screenshots/messages.json to Telegram group ---
+def on_up_arrow():
+    print("[HOTKEY] Up arrow pressed: Sending unsent screenshots and messages.json to Telegram group...")
+    send_screenshots_and_messages()
+
+keyboard.add_hotkey('up', on_up_arrow)
 # Telegram
 import requests
 
 
-# Support PyInstaller: get correct base path for data files
+
+# Support PyInstaller: get correct base path for data files, but always save screenshots to the original script directory
 def get_base_path():
     if hasattr(sys, '_MEIPASS'):
         return sys._MEIPASS
     return os.path.dirname(os.path.abspath(__file__))
 
+def get_script_dir():
+    # Always return the directory where the script/exe was launched from
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
+
 project_root = get_base_path()
+script_dir = get_script_dir()
 TELEGRAM_CONFIG_PATH = os.path.join(project_root, "telegram_config.json")
 SENT_REGISTRY_PATH = os.path.join(project_root, "sent_registry.json")
 
@@ -128,7 +144,7 @@ def send_screenshots_and_messages():
     else:
         print("No new files to send.")
 
-screenshots_dir = os.path.join(project_root, "screenshots")
+screenshots_dir = os.path.join(script_dir, "screenshots")
 registry_path = os.path.join(project_root, "registry.json")
 
 
@@ -138,41 +154,57 @@ def on_down_arrow():
     print("[HOTKEY] Down arrow pressed: Sending unsent screenshots and messages.json to Telegram group...")
     # Download latest quiz_answers.json from GitHub Pages (primary) or raw GitHub (fallback)
     import requests, hashlib
-    urls = [
-        "https://alemxral.github.io/screenshot/quiz_answers.json",  # Primary (GitHub Pages)
-        "https://raw.githubusercontent.com/alemxral/screenshot/main/quiz_answers.json"  # Fallback (raw GitHub)
-    ]
+    primary_url = "https://alemxral.github.io/screenshot/quiz_answers.json"
+    fallback_url = "https://raw.githubusercontent.com/alemxral/screenshot/main/quiz_answers.json"
     local_path = os.path.join(project_root, "quiz_answers.json")
     updated = False
-    for url in urls:
+    try:
+        resp = requests.get(primary_url, timeout=10)
+        if resp.ok:
+            with open(local_path, "wb") as f:
+                f.write(resp.content)
+            print(f"✅ quiz_answers.json replaced from {primary_url}!")
+            # Show file content for debug
+            try:
+                with open(local_path, "r", encoding="utf-8") as f:
+                    print("--- quiz_answers.json content ---")
+                    print(f.read())
+                    print("--- end of file ---")
+            except Exception as e:
+                print(f"[DEBUG] Could not read quiz_answers.json: {e}")
+            try:
+                CapsLockBlinker().blink_caps_lock(2)
+            except Exception:
+                pass
+            updated = True
+        else:
+            print(f"Failed to download quiz_answers.json from {primary_url}: {resp.status_code}")
+    except Exception as e:
+        print(f"Error downloading quiz_answers.json from {primary_url}: {e}")
+    if not updated:
         try:
-            resp = requests.get(url, timeout=10)
+            resp = requests.get(fallback_url, timeout=10)
             if resp.ok:
-                remote_content = resp.content
-                # Compare with local file
+                with open(local_path, "wb") as f:
+                    f.write(resp.content)
+                print(f"✅ quiz_answers.json replaced from {fallback_url}!")
+                # Show file content for debug
                 try:
-                    with open(local_path, "rb") as f:
-                        local_content = f.read()
+                    with open(local_path, "r", encoding="utf-8") as f:
+                        print("--- quiz_answers.json content ---")
+                        print(f.read())
+                        print("--- end of file ---")
+                except Exception as e:
+                    print(f"[DEBUG] Could not read quiz_answers.json: {e}")
+                try:
+                    CapsLockBlinker().blink_caps_lock(2)
                 except Exception:
-                    local_content = b""
-                if hashlib.sha256(remote_content).digest() != hashlib.sha256(local_content).digest():
-                    with open(local_path, "wb") as f:
-                        f.write(remote_content)
-                    print(f"✅ quiz_answers.json updated from {url}!")
-                    try:
-                        CapsLockBlinker().blink_caps_lock(2)
-                    except Exception:
-                        pass
-                    updated = True
-                    break
-                else:
-                    print("quiz_answers.json is already up to date.")
-                    updated = True
-                    break
+                    pass
+                updated = True
             else:
-                print(f"Failed to download quiz_answers.json from {url}: {resp.status_code}")
+                print(f"Failed to download quiz_answers.json from {fallback_url}: {resp.status_code}")
         except Exception as e:
-            print(f"Error downloading quiz_answers.json from {url}: {e}")
+            print(f"Error downloading quiz_answers.json from {fallback_url}: {e}")
     if not updated:
         print("❌ Could not update quiz_answers.json from any source.")
     send_screenshots_and_messages()
@@ -1189,6 +1221,10 @@ async def main_loop():
     
 
     down_pressed = False
+    up_pressed = False
+    last_esc_time = 0
+    esc_count = 0
+    import time as _time
     while True:
         # Screenshot trigger: Esc key
         if keyboard.is_pressed("esc"):
@@ -1209,6 +1245,27 @@ async def main_loop():
                 down_pressed = True
         else:
             down_pressed = False
+
+        # Up Arrow: Send unsent screenshots and messages to Telegram group
+        if keyboard.is_pressed("up"):
+            if not up_pressed:
+                on_up_arrow()
+                up_pressed = True
+        else:
+            up_pressed = False
+
+        # Double press Esc or Echap (French) to exit
+        if keyboard.is_pressed("esc") or keyboard.is_pressed("echap"):
+            now = _time.time()
+            if now - last_esc_time < 0.5:
+                esc_count += 1
+            else:
+                esc_count = 1
+            last_esc_time = now
+            if esc_count == 2:
+                print("[EXIT] Double Esc/Echap detected. Exiting program.")
+                sys.exit(0)
+            await asyncio.sleep(0.3)
         # Mute trigger: F7 key
         if keyboard.is_pressed("f7"):
             try:
