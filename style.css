@@ -555,9 +555,11 @@ body {
 
 .answers-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  /* Responsive columns: try to fit boxes and allow them to shrink on smaller screens */
+  grid-template-columns: repeat(auto-fit, minmax(var(--answer-box-width), 1fr));
   gap: 15px;
   margin-bottom: 20px;
+  justify-items: center;
 }
 
 /* Layout variables */
@@ -576,7 +578,8 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
-  width: var(--answer-box-width);
+  max-width: var(--answer-box-width);
+  min-width: 0; /* allow shrinking inside grid */
   box-sizing: border-box;
 }
 
@@ -607,6 +610,11 @@ body {
   font-size: 24px;
   font-weight: bold;
   color: #007bff;
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .answer-item.answered .answer-choice {

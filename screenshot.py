@@ -64,6 +64,15 @@ def human_type(text, min_delay=0.08, max_delay=0.22):
     """
     try:
         for ch in str(text):
+            # Poll for stop keys (space or esc) to cancel autotype reliably
+            try:
+                if keyboard.is_pressed('space') or keyboard.is_pressed('esc'):
+                    autotype_stop_event.set()
+            except Exception:
+                pass
+            if autotype_stop_event.is_set():
+                print("⏹️ Autotype cancelled by user (stop key)")
+                return
             # Use write for characters; special keys could be expanded
             pyautogui.write(ch, interval=0)
             # Slightly longer pause after punctuation
@@ -74,8 +83,81 @@ def human_type(text, min_delay=0.08, max_delay=0.22):
     except Exception as e:
         print(f"❌ human_type failed: {e}")
 
-# Global variable for storing original microphone levels
-original_mic_levels = {}
+# Autotype control
+autotype_stop_event = threading.Event()
+autotype_ctrl_hook = None
+# Quiz autotype mode: 'human' or 'fast' or None
+quiz_autotype_mode = None
+
+def fast_type(text, interval=0.001):
+    """Ultra-fast typing but still cancellable via autotype_stop_event."""
+    try:
+        for ch in str(text):
+            # Poll for stop keys (space or esc)
+            try:
+                if keyboard.is_pressed('space') or keyboard.is_pressed('esc'):
+                    autotype_stop_event.set()
+            except Exception:
+                pass
+            if autotype_stop_event.is_set():
+                print("⏹️ Autotype cancelled by user (stop key)")
+                return
+            pyautogui.write(ch, interval=interval)
+    except Exception as e:
+        print(f"❌ fast_type failed: {e}")
+
+
+def _autotype_ctrl_handler(event):
+    # If user presses Ctrl during autotype, stop
+    try:
+        # Stop autotype when SPACE is pressed
+        if event.event_type == keyboard.KEY_DOWN and event.name == 'space':
+            autotype_stop_event.set()
+    except Exception:
+        pass
+
+
+def start_autotype(text, mode='human'):
+    """Start autotyping text. mode='human'|'fast'. Ctrl cancels."""
+    global autotype_ctrl_hook
+    autotype_stop_event.clear()
+    # Install temporary hook to catch Ctrl presses
+    try:
+        # Register a reliable hotkey for SPACE to cancel autotype
+        autotype_ctrl_hook = keyboard.add_hotkey('space', lambda: autotype_stop_event.set())
+    except Exception:
+        autotype_ctrl_hook = None
+
+    try:
+        if mode == 'fast':
+            # Attempt to paste from clipboard for ultra-fast input
+            try:
+                # small pre-paste delay
+                time.sleep(0.05)
+                pyautogui.hotkey('ctrl', 'v')
+                print("✅ Pasted from clipboard (fast mode)")
+            except Exception as e:
+                print(f"⚠️ Fast paste failed, falling back to fast_type: {e}")
+                # extremely fast fallback
+                fast_type(text, interval=0.0005)
+        else:
+            # human mode
+            human_type(text)
+    finally:
+        # Clean up hook
+        try:
+            if autotype_ctrl_hook is not None:
+                try:
+                    keyboard.remove_hotkey(autotype_ctrl_hook)
+                except Exception:
+                    # fallback: unhook if needed
+                    try:
+                        keyboard.unhook(autotype_ctrl_hook)
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+        autotype_stop_event.clear()
 
 # --- HOTKEY: Up Arrow to send unsent screenshots/messages.json to Telegram group ---
 def on_up_arrow():
@@ -1112,10 +1194,46 @@ def process_quiz_question():
             print(f"📝 Question {question_num}: Text answer = {text_answer}")
             print("⌨️ Preparing to type the answer — please focus the target input field now...")
             try:
-                # Short pause to allow user to focus the destination input
+                # Ask the user whether to type fast (Shift) or human (Space)
+                print("⏱ Press SHIFT for FAST typing, SPACE for HUMAN typing, or press SPACE during typing to stop (5s timeout)")
+                mode = None
+                start_wait = time.time()
+                while time.time() - start_wait < 5:
+                    if keyboard.is_pressed('shift') or keyboard.is_pressed('left shift') or keyboard.is_pressed('right shift'):
+                        mode = 'fast'
+                        break
+                    if keyboard.is_pressed('space'):
+                        mode = 'human'
+                        break
+                    if keyboard.is_pressed('ctrl') or keyboard.is_pressed('left ctrl') or keyboard.is_pressed('right ctrl'):
+                        mode = 'cancel'
+                        break
+                    time.sleep(0.05)
+
+                if mode == 'cancel':
+                    print('⏹️ Autotype cancelled by user')
+                    reset_quiz_input()
+                    return
+
+                if mode is None:
+                    # Default to human if no choice made
+                    mode = 'human'
+
+                print(f"⌨️ Typing mode selected: {mode} — copying answer to clipboard and typing in 0.6s")
+                # Copy to clipboard (Windows 'clip' utility) with pyperclip fallback
+                try:
+                    subprocess.run(['clip'], input=text_answer, text=True, check=False)
+                    print("📋 Answer copied to clipboard via clip")
+                except Exception:
+                    try:
+                        import pyperclip
+                        pyperclip.copy(text_answer)
+                        print("📋 Answer copied to clipboard via pyperclip")
+                    except Exception:
+                        print("⚠️ Could not copy to clipboard (no 'clip' or 'pyperclip')")
+
                 time.sleep(0.6)
-                # Type the text answer slowly so it's human-like
-                human_type(text_answer, min_delay=0.06, max_delay=0.18)
+                start_autotype(text_answer, mode=mode)
                 print("✅ Text typing complete")
             except Exception as e:
                 print(f"❌ Failed to type text answer: {e}")
