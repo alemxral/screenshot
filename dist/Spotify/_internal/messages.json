@@ -1,58 +1,23 @@
 [
     {
         "id": 1,
-        "message": "lu i is the best",
-        "timestamp": "2025-10-05 20:19:46",
-        "date": "2025-10-05",
-        "time": "20:19:46"
+        "message": "help",
+        "timestamp": "2025-10-12 17:06:16",
+        "date": "2025-10-12",
+        "time": "17:06:16"
     },
     {
         "id": 2,
-        "message": "vamos",
-        "timestamp": "2025-10-05 20:24:59",
-        "date": "2025-10-05",
-        "time": "20:24:59"
+        "message": "hii",
+        "timestamp": "2025-10-12 17:06:55",
+        "date": "2025-10-12",
+        "time": "17:06:55"
     },
     {
         "id": 3,
-        "message": "lad os no la se",
-        "timestamp": "2025-10-05 20:26:33",
-        "date": "2025-10-05",
-        "time": "20:26:33"
-    },
-    {
-        "id": 4,
-        "message": "lados iuus",
-        "timestamp": "2025-10-05 20:27:00",
-        "date": "2025-10-05",
-        "time": "20:27:00"
-    },
-    {
-        "id": 5,
-        "message": "nnn",
-        "timestamp": "2025-10-05 20:28:41",
-        "date": "2025-10-05",
-        "time": "20:28:41"
-    },
-    {
-        "id": 6,
-        "message": "kiko",
-        "timestamp": "2025-10-05 20:29:27",
-        "date": "2025-10-05",
-        "time": "20:29:27"
-    },
-    {
-        "id": 7,
-        "message": "sdsds",
-        "timestamp": "2025-10-05 20:30:51",
-        "date": "2025-10-05",
-        "time": "20:30:51"
-    },
-    {
-        "id": 8,
-        "message": "ijo",
-        "timestamp": "2025-10-05 20:31:17",
-        "date": "2025-10-05",
-        "time": "20:31:17"
+        "message": "kk",
+        "timestamp": "2025-10-12 17:07:50",
+        "date": "2025-10-12",
+        "time": "17:07:50"
     }
 ]

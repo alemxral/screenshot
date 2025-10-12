@@ -510,6 +510,16 @@ function setupQuizEventListeners() {
       loadSelectedQuestion();
     }
   });
+
+  // Text answer input change
+  const textAnswerInput = document.getElementById('text-answer-input');
+  if (textAnswerInput) {
+    textAnswerInput.addEventListener('input', () => {
+      // when typing, ensure A-E buttons are not selected
+      clearAnswerSelection();
+      selectedAnswer = textAnswerInput.value.trim();
+    });
+  }
   
   // Answer button clicks
   answerButtons.forEach(btn => {
@@ -588,12 +598,34 @@ function loadSelectedQuestion() {
     return;
   }
   
-  // Load existing answer if any
-  if (quizAnswers[questionNum]) {
-    const answer = quizAnswers[questionNum];
-    selectAnswerButton(answer);
-  } else {
+  // Show either A-E buttons (Q1-14) or text input (Q15-20)
+  const textAnswerWrapper = document.querySelector('.text-answer');
+  const answerButtonsWrapper = document.querySelector('.answer-buttons');
+  const textAnswerInput = document.getElementById('text-answer-input');
+
+  if (questionNum >= 15 && questionNum <= 20) {
+    // Text answers
+    if (textAnswerWrapper) textAnswerWrapper.style.display = 'block';
+    if (answerButtonsWrapper) answerButtonsWrapper.style.display = 'none';
     clearAnswerSelection();
+    if (quizAnswers[questionNum]) {
+      selectedAnswer = quizAnswers[questionNum];
+      if (textAnswerInput) textAnswerInput.value = selectedAnswer;
+    } else {
+      selectedAnswer = null;
+      if (textAnswerInput) textAnswerInput.value = '';
+    }
+  } else {
+    // Multiple-choice answers
+    if (textAnswerWrapper) textAnswerWrapper.style.display = 'none';
+    if (answerButtonsWrapper) answerButtonsWrapper.style.display = 'flex';
+    if (quizAnswers[questionNum]) {
+      const answer = quizAnswers[questionNum];
+      selectAnswerButton(answer);
+    } else {
+      clearAnswerSelection();
+    }
+    if (textAnswerInput) textAnswerInput.value = '';
   }
 }
 
@@ -625,9 +657,21 @@ async function submitAnswer() {
     return;
   }
   
-  if (!selectedAnswer) {
-    showError("❌ Please select an answer (A, B, C, D, or E)");
-    return;
+  // Validate for multiple-choice vs text answers
+  if (questionNum >= 15 && questionNum <= 20) {
+    // Text answer required
+    const textAnswerInput = document.getElementById('text-answer-input');
+    const textVal = textAnswerInput ? textAnswerInput.value.trim() : '';
+    if (!textVal) {
+      showError('❌ Please type an answer for this question (text)');
+      return;
+    }
+    selectedAnswer = textVal;
+  } else {
+    if (!selectedAnswer) {
+      showError("❌ Please select an answer (A, B, C, D, or E)");
+      return;
+    }
   }
   
   // Show loading state
