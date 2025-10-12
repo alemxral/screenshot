@@ -1075,6 +1075,7 @@
    'C:\\Users\\pc\\AppData\\Roaming\\Python\\Python312\\site-packages\\numpy\\version.py',
    'PYMODULE'),
   ('opcode', 'C:\\Python312\\Lib\\opcode.py', 'PYMODULE'),
+  ('overlay', 'C:\\Users\\pc\\screenshot\\overlay.py', 'PYMODULE'),
   ('packaging',
    'C:\\Python312\\Lib\\site-packages\\packaging\\__init__.py',
    'PYMODULE'),

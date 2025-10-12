@@ -90,7 +90,10 @@ imported by:
   <a target="code" href="///C:/Users/pc/screenshot/screenshot.py" type="text/plain"><tt>screenshot.py</tt></a>
 <span class="moduletype">Script</span>  <div class="import">
 imports:
-    <a href="#_collections_abc">_collections_abc</a>
+    <a href="#PIL">PIL</a>
+ &#8226;   <a href="#PIL.Image">PIL.Image</a>
+ &#8226;   <a href="#PIL.ImageTk">PIL.ImageTk</a>
+ &#8226;   <a href="#_collections_abc">_collections_abc</a>
  &#8226;   <a href="#_weakrefset">_weakrefset</a>
  &#8226;   <a href="#abc">abc</a>
  &#8226;   <a href="#asyncio">asyncio</a>
@@ -239,6 +242,7 @@ imports:
  &#8226;   <a href="#numpy">numpy</a>
  &#8226;   <a href="#operator">operator</a>
  &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#overlay">overlay</a>
  &#8226;   <a href="#posixpath">posixpath</a>
  &#8226;   <a href="#pyautogui">pyautogui</a>
  &#8226;   <a href="#pycaw.pycaw">pycaw.pycaw</a>
@@ -246,6 +250,7 @@ imports:
  &#8226;   <a href="#pyi_rth_inspect.py">pyi_rth_inspect.py</a>
  &#8226;   <a href="#pyi_rth_multiprocessing.py">pyi_rth_multiprocessing.py</a>
  &#8226;   <a href="#pyi_rth_pkgutil.py">pyi_rth_pkgutil.py</a>
+ &#8226;   <a href="#pyperclip">pyperclip</a>
  &#8226;   <a href="#random">random</a>
  &#8226;   <a href="#re">re</a>
  &#8226;   <a href="#re._casefix">re._casefix</a>
@@ -263,6 +268,7 @@ imports:
  &#8226;   <a href="#sys">sys</a>
  &#8226;   <a href="#threading">threading</a>
  &#8226;   <a href="#time">time</a>
+ &#8226;   <a href="#tkinter">tkinter</a>
  &#8226;   <a href="#traceback">traceback</a>
  &#8226;   <a href="#types">types</a>
  &#8226;   <a href="#warnings">warnings</a>
@@ -528,7 +534,9 @@ imported by:
  &#8226;   <a href="#PIL._webp">PIL._webp</a>
  &#8226;   <a href="#PIL.features">PIL.features</a>
  &#8226;   <a href="#mouseinfo">mouseinfo</a>
+ &#8226;   <a href="#overlay">overlay</a>
  &#8226;   <a href="#pyscreeze">pyscreeze</a>
+ &#8226;   <a href="#screenshot.py">screenshot.py</a>
 
   </div>
 
@@ -1218,7 +1226,9 @@ imported by:
  &#8226;   <a href="#PIL.XpmImagePlugin">PIL.XpmImagePlugin</a>
  &#8226;   <a href="#PIL.features">PIL.features</a>
  &#8226;   <a href="#mouseinfo">mouseinfo</a>
+ &#8226;   <a href="#overlay">overlay</a>
  &#8226;   <a href="#pyscreeze">pyscreeze</a>
+ &#8226;   <a href="#screenshot.py">screenshot.py</a>
 
   </div>
 
@@ -1755,6 +1765,8 @@ imports:
 imported by:
     <a href="#PIL">PIL</a>
  &#8226;   <a href="#PIL.SpiderImagePlugin">PIL.SpiderImagePlugin</a>
+ &#8226;   <a href="#overlay">overlay</a>
+ &#8226;   <a href="#screenshot.py">screenshot.py</a>
 
   </div>
 
@@ -19032,6 +19044,28 @@ imported by:
 </div>
 
 <div class="node">
+  <a name="overlay"></a>
+  <a target="code" href="///C:/Users/pc/screenshot/overlay.py" type="text/plain"><tt>overlay</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#PIL">PIL</a>
+ &#8226;   <a href="#PIL.Image">PIL.Image</a>
+ &#8226;   <a href="#PIL.ImageTk">PIL.ImageTk</a>
+ &#8226;   <a href="#pyautogui">pyautogui</a>
+ &#8226;   <a href="#threading">threading</a>
+ &#8226;   <a href="#time">time</a>
+ &#8226;   <a href="#tkinter">tkinter</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#screenshot.py">screenshot.py</a>
+
+  </div>
+
+</div>
+
+<div class="node">
   <a name="packaging"></a>
   <a target="code" href="///C:/Python312/Lib/site-packages/packaging/__init__.py" type="text/plain"><tt>packaging</tt></a>
 <span class="moduletype">Package</span>  <div class="import">
@@ -19523,7 +19557,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#pyautogui">pyautogui</a>
+    <a href="#overlay">overlay</a>
+ &#8226;   <a href="#pyautogui">pyautogui</a>
  &#8226;   <a href="#pyautogui._pyautogui_osx">pyautogui._pyautogui_osx</a>
  &#8226;   <a href="#pyautogui._pyautogui_win">pyautogui._pyautogui_win</a>
  &#8226;   <a href="#pyautogui._pyautogui_x11">pyautogui._pyautogui_x11</a>
@@ -20113,6 +20148,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#mouseinfo">mouseinfo</a>
+ &#8226;   <a href="#screenshot.py">screenshot.py</a>
 
   </div>
 
@@ -22051,6 +22087,7 @@ imported by:
  &#8226;   <a href="#multiprocessing.synchronize">multiprocessing.synchronize</a>
  &#8226;   <a href="#multiprocessing.util">multiprocessing.util</a>
  &#8226;   <a href="#numpy.random.bit_generator">numpy.random.bit_generator</a>
+ &#8226;   <a href="#overlay">overlay</a>
  &#8226;   <a href="#psutil">psutil</a>
  &#8226;   <a href="#psutil._common">psutil._common</a>
  &#8226;   <a href="#pydoc">pydoc</a>
@@ -22119,6 +22156,7 @@ imported by:
  &#8226;   <a href="#multiprocessing.queues">multiprocessing.queues</a>
  &#8226;   <a href="#multiprocessing.synchronize">multiprocessing.synchronize</a>
  &#8226;   <a href="#numpy.testing._private.utils">numpy.testing._private.utils</a>
+ &#8226;   <a href="#overlay">overlay</a>
  &#8226;   <a href="#psutil">psutil</a>
  &#8226;   <a href="#psutil._pswindows">psutil._pswindows</a>
  &#8226;   <a href="#pyautogui">pyautogui</a>
@@ -22170,7 +22208,9 @@ imports:
   <div class="import">
 imported by:
     <a href="#mouseinfo">mouseinfo</a>
+ &#8226;   <a href="#overlay">overlay</a>
  &#8226;   <a href="#pymsgbox">pymsgbox</a>
+ &#8226;   <a href="#screenshot.py">screenshot.py</a>
  &#8226;   <a href="#tkinter.constants">tkinter.constants</a>
  &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
 

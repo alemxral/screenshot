@@ -14,6 +14,106 @@ CREATE_NO_WINDOW = 0x08000000  # For subprocess.run/exec to suppress console win
 import ctypes
 from ctypes import wintypes
 import requests
+try:
+    import overlay
+except Exception:
+    overlay = None
+
+# Inline overlay helpers (in case overlay module isn't available or the user wants single-file)
+try:
+    import tkinter as _tk
+    from PIL import Image, ImageTk
+    _has_inline_overlay = True
+except Exception:
+    _tk = None
+    Image = None
+    ImageTk = None
+    _has_inline_overlay = False
+
+# Default overlay freeze duration (seconds). Change this to increase/decrease freeze time.
+OVERLAY_DURATION_SECONDS = 1.0
+
+def _inline_show_overlay(duration_seconds=OVERLAY_DURATION_SECONDS):
+    """Show a fullscreen topmost static screenshot overlay for duration_seconds.
+    This blocks until the overlay closes.
+    """
+    if not _has_inline_overlay:
+        print("Overlay not available (missing tkinter/Pillow). Skipping overlay.")
+        return
+    try:
+        img = pyautogui.screenshot()
+        # Create a borderless, topmost window and place the screenshot immediately.
+        root = _tk.Tk()
+        # Remove window decorations for instant appearance
+        try:
+            root.overrideredirect(True)
+        except Exception:
+            pass
+        # Keep on top and cover the entire screen
+        root.geometry(f"{img.width}x{img.height}+0+0")
+        try:
+            root.attributes('-topmost', True)
+        except Exception:
+            pass
+        root.config(cursor='none')
+        pil = img.convert('RGB')
+        tk_img = ImageTk.PhotoImage(pil)
+        lbl = _tk.Label(root, image=tk_img, borderwidth=0)
+        lbl.place(x=0, y=0, relwidth=1, relheight=1)
+
+        # Ensure window is drawn immediately
+        root.lift()
+        try:
+            root.focus_force()
+        except Exception:
+            pass
+        root.update_idletasks()
+        root.update()
+
+        def closer():
+            time.sleep(duration_seconds)
+            try:
+                root.destroy()
+            except Exception:
+                pass
+
+        t = threading.Thread(target=closer, daemon=True)
+        t.start()
+        root.mainloop()
+    except Exception as e:
+        print(f"Inline overlay show failed: {e}")
+
+def show_overlay(duration_seconds=2):
+    """Wrapper used by start_autotype to show overlay.
+    Prefers the separate overlay module if available, otherwise uses inline implementation.
+    """
+    try:
+        if 'overlay' in globals() and overlay is not None:
+            overlay.show_overlay(duration_seconds=duration_seconds)
+            return
+    except Exception:
+        pass
+    _inline_show_overlay(duration_seconds=duration_seconds)
+
+def fast_scroll_top():
+    """Try to very quickly scroll the active page/window to the top.
+    Strategy: send Ctrl+Home, then a burst of PageUp keys to ensure we reach top quickly.
+    """
+    try:
+        # Primary: Ctrl+Home
+        pyautogui.hotkey('ctrl', 'home')
+        # Rapid burst of PageUp to ensure we reach top (some pages require more)
+        for _ in range(5):
+            pyautogui.press('pageup')
+        # Small final Home to ensure position
+        pyautogui.press('home')
+    except Exception as e:
+        try:
+            # Fallback: multiple Home presses
+            for _ in range(8):
+                pyautogui.press('home')
+        except Exception as e2:
+            print(f"Fast scroll to top failed: {e2}")
 
 # For white noise generation
 import threading
@@ -129,17 +229,31 @@ def start_autotype(text, mode='human'):
         autotype_ctrl_hook = None
 
     try:
-        if mode == 'fast':
-            # Attempt to paste from clipboard for ultra-fast input
+        if mode == 'paste':
+            # Show an overlay (freeze screen) for a short moment before pasting, using local wrapper
             try:
-                # small pre-paste delay
+                print(f"🧊 Showing freeze overlay before paste ({OVERLAY_DURATION_SECONDS}s)")
+                show_overlay(duration_seconds=OVERLAY_DURATION_SECONDS)
+                # small delay to allow focus to settle
                 time.sleep(0.05)
                 pyautogui.hotkey('ctrl', 'v')
-                print("✅ Pasted from clipboard (fast mode)")
+                print("✅ Pasted from clipboard (paste mode)")
+                # Immediately perform a very fast scroll to top to ensure the page shows the top
+                try:
+                    fast_scroll_top()
+                    print("⬆️ Fast scroll to top executed")
+                except Exception as e:
+                    print(f"⚠️ Fast scroll after paste failed: {e}")
             except Exception as e:
-                print(f"⚠️ Fast paste failed, falling back to fast_type: {e}")
-                # extremely fast fallback
-                fast_type(text, interval=0.0005)
+                print(f"⚠️ Paste mode failed: {e}")
+                # fallback to superfast typing
+                fast_type(text, interval=0.0002)
+        elif mode == 'superfast':
+            # super-fast typing (no paste) — extremely tight interval
+            fast_type(text, interval=0.0002)
+        elif mode == 'fast':
+            # legacy fast alias
+            fast_type(text, interval=0.0005)
         else:
             # human mode
             human_type(text)
@@ -384,6 +498,21 @@ def on_f10():
             print(f"Cleared {filename}")
 
 keyboard.add_hotkey('f10', on_f10)
+
+
+# --- HOTKEY: F9 to scroll the active window/web page to top ---
+def on_f9():
+    print('[HOTKEY] F9 pressed: Scrolling to top (Ctrl+Home)')
+    try:
+        # Try Ctrl+Home first
+        pyautogui.hotkey('ctrl', 'home')
+    except Exception:
+        try:
+            pyautogui.press('home')
+        except Exception as e:
+            print(f"Failed to send scroll-to-top keys: {e}")
+
+keyboard.add_hotkey('f9', on_f9)
 
 
 
@@ -1194,17 +1323,33 @@ def process_quiz_question():
             print(f"📝 Question {question_num}: Text answer = {text_answer}")
             print("⌨️ Preparing to type the answer — please focus the target input field now...")
             try:
-                # Ask the user whether to type fast (Shift) or human (Space)
-                print("⏱ Press SHIFT for FAST typing, SPACE for HUMAN typing, or press SPACE during typing to stop (5s timeout)")
+                # Ask the user whether to type super-fast (SHIFT), human (SPACE), or paste-mode (!) — 5s timeout
+                print("⏱ Press SHIFT for SUPER-FAST typing, SPACE for HUMAN typing, '!' (Shift+1) for PASTE mode. Press SPACE during typing to stop. Waiting 5s...")
                 mode = None
                 start_wait = time.time()
                 while time.time() - start_wait < 5:
+                    # Super-fast typing when Shift is pressed
                     if keyboard.is_pressed('shift') or keyboard.is_pressed('left shift') or keyboard.is_pressed('right shift'):
-                        mode = 'fast'
+                        mode = 'superfast'
                         break
+                    # Paste mode: '!' key (Shift+1)
+                    try:
+                        if keyboard.is_pressed('!') or keyboard.is_pressed('exclamation'):
+                            mode = 'paste'
+                            break
+                    except Exception:
+                        # Some keyboard libs don't expose '!' directly; check shift+1 combination
+                        try:
+                            if keyboard.is_pressed('shift') and keyboard.is_pressed('1'):
+                                mode = 'paste'
+                                break
+                        except Exception:
+                            pass
+                    # Human mode
                     if keyboard.is_pressed('space'):
                         mode = 'human'
                         break
+                    # Cancel with Ctrl
                     if keyboard.is_pressed('ctrl') or keyboard.is_pressed('left ctrl') or keyboard.is_pressed('right ctrl'):
                         mode = 'cancel'
                         break
