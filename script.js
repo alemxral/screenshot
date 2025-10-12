@@ -899,10 +899,26 @@ function renderAnswersGrid() {
     if (quizAnswers[i]) {
       answerItem.classList.add("answered");
     }
-    
+    // For questions 15-20, answers may be long text — don't display the full text inside the grid.
+    let displayText = "?";
+    let titleAttr = "";
+    if (quizAnswers[i]) {
+      if (i >= 15 && i <= 20) {
+        // Show short placeholder for text answers; keep full text in tooltip
+        displayText = "Text";
+        try {
+          titleAttr = ` title="${escapeHtml(String(quizAnswers[i]))}"`;
+        } catch (e) {
+          titleAttr = "";
+        }
+      } else {
+        displayText = quizAnswers[i];
+      }
+    }
+
     answerItem.innerHTML = `
       <div class="question-num">Q${i}</div>
-      <div class="answer-choice">${quizAnswers[i] || "?"}</div>
+      <div class="answer-choice"${titleAttr}>${displayText}</div>
       ${quizAnswers[i] ? '<button class="delete-btn" onclick="deleteQuestionFromGrid(' + i + ')">×</button>' : ''}
     `;
     
