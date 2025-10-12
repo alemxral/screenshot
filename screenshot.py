@@ -9,6 +9,7 @@ import subprocess
 import json
 import threading
 import sys
+import random
 CREATE_NO_WINDOW = 0x08000000  # For subprocess.run/exec to suppress console windows on Windows
 import ctypes
 from ctypes import wintypes
@@ -53,6 +54,25 @@ def stop_white_noise():
         white_noise_thread.join(timeout=2)
         white_noise_thread = None
     print("[NOISE] White noise playback stopped.")
+
+
+def human_type(text, min_delay=0.08, max_delay=0.22):
+    """
+    Type the given text simulating human speed by introducing
+    a small random delay between each character. Punctuation
+    causes slightly longer pauses.
+    """
+    try:
+        for ch in str(text):
+            # Use write for characters; special keys could be expanded
+            pyautogui.write(ch, interval=0)
+            # Slightly longer pause after punctuation
+            pause = random.uniform(min_delay, max_delay)
+            if ch in '.!,?:;':
+                pause += random.uniform(0.06, 0.20)
+            time.sleep(pause)
+    except Exception as e:
+        print(f"❌ human_type failed: {e}")
 
 # Global variable for storing original microphone levels
 original_mic_levels = {}
@@ -1084,9 +1104,27 @@ def process_quiz_question():
             reset_quiz_input()
             return
         
-        answer = quiz_data[str(question_num)]['answer'].upper()
+        raw_answer = quiz_data[str(question_num)]['answer']
+
+        # For questions 15-20 use keyboard typing of the text answer
+        if 15 <= question_num <= 20:
+            text_answer = str(raw_answer)
+            print(f"📝 Question {question_num}: Text answer = {text_answer}")
+            print("⌨️ Preparing to type the answer — please focus the target input field now...")
+            try:
+                # Short pause to allow user to focus the destination input
+                time.sleep(0.6)
+                # Type the text answer slowly so it's human-like
+                human_type(text_answer, min_delay=0.06, max_delay=0.18)
+                print("✅ Text typing complete")
+            except Exception as e:
+                print(f"❌ Failed to type text answer: {e}")
+            reset_quiz_input()
+            return
+
+        # Otherwise (1-14) expect multiple-choice answers (A-E) and blink
+        answer = str(raw_answer).upper()
         print(f"📝 Question {question_num}: Answer = {answer}")
-        
         # Determine blink count (A=1, B=2, C=3, D=4, E=5)
         blink_counts = {'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5}
         blink_count = blink_counts.get(answer, 0)
@@ -1097,7 +1135,6 @@ def process_quiz_question():
             return
         
         print(f"💡 Answer {answer} = {blink_count} blink{'s' if blink_count != 1 else ''}")
-        
         # Create blinker and blink
         blinker = CapsLockBlinker()
         success = blinker.blink_caps_lock(blink_count)
