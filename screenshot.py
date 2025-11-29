@@ -920,8 +920,13 @@ def start_text_recording():
     # Set up keyboard hook for text input
     keyboard.on_press(handle_text_input)
     
-    print("🎤 TEXT RECORDING STARTED - Type your message, press Fn to stop")
+    print("🎤 TEXT RECORDING STARTED - Type your message, press Left Ctrl to stop")
     print("📝 Recording: ", end="", flush=True)
+    # Blink Caps Lock once to confirm listening mode is ON
+    try:
+        CapsLockBlinker().blink_caps_lock(1)
+    except Exception:
+        pass
 
 def stop_text_recording():
     """
@@ -948,6 +953,11 @@ def stop_text_recording():
         print("\n❌ No message to record (empty)")
     
     current_message = ""
+    # Blink Caps Lock once to confirm listening mode is OFF
+    try:
+        CapsLockBlinker().blink_caps_lock(1)
+    except Exception:
+        pass
 
 def save_message_to_json(message):
     """
@@ -998,8 +1008,8 @@ def handle_text_input(event):
     
     # Handle special keys
     if event.event_type == keyboard.KEY_DOWN:
-        # Double Shift press is handled in main loop, so here single Shift press confirms message
-        if event.name in ['shift', 'left shift', 'right shift']:
+        # Left Ctrl key stops recording
+        if event.name == 'left ctrl':
             stop_text_recording()
             return
         # Skip function keys and system keys during recording
@@ -1025,14 +1035,15 @@ def handle_text_input(event):
 
 def toggle_text_recording():
     """
-    Toggles text recording on/off when Fn key is pressed.
+    Toggles text recording on/off when Left Ctrl key is pressed.
     """
     global text_recording_active
-    
     if text_recording_active:
         stop_text_recording()
     else:
         start_text_recording()
+# Register hotkey for toggling text recording (Left Ctrl)
+keyboard.add_hotkey('left ctrl', lambda: toggle_text_recording(), suppress=False)
 
 # --------------------- Quiz Caps Lock Blinking Functionality ---------------------
 

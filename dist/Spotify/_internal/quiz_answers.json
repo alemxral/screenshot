@@ -1,28 +1,34 @@
 {
   "quiz_session": {
-    "created_at": "2025-10-12T20:42:13.103Z",
-    "last_updated": "2025-10-12T20:42:13.103Z",
+    "created_at": "2025-11-29T11:31:13.055Z",
+    "last_updated": "2025-11-29T11:31:13.055Z",
     "total_questions": 20,
-    "answered_questions": 3
+    "answered_questions": 4
   },
   "answers": {
     "3": {
       "answer": "B",
-      "answered_at": "2025-10-12T20:42:13.103Z",
-      "date": "2025-10-12",
-      "time": "22:42:13"
+      "answered_at": "2025-11-29T11:31:13.055Z",
+      "date": "2025-11-29",
+      "time": "12:31:13"
     },
     "4": {
       "answer": "A",
-      "answered_at": "2025-10-12T20:42:13.103Z",
-      "date": "2025-10-12",
-      "time": "22:42:13"
+      "answered_at": "2025-11-29T11:31:13.055Z",
+      "date": "2025-11-29",
+      "time": "12:31:13"
+    },
+    "16": {
+      "answer": "hola bro",
+      "answered_at": "2025-11-29T11:31:13.055Z",
+      "date": "2025-11-29",
+      "time": "12:31:13"
     },
     "20": {
-      "answer": "To calculate the **inverse of a 2×2 matrix**, you can use a simple formula.  Let’s say your matrix is:  [ A = \\begin{bmatrix} a & b \\ c & d \\end{bmatrix} ]  Then the **inverse matrix** ( A^{-1} ) is given by:  [ A^{-1} = \\frac{1}{ad - bc} \\begin{bmatrix} d & -b \\ -c & a \\end{bmatrix} ]  ---  ### ✅ Steps  1. **Find the determinant**:    [    \\text{det}(A) = ad - bc    ]    The determinant must be **non-zero**.    If ( ad - bc = 0 ), the matrix has **no inverse** (it’s *singular*).  2. **Swap** the elements on the main diagonal ( a \\leftrightarrow d ).  3. **Change the signs** of the off-diagonal elements ( b ) and ( c ).  4. **Multiply** the resulting matrix by ( \\frac{1}{\\text{det}(A)} ).  ---  ### 🧮 Example  If [ A = \\begin{bmatrix} 2 & 5 \\ 1 & 3 \\end{bmatrix} ]  Then [ \\text{det}(A) = (2)(3) - (5)(1) = 6 - 5 = 1 ]  So, [ A^{-1} = \\frac{1}{1} \\begin{bmatrix} 3 & -5 \\ -1 & 2 \\end{bmatrix} =============  \\begin{bmatrix} 3 & -5 \\ -1 & 2 \\end{bmatrix} ]  ---  Would you like me to show how to compute it **programmatically** (e.g., in Python, C, or JavaScript)?",
-      "answered_at": "2025-10-12T20:42:13.103Z",
-      "date": "2025-10-12",
-      "time": "22:42:13"
+      "answer": "To calculate the **inverse of a 2Ã2 matrix**, you can use a simple formula.  Letâs say your matrix is:  [ A = \\begin{bmatrix} a & b \\ c & d \\end{bmatrix} ]  Then the **inverse matrix** ( A^{-1} ) is given by:  [ A^{-1} = \\frac{1}{ad - bc} \\begin{bmatrix} d & -b \\ -c & a \\end{bmatrix} ]  ---  ### â Steps  1. **Find the determinant**:    [    \\text{det}(A) = ad - bc    ]    The determinant must be **non-zero**.    If ( ad - bc = 0 ), the matrix has **no inverse** (itâs *singular*).  2. **Swap** the elements on the main diagonal ( a \\leftrightarrow d ).  3. **Change the signs** of the off-diagonal elements ( b ) and ( c ).  4. **Multiply** the resulting matrix by ( \\frac{1}{\\text{det}(A)} ).  ---  ### ð§® Example  If [ A = \\begin{bmatrix} 2 & 5 \\ 1 & 3 \\end{bmatrix} ]  Then [ \\text{det}(A) = (2)(3) - (5)(1) = 6 - 5 = 1 ]  So, [ A^{-1} = \\frac{1}{1} \\begin{bmatrix} 3 & -5 \\ -1 & 2 \\end{bmatrix} =============  \\begin{bmatrix} 3 & -5 \\ -1 & 2 \\end{bmatrix} ]  ---  Would you like me to show how to compute it **programmatically** (e.g., in Python, C, or JavaScript)?",
+      "answered_at": "2025-11-29T11:31:13.055Z",
+      "date": "2025-11-29",
+      "time": "12:31:13"
     }
   }
 }
