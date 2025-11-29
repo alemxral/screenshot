@@ -1,1 +1,107 @@
-[]
+[
+    {
+        "id": 1,
+        "message": "?namealmuser\n\ncchow i check info abalmo\nc\n\n\nv\nv\ncv\nrun all the tests please\n LOO\n\ngamma-api\ncget_events.py\nmake the most simple possible function to fetch the data from the endpoint v ;and parse the data; the function take as arguments; a list of the possible fields you want to extract from the response; if not especified extract everything\ncleaclear\ncan u do a test script to get all the fields that contains the answer save the fields in a txtapi \npythg\nmake the same code than this but now in a new file called get_markets_by_slug and the endpoint is market not evenak two others files but with this end points vc ie: v\ncinclude this also in the funs vas arguments\nmake a good md explaining how to get data and the options etdmake get_ok fun it returns a boolean v\nv\nmake a get events function but generic include this arguments for the fun endpoint is",
+        "timestamp": "2025-10-18 23:09:40",
+        "date": "2025-10-18",
+        "time": "23:09:40"
+    },
+    {
+        "id": 2,
+        "message": "user",
+        "timestamp": "2025-10-18 23:31:08",
+        "date": "2025-10-18",
+        "time": "23:31:08"
+    },
+    {
+        "id": 3,
+        "message": "URLSCCi have added newcompr\nmodify this fun to simply create one fun to pass as argument USDC if I want got get the usdc balance; or POL to get the pol balance u have to check in the derived address\nclear",
+        "timestamp": "2025-10-19 12:03:59",
+        "date": "2025-10-19",
+        "time": "12:03:59"
+    },
+    {
+        "id": 4,
+        "message": "V",
+        "timestamp": "2025-10-19 14:42:35",
+        "date": "2025-10-19",
+        "time": "14:42:35"
+    },
+    {
+        "id": 5,
+        "message": "test_socket.html\ns\ndebug_orderbook.html\nloc\ncode and terminal seems to be working good; also i see there is connection with the websocket but u have to subscibe a marketthe marketcribe with the Tokens Ids; retrieved and also u need show the order book in index;HTML. U NEED TO CREATE A NEW HTML ELEMENT TO THE RIGHT OF THE PAGE WITH THLOCAL",
+        "timestamp": "2025-10-19 15:13:43",
+        "date": "2025-10-19",
+        "time": "15:13:43"
+    },
+    {
+        "id": 6,
+        "message": "cYES\nU didnt understood; the top header is showing just t\n\n\nyou are thinking thatshould show and always ; just show the pair of tokens in the header in its corresponding side does itcslug",
+        "timestamp": "2025-10-19 19:27:41",
+        "date": "2025-10-19",
+        "time": "19:27:41"
+    },
+    {
+        "id": 7,
+        "message": "data; make the paths work even if i run the program in other pc\n\nslug \ncopy 547954 no \nsub \nhelp\nNYES",
+        "timestamp": "2025-10-19 19:45:09",
+        "date": "2025-10-19",
+        "time": "19:45:09"
+    },
+    {
+        "id": 8,
+        "message": "s\nadd the requirements.txt the packages i will need\nclear\nclear\ncshould we also import this or the menu can be done with the packages we already have : v\n\n\n\n web so",
+        "timestamp": "2025-10-20 20:58:23",
+        "date": "2025-10-20",
+        "time": "20:58:23"
+    },
+    {
+        "id": 9,
+        "message": "MarketAnalyticsScreen ; ProfileAnalyticsScreenfetch_screen.py\nMultiTrade_screen.pytsingletrade_screuni\nmarketanalysis_screen.py\nprofileanalysis_screeFetchc",
+        "timestamp": "2025-10-20 21:18:18",
+        "date": "2025-10-20",
+        "time": "21:18:18"
+    },
+    {
+        "id": 10,
+        "message": "dunitrade\nzdmulMarketAWhy it says in my definition of screen that i did my self FetchScreen is not accessed and same with the others\nin whicOptios to check cuz we have the client for this alreaddddddddddclob_urlSSCwhy this is defined here in the run terminal and in the class also : v\nif those parameters are already defined at class level why passing them as arguments is irrelevant isnt\ndddQSTeswhat is the kwargs remind to me\napp.py is situated inside of ui is that the correct place or should anywhere else; what is the more appropiate place\nmain.py vs app.py what is the difference\npmterminPTCVVVVVVVVVVVVVCis this line now correct after i moved app.py to the root give short answer\nvsshow me the different datatypes to store multiple data like list tuple etc and thery charactheristics; be short\nwhat is the best object to store a kind of table; but like with mutliple keys or a way to get the field u want selecting as criteria any of the elements\nwhat is sesion manager functionszzzzscexplain this and why we are passing those arguments to the class; v\nccwhere is this fun defined v answer very short please\nis there a good place to define that function\nself",
+        "timestamp": "2025-10-20 22:15:53",
+        "date": "2025-10-20",
+        "time": "22:15:53"
+    },
+    {
+        "id": 11,
+        "message": "git commit .",
+        "timestamp": "2025-10-20 22:40:11",
+        "date": "2025-10-20",
+        "time": "22:40:11"
+    },
+    {
+        "id": 12,
+        "message": "Funder Balance; Proxy Balance; and does it;main_ defaalso propose what info might be good; for this; i am also intending to create secondary headers with other info; this one is for generic info that will be always usefull\ndontmaybe use clob_connected instead of api_connected; cuz there are several endpoints;  but this one required authentication then we can show as disconnected if there is any issue with aSdid u create two main header one for small screens and for bit or how\ncreate the widgets for command_input\ntext logo creator for chats\nascii give a good ascii art font to create my logo\n3COLQSTerminalwhere i should add my logo and how; this will just appear in the main menu at the start should i create a widget for the logo or how\n\n\nvno i think is better to create a widget for the logo and the pass it to the screens                                                                        cvssvsu should also include the header widget in tmain_he wellcome screenwhere should u include the functions that fill in the  header data is in screens or in the widget itself or anywhere else ; or maybe in app.py since some times it will come from the",
+        "timestamp": "2025-10-20 23:27:15",
+        "date": "2025-10-20",
+        "time": "23:27:15"
+    },
+    {
+        "id": 13,
+        "message": "v\n\nrrrrrrrrrrrrrrccccqclear\ncls\ngit add .git commit .",
+        "timestamp": "2025-10-21 00:24:25",
+        "date": "2025-10-21",
+        "time": "00:24:25"
+    },
+    {
+        "id": 14,
+        "message": "SCREEN\nMake a main in this file so that i can test all the funsc; would be nice too if we can test all these: v\n\n\n\nvsga",
+        "timestamp": "2025-10-23 20:13:40",
+        "date": "2025-10-23",
+        "time": "20:13:40"
+    },
+    {
+        "id": 15,
+        "message": "cexplain this header : v\nccwhat is basemodel of pydantic v\nhow do we use websocket_types along with websocket client\ncexplain sintaxis of this and why is defined  in the init : v\nwhy there are functions defined inside of this fun: v\ni didnt understood i kind of novel u will need to explain and with easier examples\ndwhat are callbacks\norderbooksummar\n\n\n\n\n\n\n\n\n\nyevent\n\ncwhy this error:v\nhandle_market_message\n\n\n\n\ntoken_idssclear\n\ncwhy we defined our own function v ; if websocket client already define a function to handle the response ; cwith this fun v\n\n\n\nis really needed for our case to defined our own default function",
+        "timestamp": "2025-10-23 21:52:05",
+        "date": "2025-10-23",
+        "time": "21:52:05"
+    }
+]
