@@ -1,130 +1,124 @@
 {
   "quiz_session": {
-    "created_at": "2025-12-14T17:07:17.933Z",
-    "last_updated": "2025-12-14T17:07:17.933Z",
+    "created_at": "2025-12-14T17:13:17.658Z",
+    "last_updated": "2025-12-14T17:13:17.658Z",
     "total_questions": 20,
-    "answered_questions": 20
+    "answered_questions": 19
   },
   "answers": {
     "1": {
       "answer": "B",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "2": {
       "answer": "B",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "3": {
       "answer": "C",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "4": {
       "answer": "A",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "5": {
       "answer": "A",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "6": {
       "answer": "B",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "7": {
       "answer": "A",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "8": {
       "answer": "C",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "9": {
       "answer": "B",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "10": {
       "answer": "B",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "11": {
       "answer": "A",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "12": {
       "answer": "C",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "13": {
       "answer": "B",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "14": {
       "answer": "B",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "15": {
       "answer": "An SVM is a supervised learning algorithm. \t•\tIt tries to find a line/plane (hyperplane) that separates classes with the largest margin. \t•\tIt mainly uses the closest points called support vectors. \t•\tIt can be used for classification, and also for regression (SVR). \t•\tWith a kernel, it can handle non-linear data.",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
-    },
-    "16": {
-      "answer": "An SVM is a supervised learning algorithm. \t•\tIt tries to find a line/plane (hyperplane) that separates classes with the largest margin. \t•\tIt mainly uses the closest points called support vectors. \t•\tIt can be used for classification, and also for regression (SVR). \t•\tWith a kernel, it can handle non-linear data.",
-      "answered_at": "2025-12-14T17:07:17.933Z",
-      "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "17": {
       "answer": "SVM is not really suitable to learn chess end-to-end, because chess needs sequential decisions and planning. \t•\tIt can still be useful for a small subtask, like classifying/evaluating a position from features. \t•\tPros: good generalization (max-margin), and kernels can handle non-linear patterns. \t•\tCons: needs lots of labeled data, and it doesn’t handle long-term strategy/search by itself (RL + search is more common).",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "18": {
       "answer": "1) Underfitting \t•\tModel is too simple → can’t capture pattern. \t•\tHigh bias. \t•\tTrain error high, and test error also high.  2) Overfitting \t•\tModel is too complex → learns noise. \t•\tHigh variance. \t•\tTrain error very low, but test error high.  3) The compromise \t•\tCalled the bias–variance trade-off. \t•\tGoal: good generalization (balance complexity). \t•\tWays to control: regularization, cross-validation, early stopping, simpler model / more data.",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "19": {
       "answer": "Relationship: Pattern recognition (PR) focuses on identifying regularities in data and assigning labels or categories to observations (e.g., classification). Machine learning (ML) provides the algorithmic framework to learn these decision rules/models from data. In practice, modern PR is largely implemented using ML methods, and the two fields strongly overlap.  Origins: Both PR and ML have roots in statistics and probability (e.g., Bayesian decision theory, estimation, hypothesis testing), signal processing (feature extraction, filtering), and early artificial intelligence. Classic PR emphasized pipelines such as preprocessing → feature extraction → classifier, while ML increasingly emphasized data-driven model learning and optimization.",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     },
     "20": {
       "answer": "Relationship: Pattern recognition (PR) focuses on identifying regularities in data and assigning labels or categories to observations (e.g., classification). Machine learning (ML) provides the algorithmic framework to learn these decision rules/models from data. In practice, modern PR is largely implemented using ML methods, and the two fields strongly overlap.  Origins: Both PR and ML have roots in statistics and probability (e.g., Bayesian decision theory, estimation, hypothesis testing), signal processing (feature extraction, filtering), and early artificial intelligence. Classic PR emphasized pipelines such as preprocessing → feature extraction → classifier, while ML increasingly emphasized data-driven model learning and optimization.",
-      "answered_at": "2025-12-14T17:07:17.933Z",
+      "answered_at": "2025-12-14T17:13:17.658Z",
       "date": "2025-12-14",
-      "time": "18:07:17"
+      "time": "18:13:17"
     }
   }
 }
