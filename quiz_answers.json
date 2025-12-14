@@ -1,130 +1,130 @@
 {
   "quiz_session": {
-    "created_at": "2025-12-14T16:30:19.521Z",
-    "last_updated": "2025-12-14T16:30:19.521Z",
+    "created_at": "2025-12-14T16:30:44.479Z",
+    "last_updated": "2025-12-14T16:30:44.479Z",
     "total_questions": 20,
     "answered_questions": 20
   },
   "answers": {
     "1": {
       "answer": "B",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "2": {
       "answer": "B",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "3": {
       "answer": "C",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "4": {
       "answer": "A",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "5": {
       "answer": "A",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "6": {
       "answer": "B",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "7": {
       "answer": "A",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "8": {
       "answer": "C",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "9": {
       "answer": "B",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "10": {
       "answer": "B",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "11": {
       "answer": "A",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "12": {
       "answer": "C",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "13": {
       "answer": "B",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "14": {
       "answer": "B",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "15": {
       "answer": "Data Scientists: s1 = 100, n1 = 16 \tData Engineers: s2 = 121, n2 = 16     sp^2=[ï¼n1-1)s^2+(n2-1)S2^2]/(n1+n2-2)                      sp^2=[15(100^2)+15(121^2)]/30=12320.5",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "16": {
       "answer": "X1,X2~N(Î¼,1)  a) likelihood : L(Î¼) = 1/(2Ï) * exp( - ((x1 - Î¼)^2 + (x2 - Î¼)^2)/2 ) ï¼ b)log likelihood : â(Î¼) = - ln(2Ï) - ((x1 - Î¼)^2 + (x2 - Î¼)^2)/2",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "17": {
       "answer": "One-tailed test (right tail), significance level Î± = 0.01 t_{0.99, df=10} = 2.23  Reject H0 if t > 2.23",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "18": {
       "answer": "Underestimation : L(Î¼, Î´) = 100 * (Î¼ â Î´)^2 / (Î¼^2 + 1) Overestimation : L(Î¼, Î´) = (Î¼ â Î´)^2 / (Î¼^2 + 1) Î¼ = 33 Observations: 25, 30, 35, 40, 45 Denominator = Î¼^2 + 1 = 33^2 + 1 = 1090  Î´ = 25 (underestimation) L = 100 * (33 â 25)^2 / 1090   = 100 * 64 / 1090   = 5.8716 Î´ = 30 (underestimation) L = 100 * (33 â 30)^2 / 1090   = 100 * 9 / 1090   = 0.8257 Î´ = 35 (underestimation) L = (35 â 33)^2 / 1090   = 4 / 1090   = 0.00367  Î´ = 40 (underestimation) L = (40 â 33)^2 / 1090   = 49 / 1090   = 0.04495  Î´ = 45 (underestimation) L = (45 â 33)^2 / 1090   = 144 / 1090   = 0.1321 Risk estimate  Risk = (5.8716 + 0.8257 + 0.00367 + 0.04495 + 0.1321) / 5      = 1.3756",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "19": {
       "answer": "Relationship: Pattern recognition (PR) focuses on identifying regularities in data and assigning labels or categories to observations (e.g., classification). Machine learning (ML) provides the algorithmic framework to learn these decision rules/models from data. In practice, modern PR is largely implemented using ML methods, and the two fields strongly overlap.  Origins: Both PR and ML have roots in statistics and probability (e.g., Bayesian decision theory, estimation, hypothesis testing), signal processing (feature extraction, filtering), and early artificial intelligence. Classic PR emphasized pipelines such as preprocessing → feature extraction → classifier, while ML increasingly emphasized data-driven model learning and optimization.",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     },
     "20": {
       "answer": "Relationship: Pattern recognition (PR) focuses on identifying regularities in data and assigning labels or categories to observations (e.g., classification). Machine learning (ML) provides the algorithmic framework to learn these decision rules/models from data. In practice, modern PR is largely implemented using ML methods, and the two fields strongly overlap.  Origins: Both PR and ML have roots in statistics and probability (e.g., Bayesian decision theory, estimation, hypothesis testing), signal processing (feature extraction, filtering), and early artificial intelligence. Classic PR emphasized pipelines such as preprocessing → feature extraction → classifier, while ML increasingly emphasized data-driven model learning and optimization.",
-      "answered_at": "2025-12-14T16:30:19.521Z",
+      "answered_at": "2025-12-14T16:30:44.479Z",
       "date": "2025-12-14",
-      "time": "17:30:19"
+      "time": "17:30:44"
     }
   }
 }
