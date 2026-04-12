@@ -1,106 +1,112 @@
 {
   "quiz_session": {
-    "created_at": "2026-04-12T13:00:50.944Z",
-    "last_updated": "2026-04-12T13:00:50.944Z",
+    "created_at": "2026-04-12T13:01:15.298Z",
+    "last_updated": "2026-04-12T13:01:15.298Z",
     "total_questions": 20,
-    "answered_questions": 16
+    "answered_questions": 17
   },
   "answers": {
     "1": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:00:50.944Z",
+      "answered_at": "2026-04-12T13:01:15.298Z",
       "date": "2026-04-12",
-      "time": "15:00:50"
+      "time": "15:01:15"
     },
     "2": {
       "answer": "B",
-      "answered_at": "2026-04-12T13:00:50.944Z",
+      "answered_at": "2026-04-12T13:01:15.298Z",
       "date": "2026-04-12",
-      "time": "15:00:50"
+      "time": "15:01:15"
     },
     "3": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:00:50.944Z",
+      "answered_at": "2026-04-12T13:01:15.298Z",
       "date": "2026-04-12",
-      "time": "15:00:50"
+      "time": "15:01:15"
     },
     "4": {
       "answer": "B",
-      "answered_at": "2026-04-12T13:00:50.944Z",
+      "answered_at": "2026-04-12T13:01:15.298Z",
       "date": "2026-04-12",
-      "time": "15:00:50"
+      "time": "15:01:15"
     },
     "5": {
       "answer": "C",
-      "answered_at": "2026-04-12T13:00:50.944Z",
+      "answered_at": "2026-04-12T13:01:15.298Z",
       "date": "2026-04-12",
-      "time": "15:00:50"
+      "time": "15:01:15"
     },
     "6": {
       "answer": "C",
-      "answered_at": "2026-04-12T13:00:50.944Z",
+      "answered_at": "2026-04-12T13:01:15.298Z",
       "date": "2026-04-12",
-      "time": "15:00:50"
+      "time": "15:01:15"
     },
     "7": {
       "answer": "B",
-      "answered_at": "2026-04-12T13:00:50.944Z",
+      "answered_at": "2026-04-12T13:01:15.298Z",
       "date": "2026-04-12",
-      "time": "15:00:50"
+      "time": "15:01:15"
     },
     "8": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:00:50.944Z",
+      "answered_at": "2026-04-12T13:01:15.298Z",
       "date": "2026-04-12",
-      "time": "15:00:50"
+      "time": "15:01:15"
     },
     "9": {
       "answer": "D",
-      "answered_at": "2026-04-12T13:00:50.944Z",
+      "answered_at": "2026-04-12T13:01:15.298Z",
       "date": "2026-04-12",
-      "time": "15:00:50"
+      "time": "15:01:15"
     },
     "10": {
       "answer": "D",
-      "answered_at": "2026-04-12T13:00:50.944Z",
+      "answered_at": "2026-04-12T13:01:15.298Z",
       "date": "2026-04-12",
-      "time": "15:00:50"
+      "time": "15:01:15"
     },
     "11": {
       "answer": "B",
-      "answered_at": "2026-04-12T13:00:50.944Z",
+      "answered_at": "2026-04-12T13:01:15.298Z",
       "date": "2026-04-12",
-      "time": "15:00:50"
+      "time": "15:01:15"
     },
     "12": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:00:50.944Z",
+      "answered_at": "2026-04-12T13:01:15.298Z",
       "date": "2026-04-12",
-      "time": "15:00:50"
+      "time": "15:01:15"
     },
     "13": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:00:50.944Z",
+      "answered_at": "2026-04-12T13:01:15.298Z",
       "date": "2026-04-12",
-      "time": "15:00:50"
+      "time": "15:01:15"
     },
     "14": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:00:50.944Z",
+      "answered_at": "2026-04-12T13:01:15.298Z",
       "date": "2026-04-12",
-      "time": "15:00:50"
+      "time": "15:01:15"
     },
     "15": {
       "answer": "A fall in consumer income If wine is considered a normal good, lower household income reduces consumers’ purchasing power, causing demand for wine to decrease. A change in consumer preferences If consumers become more health-conscious or develop a preference for non-alcoholic beverages, the demand for wine shifts to the left. A decrease in the price of substitute goods If beer or cocktails become cheaper, some consumers may switch away from wine toward these alternatives, reducing wine demand.",
-      "answered_at": "2026-04-12T13:00:50.944Z",
+      "answered_at": "2026-04-12T13:01:15.298Z",
       "date": "2026-04-12",
-      "time": "15:00:50"
+      "time": "15:01:15"
     },
     "16": {
       "answer": "A reference point is a benchmark that people use to evaluate outcomes as gains or losses. In behavioral economics, individuals often do not judge outcomes in absolute terms, but rather relative to this comparison point.  A concrete example is a worker who expects a monthly salary of €3,000. If they receive €3,200, this is perceived as a gain of €200 relative to the reference point. If they receive €2,800, it is perceived as a loss of €200. The same amount can therefore be judged differently depending on the chosen benchmark.",
-      "answered_at": "2026-04-12T13:00:50.944Z",
+      "answered_at": "2026-04-12T13:01:15.298Z",
       "date": "2026-04-12",
-      "time": "15:00:50"
+      "time": "15:01:15"
+    },
+    "17": {
+      "answer": "The statement is not correct.  A profit-maximizing firm should expand output until marginal revenue equals marginal cost, not average cost.  Marginal revenue (MR) = additional revenue from selling one more unit. Marginal cost (MC) = additional cost of producing one more unit.  Profit is maximized where the extra revenue from the last unit exactly equals the extra cost of producing it.  In a market with full competition, the firm is a price taker, which means it cannot influence the market price. Therefore:  Marginal revenue equals the market price. Selling one additional unit always brings exactly the current market price as extra revenue.  Marginal revenue changes only when the market price changes, for example because of changes in overall market demand or supply.",
+      "answered_at": "2026-04-12T13:01:15.298Z",
+      "date": "2026-04-12",
+      "time": "15:01:15"
     }
   }
 }
