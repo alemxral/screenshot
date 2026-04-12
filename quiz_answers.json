@@ -1,124 +1,130 @@
 {
   "quiz_session": {
-    "created_at": "2026-04-12T16:18:42.302Z",
-    "last_updated": "2026-04-12T16:18:42.302Z",
+    "created_at": "2026-04-12T16:22:55.255Z",
+    "last_updated": "2026-04-12T16:22:55.255Z",
     "total_questions": 20,
-    "answered_questions": 19
+    "answered_questions": 20
   },
   "answers": {
     "1": {
       "answer": "C",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "2": {
       "answer": "A",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "3": {
       "answer": "D",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "4": {
       "answer": "A",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "5": {
       "answer": "A",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "6": {
       "answer": "D",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "7": {
       "answer": "C",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "8": {
       "answer": "B",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "9": {
       "answer": "A",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "10": {
       "answer": "D",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "11": {
       "answer": "A",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "12": {
       "answer": "A",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "13": {
       "answer": "B",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "14": {
       "answer": "D",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "15": {
       "answer": "When you store and process PII, the biggest risk is unnecessary exposure of internal traffic. If microservices communicate over public endpoints, you increase the attack chances. A typical setup would be private subnets for microservices + private connectivity to managed services, with only a controlled entry point (like an API) exposed publicly.",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "16": {
       "answer": "In a serverless database setup, the cloud provider owns the entire server layer, so they are responsible for the operating system: provisioning it, securing it... You don’t access or maintain that OS at all.  Dependency management is therefore split: the provider manages all dependencies on the database side , while you manage application-side dependencies",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "17": {
       "answer": "Virtualization runs applications inside full virtual machines, so each work has its own guest OS on top of a hypervisor. This gives isolation  (even different OS types), but it is heavier, slower to start, and uses more resources.  Containerization packages the app and its dependencies while sharing the host OS kernel. Containers are lighter and are easier to move and scale.  For microservices, containers are usually better.",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "18": {
       "answer": "None of these fits Azure + maximum control.  Computer Vision is a pre-built API, not a custom training environment. Azure ML is managed, so you don’t get full control like on a raw VM. And EC2 and Compute Engine (Google Cloud) aren’t Azure services at all.  For maximum control on Azure, you’d choose something like Azure Virtual Machines.",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
     },
     "19": {
       "answer": "IoT sensors send telemetry to Google Pub. Azure Data Factory pulls the messages, transforms/cleans them, and loads the result into AWS Redshift for analytic and reporting.  Vendor lock in risk is high and the probability is high, because all three are cloud‑specific managed services with different APIs  and pipeline logic. Replacing any one of them usually means  not just moving the data.",
-      "answered_at": "2026-04-12T16:18:42.302Z",
+      "answered_at": "2026-04-12T16:22:55.255Z",
       "date": "2026-04-12",
-      "time": "18:18:42"
+      "time": "18:22:55"
+    },
+    "20": {
+      "answer": "SaaS is easy to use because you can open it in a browser and the provider does updates and maintenance (for example Microsoft or Google Workspace). It can also save money because you don’t need to buy and run your own servers, and you pay a monthly fee.  The disadvantages are that you need a good internet connection, so if the internet or the service is down you cannot work. Also, you cant change the software a lot, because you must use the features the provider offers (for example Shopify).",
+      "answered_at": "2026-04-12T16:22:55.255Z",
+      "date": "2026-04-12",
+      "time": "18:22:55"
     }
   }
 }
