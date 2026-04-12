@@ -1,112 +1,118 @@
 {
   "quiz_session": {
-    "created_at": "2026-04-12T16:10:45.246Z",
-    "last_updated": "2026-04-12T16:10:45.246Z",
+    "created_at": "2026-04-12T16:14:07.870Z",
+    "last_updated": "2026-04-12T16:14:07.870Z",
     "total_questions": 20,
-    "answered_questions": 17
+    "answered_questions": 18
   },
   "answers": {
     "1": {
       "answer": "C",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
     },
     "2": {
       "answer": "A",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
     },
     "3": {
       "answer": "D",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
     },
     "4": {
       "answer": "A",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
     },
     "5": {
       "answer": "A",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
     },
     "6": {
       "answer": "D",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
     },
     "7": {
       "answer": "C",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
     },
     "8": {
       "answer": "B",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
     },
     "9": {
       "answer": "A",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
     },
     "10": {
       "answer": "D",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
     },
     "11": {
       "answer": "A",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
     },
     "12": {
       "answer": "A",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
     },
     "13": {
       "answer": "B",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
     },
     "14": {
       "answer": "D",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
     },
     "15": {
       "answer": "When you store and process PII, the biggest risk is unnecessary exposure of internal traffic. If microservices communicate over public endpoints, you increase the attack chances. A typical setup would be private subnets for microservices + private connectivity to managed services, with only a controlled entry point (like an API) exposed publicly.",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
     },
     "16": {
       "answer": "In a serverless database setup, the cloud provider owns the entire server layer, so they are responsible for the operating system: provisioning it, securing it... You don’t access or maintain that OS at all.  Dependency management is therefore split: the provider manages all dependencies on the database side , while you manage application-side dependencies",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
     },
     "17": {
       "answer": "Virtualization runs applications inside full virtual machines, so each work has its own guest OS on top of a hypervisor. This gives isolation  (even different OS types), but it is heavier, slower to start, and uses more resources.  Containerization packages the app and its dependencies while sharing the host OS kernel. Containers are lighter and are easier to move and scale.  For microservices, containers are usually better.",
-      "answered_at": "2026-04-12T16:10:45.246Z",
+      "answered_at": "2026-04-12T16:14:07.870Z",
       "date": "2026-04-12",
-      "time": "18:10:45"
+      "time": "18:14:07"
+    },
+    "18": {
+      "answer": "None of these fits Azure + maximum control.  Computer Vision is a pre-built API, not a custom training environment. Azure ML is managed, so you don’t get full control like on a raw VM. And EC2 and Compute Engine (Google Cloud) aren’t Azure services at all.  For maximum control on Azure, you’d choose something like Azure Virtual Machines.",
+      "answered_at": "2026-04-12T16:14:07.870Z",
+      "date": "2026-04-12",
+      "time": "18:14:07"
     }
   }
 }
