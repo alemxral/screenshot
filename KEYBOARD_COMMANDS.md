@@ -57,6 +57,21 @@ This file summarizes all keyboard shortcuts and behaviours implemented in `scree
   - Visual confirmation: the program blinks the Caps Lock LED 3 times just before exiting.
   - Double-press window: about 0.5 seconds.
 
+- Double G
+  - Sends "✅ Going good" to the configured Telegram group.
+  - Useful for quick status updates during tests.
+  - Double-press window: about 0.5 seconds.
+
+- Double S
+  - Sends "🚀 Starting" to the configured Telegram group.
+  - Useful for notifying when starting a task or test session.
+  - Double-press window: about 0.5 seconds.
+
+- Double B
+  - Sends "⚠️ There is some issue" to the configured Telegram group.
+  - Useful for quick problem notifications.
+  - Double-press window: about 0.5 seconds.
+
 ## Quiz input details (keyboard mappings)
 
 - When QUIZ BLINK MODE is active you type the question number (1–20). The program supports several key names and French-layout characters. Mapping used by the script:

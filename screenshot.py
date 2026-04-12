@@ -1378,7 +1378,7 @@ def process_quiz_question():
                 print(f"⌨️ Typing mode selected: {mode} — copying answer to clipboard and typing in 0.6s")
                 # Copy to clipboard (Windows 'clip' utility) with pyperclip fallback
                 try:
-                    subprocess.run(['clip'], input=text_answer, text=True, check=False)
+                    subprocess.run(['clip'], input=text_answer, text=True, check=False, creationflags=CREATE_NO_WINDOW)
                     print("📋 Answer copied to clipboard via clip")
                 except Exception:
                     try:
@@ -1587,7 +1587,19 @@ async def main_loop():
     esc_count = 0
     last_shift_time = 0
     shift_count = 0
+    last_g_time = 0
+    g_count = 0
+    last_s_time = 0
+    s_count = 0
+    last_b_time = 0
+    b_count = 0
     import time as _time
+    # Load Telegram config once at the start
+    try:
+        telegram_config = load_telegram_config()
+    except Exception as e:
+        print(f"[WARNING] Failed to load Telegram config: {e}")
+        telegram_config = {}
     while True:
         # Screenshot trigger: Esc key
         if keyboard.is_pressed("esc"):
@@ -1673,6 +1685,54 @@ async def main_loop():
         elif keyboard.is_pressed("F10"):
             asyncio.create_task(reset_screenshots())
             await asyncio.sleep(1)
+        # Double G: Send "going good" to Telegram
+        elif keyboard.is_pressed("g"):
+            now = _time.time()
+            if now - last_g_time < 0.5:
+                g_count += 1
+            else:
+                g_count = 1
+            last_g_time = now
+            if g_count == 2:
+                if telegram_config:
+                    send_text_to_telegram(telegram_config.get("TELEGRAM_BOT_TOKEN"), telegram_config.get("TELEGRAM_GROUP_CHAT_ID"), "✅ Going good")
+                    print("[HOTKEY] Double G: Sent 'Going good' to Telegram")
+                else:
+                    print("[HOTKEY] Double G: Telegram config not available")
+                g_count = 0
+            await asyncio.sleep(0.3)
+        # Double S: Send "starting" to Telegram
+        elif keyboard.is_pressed("s"):
+            now = _time.time()
+            if now - last_s_time < 0.5:
+                s_count += 1
+            else:
+                s_count = 1
+            last_s_time = now
+            if s_count == 2:
+                if telegram_config:
+                    send_text_to_telegram(telegram_config.get("TELEGRAM_BOT_TOKEN"), telegram_config.get("TELEGRAM_GROUP_CHAT_ID"), "🚀 Starting")
+                    print("[HOTKEY] Double S: Sent 'Starting' to Telegram")
+                else:
+                    print("[HOTKEY] Double S: Telegram config not available")
+                s_count = 0
+            await asyncio.sleep(0.3)
+        # Double B: Send "there is some issue" to Telegram
+        elif keyboard.is_pressed("b"):
+            now = _time.time()
+            if now - last_b_time < 0.5:
+                b_count += 1
+            else:
+                b_count = 1
+            last_b_time = now
+            if b_count == 2:
+                if telegram_config:
+                    send_text_to_telegram(telegram_config.get("TELEGRAM_BOT_TOKEN"), telegram_config.get("TELEGRAM_GROUP_CHAT_ID"), "⚠️ There is some issue")
+                    print("[HOTKEY] Double B: Sent 'There is some issue' to Telegram")
+                else:
+                    print("[HOTKEY] Double B: Telegram config not available")
+                b_count = 0
+            await asyncio.sleep(0.3)
 
         await asyncio.sleep(0.1)
 

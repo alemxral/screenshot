@@ -1,9 +1,170 @@
 [
     {
         "id": 1,
-        "message": "hol",
-        "timestamp": "2025-11-29 13:00:17",
-        "date": "2025-11-29",
-        "time": "13:00:17"
+        "message": "is that good\ntasis that okay\ncan i go to the toilet fast before start the exam\n5s\nthanks\n²²²²²²²²²²²²²²²²²²²²²²²²²²²²²²²²²²²²²²²²²é²éé²ayuda",
+        "timestamp": "2025-12-14 17:18:34",
+        "date": "2025-12-14",
+        "time": "17:18:34"
+    },
+    {
+        "id": 2,
+        "message": "las largas",
+        "timestamp": "2025-12-14 17:35:45",
+        "date": "2025-12-14",
+        "time": "17:35:45"
+    },
+    {
+        "id": 3,
+        "message": "mal pregunta larga",
+        "timestamp": "2025-12-14 18:01:06",
+        "date": "2025-12-14",
+        "time": "18:01:06"
+    },
+    {
+        "id": 4,
+        "message": "W\nJR\nNBA TE\nDETROITWHY NO BASKET IN NEW ME\nNEW MEXY\nY\nCV\nesta guzman pitando no",
+        "timestamp": "2025-12-14 21:06:45",
+        "date": "2025-12-14",
+        "time": "21:06:45"
+    },
+    {
+        "id": 5,
+        "message": ";from the paired markets what u need to track is the best bid and ask and shares ; every 5seconds so you need do add an auto refresh; please make your self some queries and check my utils folder to retrieve the price best bid and ask and shares for the markets pairedBest bid and best ask and amounts.",
+        "timestamp": "2026-04-06 21:39:23",
+        "date": "2026-04-06",
+        "time": "21:39:23"
+    },
+    {
+        "id": 6,
+        "message": ";htm\n. You need to fix another aspect we are only retrieving 100 markets this is a mistake there should be thousands in polymarket and thousands in kalshi; please fetch all the active markets; be carefull with the pagination of the api check c vcd .",
+        "timestamp": "2026-04-06 21:47:36",
+        "date": "2026-04-06",
+        "time": "21:47:36"
+    },
+    {
+        "id": 7,
+        "message": ".\ncd spot\ngit add",
+        "timestamp": "2026-04-06 21:47:47",
+        "date": "2026-04-06",
+        "time": "21:47:47"
+    },
+    {
+        "id": 8,
+        "message": "CCVV",
+        "timestamp": "2026-04-07 21:11:10",
+        "date": "2026-04-07",
+        "time": "21:11:10"
+    },
+    {
+        "id": 9,
+        "message": ".41983A37CA97Fa.",
+        "timestamp": "2026-04-08 07:47:24",
+        "date": "2026-04-08",
+        "time": "07:47:24"
+    },
+    {
+        "id": 10,
+        "message": "?",
+        "timestamp": "2026-04-08 20:35:03",
+        "date": "2026-04-08",
+        "time": "20:35:03"
+    },
+    {
+        "id": 11,
+        "message": "v",
+        "timestamp": "2026-04-08 21:49:57",
+        "date": "2026-04-08",
+        "time": "21:49:57"
+    },
+    {
+        "id": 12,
+        "message": "hola",
+        "timestamp": "2026-04-12 11:54:50",
+        "date": "2026-04-12",
+        "time": "11:54:50"
+    },
+    {
+        "id": 13,
+        "message": "hola",
+        "timestamp": "2026-04-12 11:56:57",
+        "date": "2026-04-12",
+        "time": "11:56:57"
+    },
+    {
+        "id": 14,
+        "message": "²²²²²²²²²²²²²",
+        "timestamp": "2026-04-12 11:58:17",
+        "date": "2026-04-12",
+        "time": "11:58:17"
+    },
+    {
+        "id": 15,
+        "message": "pLEAS",
+        "timestamp": "2026-04-12 12:00:57",
+        "date": "2026-04-12",
+        "time": "12:00:57"
+    },
+    {
+        "id": 16,
+        "message": "kil",
+        "timestamp": "2026-04-12 12:01:00",
+        "date": "2026-04-12",
+        "time": "12:01:00"
+    },
+    {
+        "id": 17,
+        "message": "rocc",
+        "timestamp": "2026-04-12 12:01:02",
+        "date": "2026-04-12",
+        "time": "12:01:02"
+    },
+    {
+        "id": 18,
+        "message": "progr",
+        "timestamp": "2026-04-12 12:01:05",
+        "date": "2026-04-12",
+        "time": "12:01:05"
+    },
+    {
+        "id": 19,
+        "message": "of the b",
+        "timestamp": "2026-04-12 12:01:07",
+        "date": "2026-04-12",
+        "time": "12:01:07"
+    },
+    {
+        "id": 20,
+        "message": "r",
+        "timestamp": "2026-04-12 12:01:10",
+        "date": "2026-04-12",
+        "time": "12:01:10"
+    },
+    {
+        "id": 21,
+        "message": "is",
+        "timestamp": "2026-04-12 12:01:12",
+        "date": "2026-04-12",
+        "time": "12:01:12"
+    },
+    {
+        "id": 22,
+        "message": "é",
+        "timestamp": "2026-04-12 12:01:17",
+        "date": "2026-04-12",
+        "time": "12:01:17"
+    },
+    {
+        "id": 23,
+        "message": "ess",
+        "timestamp": "2026-04-12 12:01:20",
+        "date": "2026-04-12",
+        "time": "12:01:20"
+    },
+    {
+        "id": 24,
+        "message": "; double s cliking it means starting; bb is there is some issue",
+        "timestamp": "2026-04-12 12:27:00",
+        "date": "2026-04-12",
+        "time": "12:27:00"
     }
 ]
