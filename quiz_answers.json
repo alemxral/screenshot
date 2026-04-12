@@ -1,124 +1,130 @@
 {
   "quiz_session": {
-    "created_at": "2026-04-12T13:02:41.427Z",
-    "last_updated": "2026-04-12T13:02:41.427Z",
+    "created_at": "2026-04-12T13:03:19.770Z",
+    "last_updated": "2026-04-12T13:03:19.770Z",
     "total_questions": 20,
-    "answered_questions": 19
+    "answered_questions": 20
   },
   "answers": {
     "1": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "2": {
       "answer": "B",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "3": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "4": {
       "answer": "B",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "5": {
       "answer": "C",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "6": {
       "answer": "C",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "7": {
       "answer": "B",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "8": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "9": {
       "answer": "D",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "10": {
       "answer": "D",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "11": {
       "answer": "B",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "12": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "13": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "14": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "15": {
       "answer": "A fall in consumer income If wine is considered a normal good, lower household income reduces consumers’ purchasing power, causing demand for wine to decrease. A change in consumer preferences If consumers become more health-conscious or develop a preference for non-alcoholic beverages, the demand for wine shifts to the left. A decrease in the price of substitute goods If beer or cocktails become cheaper, some consumers may switch away from wine toward these alternatives, reducing wine demand.",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "16": {
       "answer": "A reference point is a benchmark that people use to evaluate outcomes as gains or losses. In behavioral economics, individuals often do not judge outcomes in absolute terms, but rather relative to this comparison point.  A concrete example is a worker who expects a monthly salary of €3,000. If they receive €3,200, this is perceived as a gain of €200 relative to the reference point. If they receive €2,800, it is perceived as a loss of €200. The same amount can therefore be judged differently depending on the chosen benchmark.",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "17": {
       "answer": "The statement is not correct.  A profit-maximizing firm should expand output until marginal revenue equals marginal cost, not average cost.  Marginal revenue (MR) = additional revenue from selling one more unit. Marginal cost (MC) = additional cost of producing one more unit.  Profit is maximized where the extra revenue from the last unit exactly equals the extra cost of producing it.  In a market with full competition, the firm is a price taker, which means it cannot influence the market price. Therefore:  Marginal revenue equals the market price. Selling one additional unit always brings exactly the current market price as extra revenue.  Marginal revenue changes only when the market price changes, for example because of changes in overall market demand or supply.",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "18": {
       "answer": "Screening refers to actions taken by the less-informed party in order to obtain information about the characteristics of the better-informed party.  In the labor market, employers use screening to reduce uncertainty about the productivity, reliability, or qualifications of applicants.  Two concrete screening methods are:  Reviewing educational qualifications and certificates Degrees, transcripts, and professional certifications can help employers assess skills and competence. Job interviews and assessment tests Structured interviews, case studies, or practical tests help evaluate communication ability, problem-solving, and job-specific knowledge.",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
     },
     "19": {
       "answer": "The key rule in full competition is:  If price > marginal cost, increase output. If price < marginal cost, reduce output. If price = marginal cost, keep output unchanged. a) Marginal cost = €85, Market price = €95  Since price is higher than marginal cost, producing one more table adds more revenue than cost.  Decision: Increase production.  b) Marginal cost = €105, Market price = €115  Again, price exceeds marginal cost, so each additional table still increases profit.  Decision: Increase production.  c) Marginal cost = €115, Market price = €105  Here, marginal cost is above price, meaning the extra unit costs more than it earns.  Decision: Reduce production.Marginal Principle  The marginal principle means that economic decisions should be based on comparing additional benefits with additional costs.  In this case, the workshop should continue expanding output as long as the additional revenue from one more table (the market price) is greater than or equal to the additional production cost (marginal cost).",
-      "answered_at": "2026-04-12T13:02:41.427Z",
+      "answered_at": "2026-04-12T13:03:19.770Z",
       "date": "2026-04-12",
-      "time": "15:02:41"
+      "time": "15:03:19"
+    },
+    "20": {
+      "answer": "The replacement value of the car is €30,000.  1) Fair premium if the insurer can observe driver type  The fair premium equals:  Premium = Probability of loss × Loss amount  Careful driver: 2% × €30,000 = €600 Careless driver: 5% × €30,000 = €1,500  So the actuarially fair premiums are:  Careful driver: €600 Careless driver: €1,500 2) Premium if the insurer cannot observe driver type  If both driver types are equally common in the population, the average risk is:  Average probability = (2% + 5%) / 2 = 3.5%  Fair pooled premium:  3.5% × €30,000 = €1,050  So the insurer charges a uniform premium of €1,050.  3) Information-economic term and solution  The problem is called adverse selection, a form of asymmetric information.  The insurer cannot directly observe whether a customer is a careful or careless driver before the contract is signed.  A concrete way to overcome this problem is screening through contract design, for example:  offering different contracts with different deductibles, or using telematics/black-box insurance that monitors actual driving behavior.  This helps separate careful from careless drivers and allows more accurate pricing.",
+      "answered_at": "2026-04-12T13:03:19.770Z",
+      "date": "2026-04-12",
+      "time": "15:03:19"
     }
   }
 }
