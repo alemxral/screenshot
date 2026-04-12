@@ -1332,6 +1332,11 @@ def process_quiz_question():
         if 15 <= question_num <= 20:
             text_answer = str(raw_answer)
             print(f"📝 Question {question_num}: Text answer = {text_answer}")
+            try:
+                CapsLockBlinker().blink_caps_lock(1)
+                print("💡 Answer found: blink confirmation sent")
+            except Exception as e:
+                print(f"⚠️ Could not blink confirmation for text answer: {e}")
             print("⌨️ Preparing to type the answer — please focus the target input field now...")
             try:
                 # Ask the user whether to type super-fast (SHIFT), human (SPACE), or paste-mode (!) — 5s timeout

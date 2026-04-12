@@ -1,11 +1,19 @@
 @echo off
-echo Building PyAutoGUI executable...
+echo Building Spotify executable...
 cd /d "c:\Users\pc\screenshot"
 
 REM Install PyInstaller if not already installed
-pip install pyinstaller
+python -m pip install --user pyinstaller
+if errorlevel 1 (
+	echo Failed to install/verify PyInstaller.
+	exit /b 1
+)
 
-REM Build the executable with necessary options for PyAutoGUI
-pyinstaller --onefile --windowed --hidden-import pyautogui --hidden-import keyboard --hidden-import pycaw --hidden-import comtypes --hidden-import git --hidden-import ctypes.wintypes --add-data "requirements.txt;." screenshot.py
+REM Build from Spotify.spec (name/icon are defined in the spec file)
+python -m PyInstaller --noconfirm --clean Spotify.spec
+if errorlevel 1 (
+	echo Build failed.
+	exit /b 1
+)
 
-echo Build complete! Check the 'dist' folder for screenshot.exe
+echo Build complete! Check dist\Spotify\Spotify.exe
