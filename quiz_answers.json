@@ -1,100 +1,106 @@
 {
   "quiz_session": {
-    "created_at": "2026-04-12T13:00:38.362Z",
-    "last_updated": "2026-04-12T13:00:38.362Z",
+    "created_at": "2026-04-12T13:00:50.944Z",
+    "last_updated": "2026-04-12T13:00:50.944Z",
     "total_questions": 20,
-    "answered_questions": 15
+    "answered_questions": 16
   },
   "answers": {
     "1": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:00:38.362Z",
+      "answered_at": "2026-04-12T13:00:50.944Z",
       "date": "2026-04-12",
-      "time": "15:00:38"
+      "time": "15:00:50"
     },
     "2": {
       "answer": "B",
-      "answered_at": "2026-04-12T13:00:38.362Z",
+      "answered_at": "2026-04-12T13:00:50.944Z",
       "date": "2026-04-12",
-      "time": "15:00:38"
+      "time": "15:00:50"
     },
     "3": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:00:38.362Z",
+      "answered_at": "2026-04-12T13:00:50.944Z",
       "date": "2026-04-12",
-      "time": "15:00:38"
+      "time": "15:00:50"
     },
     "4": {
       "answer": "B",
-      "answered_at": "2026-04-12T13:00:38.362Z",
+      "answered_at": "2026-04-12T13:00:50.944Z",
       "date": "2026-04-12",
-      "time": "15:00:38"
+      "time": "15:00:50"
     },
     "5": {
       "answer": "C",
-      "answered_at": "2026-04-12T13:00:38.362Z",
+      "answered_at": "2026-04-12T13:00:50.944Z",
       "date": "2026-04-12",
-      "time": "15:00:38"
+      "time": "15:00:50"
     },
     "6": {
       "answer": "C",
-      "answered_at": "2026-04-12T13:00:38.362Z",
+      "answered_at": "2026-04-12T13:00:50.944Z",
       "date": "2026-04-12",
-      "time": "15:00:38"
+      "time": "15:00:50"
     },
     "7": {
       "answer": "B",
-      "answered_at": "2026-04-12T13:00:38.362Z",
+      "answered_at": "2026-04-12T13:00:50.944Z",
       "date": "2026-04-12",
-      "time": "15:00:38"
+      "time": "15:00:50"
     },
     "8": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:00:38.362Z",
+      "answered_at": "2026-04-12T13:00:50.944Z",
       "date": "2026-04-12",
-      "time": "15:00:38"
+      "time": "15:00:50"
     },
     "9": {
       "answer": "D",
-      "answered_at": "2026-04-12T13:00:38.362Z",
+      "answered_at": "2026-04-12T13:00:50.944Z",
       "date": "2026-04-12",
-      "time": "15:00:38"
+      "time": "15:00:50"
     },
     "10": {
       "answer": "D",
-      "answered_at": "2026-04-12T13:00:38.362Z",
+      "answered_at": "2026-04-12T13:00:50.944Z",
       "date": "2026-04-12",
-      "time": "15:00:38"
+      "time": "15:00:50"
     },
     "11": {
       "answer": "B",
-      "answered_at": "2026-04-12T13:00:38.362Z",
+      "answered_at": "2026-04-12T13:00:50.944Z",
       "date": "2026-04-12",
-      "time": "15:00:38"
+      "time": "15:00:50"
     },
     "12": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:00:38.362Z",
+      "answered_at": "2026-04-12T13:00:50.944Z",
       "date": "2026-04-12",
-      "time": "15:00:38"
+      "time": "15:00:50"
     },
     "13": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:00:38.362Z",
+      "answered_at": "2026-04-12T13:00:50.944Z",
       "date": "2026-04-12",
-      "time": "15:00:38"
+      "time": "15:00:50"
     },
     "14": {
       "answer": "A",
-      "answered_at": "2026-04-12T13:00:38.362Z",
+      "answered_at": "2026-04-12T13:00:50.944Z",
       "date": "2026-04-12",
-      "time": "15:00:38"
+      "time": "15:00:50"
     },
     "15": {
       "answer": "A fall in consumer income If wine is considered a normal good, lower household income reduces consumers’ purchasing power, causing demand for wine to decrease. A change in consumer preferences If consumers become more health-conscious or develop a preference for non-alcoholic beverages, the demand for wine shifts to the left. A decrease in the price of substitute goods If beer or cocktails become cheaper, some consumers may switch away from wine toward these alternatives, reducing wine demand.",
-      "answered_at": "2026-04-12T13:00:38.362Z",
+      "answered_at": "2026-04-12T13:00:50.944Z",
       "date": "2026-04-12",
-      "time": "15:00:38"
+      "time": "15:00:50"
+    },
+    "16": {
+      "answer": "A reference point is a benchmark that people use to evaluate outcomes as gains or losses. In behavioral economics, individuals often do not judge outcomes in absolute terms, but rather relative to this comparison point.  A concrete example is a worker who expects a monthly salary of €3,000. If they receive €3,200, this is perceived as a gain of €200 relative to the reference point. If they receive €2,800, it is perceived as a loss of €200. The same amount can therefore be judged differently depending on the chosen benchmark.",
+      "answered_at": "2026-04-12T13:00:50.944Z",
+      "date": "2026-04-12",
+      "time": "15:00:50"
     }
   }
 }
