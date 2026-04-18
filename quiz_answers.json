@@ -1,9 +1,16 @@
 {
   "quiz_session": {
-    "created_at": "2026-04-18T16:09:59.215Z",
-    "last_updated": "2026-04-18T16:09:59.215Z",
+    "created_at": "2026-04-18T16:37:35.345Z",
+    "last_updated": "2026-04-18T16:37:35.345Z",
     "total_questions": 20,
-    "answered_questions": 0
+    "answered_questions": 1
   },
-  "answers": {}
+  "answers": {
+    "1": {
+      "answer": "A",
+      "answered_at": "2026-04-18T16:37:35.345Z",
+      "date": "2026-04-18",
+      "time": "18:37:35"
+    }
+  }
 }
