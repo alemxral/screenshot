@@ -1,118 +1,124 @@
 {
   "quiz_session": {
-    "created_at": "2026-04-18T17:13:52.952Z",
-    "last_updated": "2026-04-18T17:13:52.952Z",
+    "created_at": "2026-04-18T17:16:53.994Z",
+    "last_updated": "2026-04-18T17:16:53.994Z",
     "total_questions": 20,
-    "answered_questions": 18
+    "answered_questions": 19
   },
   "answers": {
     "1": {
       "answer": "A",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "2": {
       "answer": "B",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "3": {
       "answer": "B",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "4": {
       "answer": "C",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "5": {
       "answer": "A",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "6": {
       "answer": "A",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "7": {
       "answer": "A",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "8": {
       "answer": "A",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "9": {
       "answer": "B",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "10": {
       "answer": "A",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "11": {
       "answer": "C",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "12": {
       "answer": "C",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "13": {
       "answer": "A",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "14": {
       "answer": "D",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "15": {
       "answer": "Separating production and development environments is important because development systems are used for testing and often contain unstable or insecure code. If they are not isolated with a firewall, an attacker or a simple mistake in development could reach the production environment and damage live services or expose real customer data.",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "16": {
       "answer": "A PII Principal is the person the data is about,the individual whose identity can be directly or indirectly identified from the PII",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "17": {
       "answer": "Three of the most common general information security controls catalogues used in the United States are NIST , the CIS  and ISO .",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
     },
     "18": {
       "answer": "The organization you’re looking for is OWASP, or the Open Web Application Security. Their Top 10 list serves as a guide for developers and security teams, helping to prioritize which web vulnerabilities to fix first  and to keep their applications safe from the most common attacks. Two of the current heavy hitters in the top three are broken access control and cryptographic failures.",
-      "answered_at": "2026-04-18T17:13:52.952Z",
+      "answered_at": "2026-04-18T17:16:53.994Z",
       "date": "2026-04-18",
-      "time": "19:13:52"
+      "time": "19:16:53"
+    },
+    "20": {
+      "answer": "The Assume Breach mentality acknowledges that breaches are inevitable and focuses on detecting, containing, and minimizing their impact. Its purpose is to improve security by  preparation, rapid response, and damage control to protect systems and data effectively.",
+      "answered_at": "2026-04-18T17:16:53.994Z",
+      "date": "2026-04-18",
+      "time": "19:16:53"
     }
   }
 }
