@@ -1,94 +1,100 @@
 {
   "quiz_session": {
-    "created_at": "2026-04-18T16:44:26.136Z",
-    "last_updated": "2026-04-18T16:44:26.136Z",
+    "created_at": "2026-04-18T16:50:02.585Z",
+    "last_updated": "2026-04-18T16:50:02.585Z",
     "total_questions": 20,
-    "answered_questions": 14
+    "answered_questions": 15
   },
   "answers": {
     "1": {
       "answer": "A",
-      "answered_at": "2026-04-18T16:44:26.136Z",
+      "answered_at": "2026-04-18T16:50:02.585Z",
       "date": "2026-04-18",
-      "time": "18:44:26"
+      "time": "18:50:02"
     },
     "2": {
       "answer": "B",
-      "answered_at": "2026-04-18T16:44:26.136Z",
+      "answered_at": "2026-04-18T16:50:02.585Z",
       "date": "2026-04-18",
-      "time": "18:44:26"
+      "time": "18:50:02"
     },
     "3": {
       "answer": "B",
-      "answered_at": "2026-04-18T16:44:26.136Z",
+      "answered_at": "2026-04-18T16:50:02.585Z",
       "date": "2026-04-18",
-      "time": "18:44:26"
+      "time": "18:50:02"
     },
     "4": {
       "answer": "C",
-      "answered_at": "2026-04-18T16:44:26.136Z",
+      "answered_at": "2026-04-18T16:50:02.585Z",
       "date": "2026-04-18",
-      "time": "18:44:26"
+      "time": "18:50:02"
     },
     "5": {
       "answer": "A",
-      "answered_at": "2026-04-18T16:44:26.136Z",
+      "answered_at": "2026-04-18T16:50:02.585Z",
       "date": "2026-04-18",
-      "time": "18:44:26"
+      "time": "18:50:02"
     },
     "6": {
       "answer": "A",
-      "answered_at": "2026-04-18T16:44:26.136Z",
+      "answered_at": "2026-04-18T16:50:02.585Z",
       "date": "2026-04-18",
-      "time": "18:44:26"
+      "time": "18:50:02"
     },
     "7": {
       "answer": "A",
-      "answered_at": "2026-04-18T16:44:26.136Z",
+      "answered_at": "2026-04-18T16:50:02.585Z",
       "date": "2026-04-18",
-      "time": "18:44:26"
+      "time": "18:50:02"
     },
     "8": {
       "answer": "A",
-      "answered_at": "2026-04-18T16:44:26.136Z",
+      "answered_at": "2026-04-18T16:50:02.585Z",
       "date": "2026-04-18",
-      "time": "18:44:26"
+      "time": "18:50:02"
     },
     "9": {
       "answer": "B",
-      "answered_at": "2026-04-18T16:44:26.136Z",
+      "answered_at": "2026-04-18T16:50:02.585Z",
       "date": "2026-04-18",
-      "time": "18:44:26"
+      "time": "18:50:02"
     },
     "10": {
       "answer": "A",
-      "answered_at": "2026-04-18T16:44:26.136Z",
+      "answered_at": "2026-04-18T16:50:02.585Z",
       "date": "2026-04-18",
-      "time": "18:44:26"
+      "time": "18:50:02"
     },
     "11": {
       "answer": "C",
-      "answered_at": "2026-04-18T16:44:26.136Z",
+      "answered_at": "2026-04-18T16:50:02.585Z",
       "date": "2026-04-18",
-      "time": "18:44:26"
+      "time": "18:50:02"
     },
     "12": {
       "answer": "C",
-      "answered_at": "2026-04-18T16:44:26.136Z",
+      "answered_at": "2026-04-18T16:50:02.585Z",
       "date": "2026-04-18",
-      "time": "18:44:26"
+      "time": "18:50:02"
     },
     "13": {
       "answer": "A",
-      "answered_at": "2026-04-18T16:44:26.136Z",
+      "answered_at": "2026-04-18T16:50:02.585Z",
       "date": "2026-04-18",
-      "time": "18:44:26"
+      "time": "18:50:02"
     },
     "14": {
       "answer": "D",
-      "answered_at": "2026-04-18T16:44:26.136Z",
+      "answered_at": "2026-04-18T16:50:02.585Z",
       "date": "2026-04-18",
-      "time": "18:44:26"
+      "time": "18:50:02"
+    },
+    "15": {
+      "answer": "Separating production and development environments is important because development systems are used for testing and often contain unstable or insecure code. If they are not isolated with a firewall, an attacker or a simple mistake in development could reach the production environment and damage live services or expose real customer data.",
+      "answered_at": "2026-04-18T16:50:02.585Z",
+      "date": "2026-04-18",
+      "time": "18:50:02"
     }
   }
 }
