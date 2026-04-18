@@ -1,106 +1,106 @@
 {
   "quiz_session": {
-    "created_at": "2026-04-18T17:04:48.270Z",
-    "last_updated": "2026-04-18T17:04:48.270Z",
+    "created_at": "2026-04-18T17:05:25.058Z",
+    "last_updated": "2026-04-18T17:05:25.058Z",
     "total_questions": 20,
     "answered_questions": 16
   },
   "answers": {
     "1": {
       "answer": "A",
-      "answered_at": "2026-04-18T17:04:48.270Z",
+      "answered_at": "2026-04-18T17:05:25.058Z",
       "date": "2026-04-18",
-      "time": "19:04:48"
+      "time": "19:05:25"
     },
     "2": {
       "answer": "B",
-      "answered_at": "2026-04-18T17:04:48.270Z",
+      "answered_at": "2026-04-18T17:05:25.058Z",
       "date": "2026-04-18",
-      "time": "19:04:48"
+      "time": "19:05:25"
     },
     "3": {
       "answer": "B",
-      "answered_at": "2026-04-18T17:04:48.270Z",
+      "answered_at": "2026-04-18T17:05:25.058Z",
       "date": "2026-04-18",
-      "time": "19:04:48"
+      "time": "19:05:25"
     },
     "4": {
       "answer": "C",
-      "answered_at": "2026-04-18T17:04:48.270Z",
+      "answered_at": "2026-04-18T17:05:25.058Z",
       "date": "2026-04-18",
-      "time": "19:04:48"
+      "time": "19:05:25"
     },
     "5": {
       "answer": "A",
-      "answered_at": "2026-04-18T17:04:48.270Z",
+      "answered_at": "2026-04-18T17:05:25.058Z",
       "date": "2026-04-18",
-      "time": "19:04:48"
+      "time": "19:05:25"
     },
     "6": {
       "answer": "A",
-      "answered_at": "2026-04-18T17:04:48.270Z",
+      "answered_at": "2026-04-18T17:05:25.058Z",
       "date": "2026-04-18",
-      "time": "19:04:48"
+      "time": "19:05:25"
     },
     "7": {
       "answer": "A",
-      "answered_at": "2026-04-18T17:04:48.270Z",
+      "answered_at": "2026-04-18T17:05:25.058Z",
       "date": "2026-04-18",
-      "time": "19:04:48"
+      "time": "19:05:25"
     },
     "8": {
       "answer": "A",
-      "answered_at": "2026-04-18T17:04:48.270Z",
+      "answered_at": "2026-04-18T17:05:25.058Z",
       "date": "2026-04-18",
-      "time": "19:04:48"
+      "time": "19:05:25"
     },
     "9": {
       "answer": "B",
-      "answered_at": "2026-04-18T17:04:48.270Z",
+      "answered_at": "2026-04-18T17:05:25.058Z",
       "date": "2026-04-18",
-      "time": "19:04:48"
+      "time": "19:05:25"
     },
     "10": {
       "answer": "A",
-      "answered_at": "2026-04-18T17:04:48.270Z",
+      "answered_at": "2026-04-18T17:05:25.058Z",
       "date": "2026-04-18",
-      "time": "19:04:48"
+      "time": "19:05:25"
     },
     "11": {
       "answer": "C",
-      "answered_at": "2026-04-18T17:04:48.270Z",
+      "answered_at": "2026-04-18T17:05:25.058Z",
       "date": "2026-04-18",
-      "time": "19:04:48"
+      "time": "19:05:25"
     },
     "12": {
       "answer": "C",
-      "answered_at": "2026-04-18T17:04:48.270Z",
+      "answered_at": "2026-04-18T17:05:25.058Z",
       "date": "2026-04-18",
-      "time": "19:04:48"
+      "time": "19:05:25"
     },
     "13": {
       "answer": "A",
-      "answered_at": "2026-04-18T17:04:48.270Z",
+      "answered_at": "2026-04-18T17:05:25.058Z",
       "date": "2026-04-18",
-      "time": "19:04:48"
+      "time": "19:05:25"
     },
     "14": {
       "answer": "D",
-      "answered_at": "2026-04-18T17:04:48.270Z",
+      "answered_at": "2026-04-18T17:05:25.058Z",
       "date": "2026-04-18",
-      "time": "19:04:48"
+      "time": "19:05:25"
     },
     "15": {
       "answer": "Separating production and development environments is important because development systems are used for testing and often contain unstable or insecure code. If they are not isolated with a firewall, an attacker or a simple mistake in development could reach the production environment and damage live services or expose real customer data.",
-      "answered_at": "2026-04-18T17:04:48.270Z",
+      "answered_at": "2026-04-18T17:05:25.058Z",
       "date": "2026-04-18",
-      "time": "19:04:48"
+      "time": "19:05:25"
     },
     "16": {
-      "answer": "A PII Principal is the person the data is about—the individual whose identity can be directly or indirectly identified from the PII",
-      "answered_at": "2026-04-18T17:04:48.270Z",
+      "answer": "A PII Principal is the person the data is about,the individual whose identity can be directly or indirectly identified from the PII",
+      "answered_at": "2026-04-18T17:05:25.058Z",
       "date": "2026-04-18",
-      "time": "19:04:48"
+      "time": "19:05:25"
     }
   }
 }
