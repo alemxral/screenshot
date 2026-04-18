@@ -1,22 +1,28 @@
 {
   "quiz_session": {
-    "created_at": "2026-04-18T16:37:41.310Z",
-    "last_updated": "2026-04-18T16:37:41.310Z",
+    "created_at": "2026-04-18T16:39:42.224Z",
+    "last_updated": "2026-04-18T16:39:42.224Z",
     "total_questions": 20,
-    "answered_questions": 2
+    "answered_questions": 3
   },
   "answers": {
     "1": {
       "answer": "A",
-      "answered_at": "2026-04-18T16:37:41.310Z",
+      "answered_at": "2026-04-18T16:39:42.224Z",
       "date": "2026-04-18",
-      "time": "18:37:41"
+      "time": "18:39:42"
     },
     "2": {
       "answer": "B",
-      "answered_at": "2026-04-18T16:37:41.310Z",
+      "answered_at": "2026-04-18T16:39:42.224Z",
       "date": "2026-04-18",
-      "time": "18:37:41"
+      "time": "18:39:42"
+    },
+    "3": {
+      "answer": "B",
+      "answered_at": "2026-04-18T16:39:42.224Z",
+      "date": "2026-04-18",
+      "time": "18:39:42"
     }
   }
 }
