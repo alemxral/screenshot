@@ -1,118 +1,124 @@
 {
   "quiz_session": {
-    "created_at": "2026-04-22T18:49:01.655Z",
-    "last_updated": "2026-04-22T18:49:01.655Z",
+    "created_at": "2026-04-22T18:49:10.108Z",
+    "last_updated": "2026-04-22T18:49:10.108Z",
     "total_questions": 20,
-    "answered_questions": 18
+    "answered_questions": 19
   },
   "answers": {
     "1": {
       "answer": "B",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "2": {
       "answer": "D",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "3": {
       "answer": "C",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "4": {
       "answer": "C",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "5": {
       "answer": "D",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "6": {
       "answer": "D",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "7": {
       "answer": "D",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "8": {
       "answer": "C",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "9": {
       "answer": "B",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "10": {
       "answer": "B",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "11": {
       "answer": "B",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "12": {
       "answer": "B",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "13": {
       "answer": "B",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "14": {
       "answer": "C",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "15": {
       "answer": "Three Spark libraries:  Spark SQL: Used for structured data processing; allows querying data using SQL and DataFrames. MLlib: Provides machine learning algorithms (classification, regression, clustering). Spark Streaming: Enables real-time stream data processing.",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "16": {
       "answer": "4Vs of Big Data:  Volume  → e.g. TB, PB Velocity→ e.g. records per second Variety Veracity",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "17": {
       "answer": "Map function: Processes input data and transforms it into key-value pairs. Reduce function: Aggregates values with the same key to produce a final result.",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
     },
     "18": {
       "answer": "Confluent REST Proxy: Provides a RESTful HTTP interface to interact with Kafka, allowing clients to produce and consume messages without using native Kafka clients.",
-      "answered_at": "2026-04-22T18:49:01.655Z",
+      "answered_at": "2026-04-22T18:49:10.108Z",
       "date": "2026-04-22",
-      "time": "20:49:01"
+      "time": "20:49:10"
+    },
+    "19": {
+      "answer": "MapReduce is parallelizable because:  Map tasks operate independently on different data splits Reduce tasks process grouped keys in parallel → Enables distributed computation across multiple nodes",
+      "answered_at": "2026-04-22T18:49:10.108Z",
+      "date": "2026-04-22",
+      "time": "20:49:10"
     }
   }
 }
