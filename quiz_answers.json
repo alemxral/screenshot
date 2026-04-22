@@ -1,106 +1,112 @@
 {
   "quiz_session": {
-    "created_at": "2026-04-22T18:48:41.087Z",
-    "last_updated": "2026-04-22T18:48:41.087Z",
+    "created_at": "2026-04-22T18:48:51.451Z",
+    "last_updated": "2026-04-22T18:48:51.451Z",
     "total_questions": 20,
-    "answered_questions": 16
+    "answered_questions": 17
   },
   "answers": {
     "1": {
       "answer": "B",
-      "answered_at": "2026-04-22T18:48:41.087Z",
+      "answered_at": "2026-04-22T18:48:51.451Z",
       "date": "2026-04-22",
-      "time": "20:48:41"
+      "time": "20:48:51"
     },
     "2": {
       "answer": "D",
-      "answered_at": "2026-04-22T18:48:41.087Z",
+      "answered_at": "2026-04-22T18:48:51.451Z",
       "date": "2026-04-22",
-      "time": "20:48:41"
+      "time": "20:48:51"
     },
     "3": {
       "answer": "C",
-      "answered_at": "2026-04-22T18:48:41.087Z",
+      "answered_at": "2026-04-22T18:48:51.451Z",
       "date": "2026-04-22",
-      "time": "20:48:41"
+      "time": "20:48:51"
     },
     "4": {
       "answer": "C",
-      "answered_at": "2026-04-22T18:48:41.087Z",
+      "answered_at": "2026-04-22T18:48:51.451Z",
       "date": "2026-04-22",
-      "time": "20:48:41"
+      "time": "20:48:51"
     },
     "5": {
       "answer": "D",
-      "answered_at": "2026-04-22T18:48:41.087Z",
+      "answered_at": "2026-04-22T18:48:51.451Z",
       "date": "2026-04-22",
-      "time": "20:48:41"
+      "time": "20:48:51"
     },
     "6": {
       "answer": "D",
-      "answered_at": "2026-04-22T18:48:41.087Z",
+      "answered_at": "2026-04-22T18:48:51.451Z",
       "date": "2026-04-22",
-      "time": "20:48:41"
+      "time": "20:48:51"
     },
     "7": {
       "answer": "D",
-      "answered_at": "2026-04-22T18:48:41.087Z",
+      "answered_at": "2026-04-22T18:48:51.451Z",
       "date": "2026-04-22",
-      "time": "20:48:41"
+      "time": "20:48:51"
     },
     "8": {
       "answer": "C",
-      "answered_at": "2026-04-22T18:48:41.087Z",
+      "answered_at": "2026-04-22T18:48:51.451Z",
       "date": "2026-04-22",
-      "time": "20:48:41"
+      "time": "20:48:51"
     },
     "9": {
       "answer": "B",
-      "answered_at": "2026-04-22T18:48:41.087Z",
+      "answered_at": "2026-04-22T18:48:51.451Z",
       "date": "2026-04-22",
-      "time": "20:48:41"
+      "time": "20:48:51"
     },
     "10": {
       "answer": "B",
-      "answered_at": "2026-04-22T18:48:41.087Z",
+      "answered_at": "2026-04-22T18:48:51.451Z",
       "date": "2026-04-22",
-      "time": "20:48:41"
+      "time": "20:48:51"
     },
     "11": {
       "answer": "B",
-      "answered_at": "2026-04-22T18:48:41.087Z",
+      "answered_at": "2026-04-22T18:48:51.451Z",
       "date": "2026-04-22",
-      "time": "20:48:41"
+      "time": "20:48:51"
     },
     "12": {
       "answer": "B",
-      "answered_at": "2026-04-22T18:48:41.087Z",
+      "answered_at": "2026-04-22T18:48:51.451Z",
       "date": "2026-04-22",
-      "time": "20:48:41"
+      "time": "20:48:51"
     },
     "13": {
       "answer": "B",
-      "answered_at": "2026-04-22T18:48:41.087Z",
+      "answered_at": "2026-04-22T18:48:51.451Z",
       "date": "2026-04-22",
-      "time": "20:48:41"
+      "time": "20:48:51"
     },
     "14": {
       "answer": "C",
-      "answered_at": "2026-04-22T18:48:41.087Z",
+      "answered_at": "2026-04-22T18:48:51.451Z",
       "date": "2026-04-22",
-      "time": "20:48:41"
+      "time": "20:48:51"
     },
     "15": {
       "answer": "Three Spark libraries:  Spark SQL: Used for structured data processing; allows querying data using SQL and DataFrames. MLlib: Provides machine learning algorithms (classification, regression, clustering). Spark Streaming: Enables real-time stream data processing.",
-      "answered_at": "2026-04-22T18:48:41.087Z",
+      "answered_at": "2026-04-22T18:48:51.451Z",
       "date": "2026-04-22",
-      "time": "20:48:41"
+      "time": "20:48:51"
     },
     "16": {
       "answer": "4Vs of Big Data:  Volume  → e.g. TB, PB Velocity→ e.g. records per second Variety Veracity",
-      "answered_at": "2026-04-22T18:48:41.087Z",
+      "answered_at": "2026-04-22T18:48:51.451Z",
       "date": "2026-04-22",
-      "time": "20:48:41"
+      "time": "20:48:51"
+    },
+    "17": {
+      "answer": "Map function: Processes input data and transforms it into key-value pairs. Reduce function: Aggregates values with the same key to produce a final result.",
+      "answered_at": "2026-04-22T18:48:51.451Z",
+      "date": "2026-04-22",
+      "time": "20:48:51"
     }
   }
 }
