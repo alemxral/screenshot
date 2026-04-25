@@ -1,112 +1,118 @@
 {
   "quiz_session": {
-    "created_at": "2026-04-25T08:43:30.137Z",
-    "last_updated": "2026-04-25T08:43:30.137Z",
+    "created_at": "2026-04-25T08:43:38.019Z",
+    "last_updated": "2026-04-25T08:43:38.019Z",
     "total_questions": 20,
-    "answered_questions": 17
+    "answered_questions": 18
   },
   "answers": {
     "1": {
       "answer": "B",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
     },
     "2": {
       "answer": "A",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
     },
     "3": {
       "answer": "C",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
     },
     "4": {
       "answer": "C",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
     },
     "5": {
       "answer": "A",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
     },
     "6": {
       "answer": "D",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
     },
     "7": {
       "answer": "B",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
     },
     "8": {
       "answer": "A",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
     },
     "9": {
       "answer": "A",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
     },
     "10": {
       "answer": "A",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
     },
     "11": {
       "answer": "C",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
     },
     "12": {
       "answer": "C",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
     },
     "13": {
       "answer": "C",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
     },
     "14": {
       "answer": "A",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
     },
     "15": {
       "answer": "Better scalability – statistical systems can learn from large datasets without manually writing rules. Higher robustness/flexibility – they handle ambiguity and unseen cases better than rigid rule-based systems.",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
     },
     "17": {
       "answer": "Word vectors (e.g., Word2Vec) are static, meaning the same word always has the same representation, regardless of context. They do not capture sentence structure or meaning.  For tasks like sentiment analysis or QA, contextual models (e.g., BERT, GPT) and sequence models (RNNs, LSTMs, Transformers) are used because they consider context.",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
     },
     "18": {
       "answer": "The Markov property means the future depends only on the current state:  P(s t+1 \t​  ∣s t \t​  ,...)=P(s t+1 \t​  ∣s t \t​  )  It is important because it simplifies learning and allows algorithms like MDPs and Q-learning to work efficiently.",
-      "answered_at": "2026-04-25T08:43:30.137Z",
+      "answered_at": "2026-04-25T08:43:38.019Z",
       "date": "2026-04-25",
-      "time": "10:43:30"
+      "time": "10:43:38"
+    },
+    "19": {
+      "answer": "Concerns:  Bias and unfair decisions Lack of transparency Privacy risks Unclear accountability Safety (especially for AGI) Job displacement  Best practices:  Test for bias Improve explainability Protect data privacy Keep human oversight Ensure system safety Be transparent and monitor systems",
+      "answered_at": "2026-04-25T08:43:38.019Z",
+      "date": "2026-04-25",
+      "time": "10:43:38"
     }
   }
 }
