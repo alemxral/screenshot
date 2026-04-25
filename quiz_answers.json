@@ -1,118 +1,124 @@
 {
   "quiz_session": {
-    "created_at": "2026-04-25T08:43:38.019Z",
-    "last_updated": "2026-04-25T08:43:38.019Z",
+    "created_at": "2026-04-25T08:43:46.365Z",
+    "last_updated": "2026-04-25T08:43:46.365Z",
     "total_questions": 20,
-    "answered_questions": 18
+    "answered_questions": 19
   },
   "answers": {
     "1": {
       "answer": "B",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     },
     "2": {
       "answer": "A",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     },
     "3": {
       "answer": "C",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     },
     "4": {
       "answer": "C",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     },
     "5": {
       "answer": "A",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     },
     "6": {
       "answer": "D",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     },
     "7": {
       "answer": "B",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     },
     "8": {
       "answer": "A",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     },
     "9": {
       "answer": "A",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     },
     "10": {
       "answer": "A",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     },
     "11": {
       "answer": "C",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     },
     "12": {
       "answer": "C",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     },
     "13": {
       "answer": "C",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     },
     "14": {
       "answer": "A",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     },
     "15": {
       "answer": "Better scalability – statistical systems can learn from large datasets without manually writing rules. Higher robustness/flexibility – they handle ambiguity and unseen cases better than rigid rule-based systems.",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
+    },
+    "16": {
+      "answer": "The total reward is the sum of all rewards over time with a discount factor:  R = r0 + γr1 + γ²r2 + ... + γ^T' rT'  Here, r t \t​   is the reward at time t, and γ∈[0,1] reduces future rewards.",
+      "answered_at": "2026-04-25T08:43:46.365Z",
+      "date": "2026-04-25",
+      "time": "10:43:46"
     },
     "17": {
       "answer": "Word vectors (e.g., Word2Vec) are static, meaning the same word always has the same representation, regardless of context. They do not capture sentence structure or meaning.  For tasks like sentiment analysis or QA, contextual models (e.g., BERT, GPT) and sequence models (RNNs, LSTMs, Transformers) are used because they consider context.",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     },
     "18": {
       "answer": "The Markov property means the future depends only on the current state:  P(s t+1 \t​  ∣s t \t​  ,...)=P(s t+1 \t​  ∣s t \t​  )  It is important because it simplifies learning and allows algorithms like MDPs and Q-learning to work efficiently.",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     },
     "19": {
       "answer": "Concerns:  Bias and unfair decisions Lack of transparency Privacy risks Unclear accountability Safety (especially for AGI) Job displacement  Best practices:  Test for bias Improve explainability Protect data privacy Keep human oversight Ensure system safety Be transparent and monitor systems",
-      "answered_at": "2026-04-25T08:43:38.019Z",
+      "answered_at": "2026-04-25T08:43:46.365Z",
       "date": "2026-04-25",
-      "time": "10:43:38"
+      "time": "10:43:46"
     }
   }
 }
