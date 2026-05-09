@@ -1,124 +1,130 @@
 {
   "quiz_session": {
-    "created_at": "2026-05-09T14:46:37.485Z",
-    "last_updated": "2026-05-09T14:46:37.485Z",
+    "created_at": "2026-05-09T14:49:44.045Z",
+    "last_updated": "2026-05-09T14:49:44.045Z",
     "total_questions": 20,
-    "answered_questions": 19
+    "answered_questions": 20
   },
   "answers": {
     "1": {
       "answer": "B",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "2": {
       "answer": "A",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "3": {
       "answer": "A",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "4": {
       "answer": "D",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "5": {
       "answer": "B",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "6": {
       "answer": "C",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "7": {
       "answer": "D",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "8": {
       "answer": "A",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "9": {
       "answer": "B",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "10": {
       "answer": "D",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "11": {
       "answer": "D",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "12": {
       "answer": "B",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "13": {
       "answer": "D",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "14": {
       "answer": "D",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "15": {
       "answer": "No, the moving average model is not always causal. A MA(q) model is causal because it depends only on present and past errors. But it is not always invertible. For a MA model to be invertible, the roots must be outside the unit circle. If this condition fails, we cannot write it as an AR model, so it is not invertible.",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "16": {
       "answer": "Exponential Smoothing means that recent observations have more weight than older ones in the forecast. The weights decrease exponentially as we go back in time. In exponential smoothing, we use a smoothing parameter (alpha) between 0 and 1. This parameter controls how much weight we give to recent data versus past data. A high alpha means we focus more on recent values, while a low alpha gives more importance to historical data.",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "17": {
       "answer": "SARIMAX models are better than using SARIMA with linear regression because they put everything in one model. SARIMAX includes seasonal patterns, trends, and external variables all together. If we use SARIMA and regression separately, we need two models and this make things more complicated. Also, when we combine models separately, we don't capture properly how seasonal parts and external variables interact. With SARIMAX, all parameters are estimated at the same time, so the model understand better the relationships.",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "18": {
       "answer": "No, this is not correct. Correlation measures linear relationships between variables. However, two variables can be interdependent in non-linear ways without showing correlation. For example, if Y = XxX, there is a clear relationship between X and Y, but the correlation can be zero because the relationship is not linear.",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
     },
     "19": {
       "answer": "In stationary ARMA models, this assumption is reflected in the autocorrelation function (ACF) and partial autocorrelation function (PACF). The ACF shows how current values correlate with past values at different lags. In a stationary ARMA model, the ACF decay exponentially or cuts off after certain lags. This means that observations far in the past have less correlation with the present, so they have less impact on current values.",
-      "answered_at": "2026-05-09T14:46:37.485Z",
+      "answered_at": "2026-05-09T14:49:44.045Z",
       "date": "2026-05-09",
-      "time": "16:46:37"
+      "time": "16:49:44"
+    },
+    "20": {
+      "answer": "The rationale behind using geometric decaying weights in SES models is based on how information decreases over time in a natural way. SES focuses mainly on the trend component of the time series. Geometric weights give more importance to older observations, which helps the model capture long-term patterns while reducing recent noise. The basic assumption is that distant past contains more relevant information about the future than recent past, and geometric decay reflects this naturally. The smoothing parameter alpha controls the decay rate. The weights follow the pattern alpha, alpha times (1 plus alpha), alpha times (1 plus alpha) squared, and so on. This ensures that weights sum to infinity and decay geometrically, giving exponentially more importance to older observations. This condition makes the model stable and allows it to balance between historical patterns and recent changes effectively.",
+      "answered_at": "2026-05-09T14:49:44.045Z",
+      "date": "2026-05-09",
+      "time": "16:49:44"
     }
   }
 }
