@@ -1,40 +1,46 @@
 {
   "quiz_session": {
-    "created_at": "2026-05-09T14:30:49.386Z",
-    "last_updated": "2026-05-09T14:30:49.386Z",
+    "created_at": "2026-05-09T14:30:57.450Z",
+    "last_updated": "2026-05-09T14:30:57.450Z",
     "total_questions": 20,
-    "answered_questions": 5
+    "answered_questions": 6
   },
   "answers": {
     "1": {
       "answer": "B",
-      "answered_at": "2026-05-09T14:30:49.386Z",
+      "answered_at": "2026-05-09T14:30:57.450Z",
       "date": "2026-05-09",
-      "time": "16:30:49"
+      "time": "16:30:57"
     },
     "2": {
       "answer": "A",
-      "answered_at": "2026-05-09T14:30:49.386Z",
+      "answered_at": "2026-05-09T14:30:57.450Z",
       "date": "2026-05-09",
-      "time": "16:30:49"
+      "time": "16:30:57"
     },
     "3": {
       "answer": "A",
-      "answered_at": "2026-05-09T14:30:49.386Z",
+      "answered_at": "2026-05-09T14:30:57.450Z",
       "date": "2026-05-09",
-      "time": "16:30:49"
+      "time": "16:30:57"
     },
     "4": {
       "answer": "D",
-      "answered_at": "2026-05-09T14:30:49.386Z",
+      "answered_at": "2026-05-09T14:30:57.450Z",
       "date": "2026-05-09",
-      "time": "16:30:49"
+      "time": "16:30:57"
     },
     "5": {
       "answer": "B",
-      "answered_at": "2026-05-09T14:30:49.386Z",
+      "answered_at": "2026-05-09T14:30:57.450Z",
       "date": "2026-05-09",
-      "time": "16:30:49"
+      "time": "16:30:57"
+    },
+    "6": {
+      "answer": "C",
+      "answered_at": "2026-05-09T14:30:57.450Z",
+      "date": "2026-05-09",
+      "time": "16:30:57"
     }
   }
 }
