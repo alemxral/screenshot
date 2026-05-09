@@ -1,112 +1,118 @@
 {
   "quiz_session": {
-    "created_at": "2026-05-09T14:42:53.902Z",
-    "last_updated": "2026-05-09T14:42:53.902Z",
+    "created_at": "2026-05-09T14:45:36.461Z",
+    "last_updated": "2026-05-09T14:45:36.461Z",
     "total_questions": 20,
-    "answered_questions": 17
+    "answered_questions": 18
   },
   "answers": {
     "1": {
       "answer": "B",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
     },
     "2": {
       "answer": "A",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
     },
     "3": {
       "answer": "A",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
     },
     "4": {
       "answer": "D",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
     },
     "5": {
       "answer": "B",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
     },
     "6": {
       "answer": "C",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
     },
     "7": {
       "answer": "D",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
     },
     "8": {
       "answer": "A",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
     },
     "9": {
       "answer": "B",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
     },
     "10": {
       "answer": "D",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
     },
     "11": {
       "answer": "D",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
     },
     "12": {
       "answer": "B",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
     },
     "13": {
       "answer": "D",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
     },
     "14": {
       "answer": "D",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
     },
     "15": {
       "answer": "No, the moving average model is not always causal. A MA(q) model is causal because it depends only on present and past errors. But it is not always invertible. For a MA model to be invertible, the roots must be outside the unit circle. If this condition fails, we cannot write it as an AR model, so it is not invertible.",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
     },
     "16": {
       "answer": "Exponential Smoothing means that recent observations have more weight than older ones in the forecast. The weights decrease exponentially as we go back in time. In exponential smoothing, we use a smoothing parameter (alpha) between 0 and 1. This parameter controls how much weight we give to recent data versus past data. A high alpha means we focus more on recent values, while a low alpha gives more importance to historical data.",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
     },
     "17": {
       "answer": "SARIMAX models are better than using SARIMA with linear regression because they put everything in one model. SARIMAX includes seasonal patterns, trends, and external variables all together. If we use SARIMA and regression separately, we need two models and this make things more complicated. Also, when we combine models separately, we don't capture properly how seasonal parts and external variables interact. With SARIMAX, all parameters are estimated at the same time, so the model understand better the relationships.",
-      "answered_at": "2026-05-09T14:42:53.902Z",
+      "answered_at": "2026-05-09T14:45:36.461Z",
       "date": "2026-05-09",
-      "time": "16:42:53"
+      "time": "16:45:36"
+    },
+    "18": {
+      "answer": "No, this is not correct. Correlation measures linear relationships between variables. However, two variables can be interdependent in non-linear ways without showing correlation. For example, if Y = XxX, there is a clear relationship between X and Y, but the correlation can be zero because the relationship is not linear.",
+      "answered_at": "2026-05-09T14:45:36.461Z",
+      "date": "2026-05-09",
+      "time": "16:45:36"
     }
   }
 }
